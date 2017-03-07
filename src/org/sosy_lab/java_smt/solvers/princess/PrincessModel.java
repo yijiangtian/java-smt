@@ -74,7 +74,7 @@ class PrincessModel
   }
 
   @Override
-  protected ImmutableList<ValueAssignment> modelToList() {
+  protected ImmutableList<ValueAssignment> toList() {
     scala.collection.Map<ModelLocation, ModelValue> interpretation = model.interpretation();
 
     // first get the addresses of arrays

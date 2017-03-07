@@ -61,7 +61,7 @@ class Mathsat5Model extends CachingAbstractModel<Long, Long, Long> {
   }
 
   @Override
-  protected ImmutableList<ValueAssignment> modelToList() {
+  protected ImmutableList<ValueAssignment> toList() {
     Builder<ValueAssignment> assignments = ImmutableList.builder();
 
     long modelIterator = msat_model_create_iterator(model);

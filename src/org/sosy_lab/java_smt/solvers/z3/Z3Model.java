@@ -75,7 +75,7 @@ class Z3Model extends CachingAbstractModel<Long, Long, Long> {
   }
 
   @Override
-  protected ImmutableList<ValueAssignment> modelToList() {
+  protected ImmutableList<ValueAssignment> toList() {
     Builder<ValueAssignment> out = ImmutableList.builder();
 
     // Iterate through constants.

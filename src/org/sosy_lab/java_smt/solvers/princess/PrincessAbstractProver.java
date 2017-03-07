@@ -124,7 +124,7 @@ abstract class PrincessAbstractProver implements BasicProverEnvironment {
   @Override
   public ImmutableList<ValueAssignment> getModelAssignments() throws SolverException {
     try (PrincessModel model = getModel()) {
-      return model.modelToList();
+      return model.toList();
     }
   }
 
