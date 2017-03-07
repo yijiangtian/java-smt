@@ -89,7 +89,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-        List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
       throws InterruptedException, SolverException {
     Preconditions.checkState(!closed);
     Preconditions.checkArgument(
@@ -101,8 +101,8 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas,
-      int[] startOfSubTree) throws InterruptedException, SolverException {
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
+      throws InterruptedException, SolverException {
 
     Preconditions.checkState(!closed);
     final long[] conjunctionFormulas = new long[partitionedFormulas.size()];
@@ -116,12 +116,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
       long conjunction =
           Native.mkAnd(
-              z3context,
-              size,
-              partition.stream().mapToLong(
-                  s -> (long) s.getValue()
-              ).toArray()
-          );
+              z3context, size, partition.stream().mapToLong(s -> (long) s.getValue()).toArray());
       Native.incRef(z3context, conjunction);
       conjunctionFormulas[i] = conjunction;
     }

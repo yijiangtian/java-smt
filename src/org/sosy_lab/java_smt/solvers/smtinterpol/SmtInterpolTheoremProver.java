@@ -42,8 +42,7 @@ import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.basicimpl.FormulaCreator;
 
-class SmtInterpolTheoremProver extends SmtInterpolBasicProver
-    implements ProverEnvironment {
+class SmtInterpolTheoremProver extends SmtInterpolBasicProver implements ProverEnvironment {
 
   private final SmtInterpolFormulaManager mgr;
   private final SmtInterpolEnvironment env;

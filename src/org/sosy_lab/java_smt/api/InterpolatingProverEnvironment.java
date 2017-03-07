@@ -50,29 +50,27 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
   }
 
   /**
-   * Compute an inductive sequence of interpolants
-   * over a list of interpolation handlers, generated with {@link #push(BooleanFormula)}
-   * and {@link #addConstraint(BooleanFormula)}.
-   * Each list element may contain one or multiple interpolation handles: the semantics
-   * of each such collection is a conjunction of all the contained formulas.
+   * Compute an inductive sequence of interpolants over a list of interpolation handlers, generated
+   * with {@link #push(BooleanFormula)} and {@link #addConstraint(BooleanFormula)}. Each list
+   * element may contain one or multiple interpolation handles: the semantics of each such
+   * collection is a conjunction of all the contained formulas.
    *
    * <p>The stack must contain exactly the partitioned formulas, but any order is allowed. For an
    * input of {@code N} partitions we return {@code N-1} interpolants.
    *
-   * @return an inductive sequence of interpolants, such that the implication
-   * {@code AND(I_i, P_i) => I_(i+1)} is satisfied for all {@code i},
-   * where {@code P_i} is the conjunction of all formulas in partition i.
-   *
-   * @throws SolverException if interpolant cannot be computed
-   * (e.g. if interpolation procedure is incomplete).
+   * @return an inductive sequence of interpolants, such that the implication {@code AND(I_i, P_i)
+   *     => I_(i+1)} is satisfied for all {@code i}, where {@code P_i} is the conjunction of all
+   *     formulas in partition i.
+   * @throws SolverException if interpolant cannot be computed (e.g. if interpolation procedure is
+   *     incomplete).
    */
-  List<BooleanFormula> getSeqInterpolants(List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+  List<BooleanFormula> getSeqInterpolants(
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
       throws SolverException, InterruptedException;
 
   /**
-   * Compute an inductive sequence of interpolants.
-   * Syntax sugar over the method {@link #getSeqInterpolants} for the case
-   * where all elements of the list contain only one handle.
+   * Compute an inductive sequence of interpolants. Syntax sugar over the method {@link
+   * #getSeqInterpolants} for the case where all elements of the list contain only one handle.
    */
   default List<BooleanFormula> getSeqInterpolants2(List<InterpolationHandle> partitionedFormulas)
       throws SolverException, InterruptedException {

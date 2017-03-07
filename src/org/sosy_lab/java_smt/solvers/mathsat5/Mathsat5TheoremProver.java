@@ -162,8 +162,9 @@ class Mathsat5TheoremProver extends Mathsat5AbstractProver implements ProverEnvi
       return Optional.empty();
     }
     long[] unsatAssumptions = msat_get_unsat_assumptions(curEnv);
-    return Optional.of(Arrays.stream(unsatAssumptions)
-        .mapToObj(creator::encapsulateBoolean)
-        .collect(Collectors.toList()));
+    return Optional.of(
+        Arrays.stream(unsatAssumptions)
+            .mapToObj(creator::encapsulateBoolean)
+            .collect(Collectors.toList()));
   }
 }

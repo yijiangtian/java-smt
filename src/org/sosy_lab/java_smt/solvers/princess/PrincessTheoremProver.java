@@ -23,7 +23,6 @@ import ap.SimpleAPI;
 import ap.parser.IBinFormula;
 import ap.parser.IBinJunctor;
 import ap.parser.IBoolLit;
-import ap.parser.IExpression;
 import ap.parser.IFormula;
 import ap.parser.INot;
 import com.google.common.base.Preconditions;
@@ -39,8 +38,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import scala.Option;
 
-class PrincessTheoremProver extends PrincessAbstractProver
-    implements ProverEnvironment {
+class PrincessTheoremProver extends PrincessAbstractProver implements ProverEnvironment {
 
   PrincessTheoremProver(
       PrincessFormulaManager pMgr,

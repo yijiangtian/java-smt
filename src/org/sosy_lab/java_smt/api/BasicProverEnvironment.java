@@ -44,9 +44,7 @@ public interface BasicProverEnvironment extends AutoCloseable {
   /** Remove one formula from the environment stack. */
   void pop();
 
-  /**
-   * Add constraint to the context.
-   **/
+  /** Add constraint to the context. */
   @Nullable
   @CanIgnoreReturnValue
   InterpolationHandle addConstraint(BooleanFormula constraint);

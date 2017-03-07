@@ -24,8 +24,8 @@ import java.util.Objects;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 
 /**
- * Implementation for {@link org.sosy_lab.java_smt.api.InterpolationHandle}
- * where the handle is given by a native pointer.
+ * Implementation for {@link org.sosy_lab.java_smt.api.InterpolationHandle} where the handle is
+ * given by a native pointer.
  */
 public class InterpolationHandlerImpl<E> implements InterpolationHandle {
   private final E handle;

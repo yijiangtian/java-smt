@@ -403,15 +403,14 @@ public class FloatingPointFormulaManagerTest extends SolverBasedTest0 {
     FloatingPointFormula var = fpmgr.makeVariable("x", singlePrecType);
     BooleanFormula f1 = fpmgr.equalWithFPSemantics(var, zero);
     BooleanFormula f2 = bmgr.not(fpmgr.isZero(var));
-    try (InterpolatingProverEnvironment prover =
-         context.newProverEnvironmentWithInterpolation()) {
+    try (InterpolatingProverEnvironment prover = context.newProverEnvironmentWithInterpolation()) {
       InterpolationHandle itpGroup1 = prover.push(f1);
       InterpolationHandle itpGroup2 = prover.push(f2);
 
       assertThatEnvironment(prover).isUnsatisfiable();
 
-      BooleanFormula itp = bmgr.and(
-          prover.getSeqInterpolants2(ImmutableList.of(itpGroup1, itpGroup2)));
+      BooleanFormula itp =
+          bmgr.and(prover.getSeqInterpolants2(ImmutableList.of(itpGroup1, itpGroup2)));
       assertThatFormula(f1).implies(itp);
       assertThatFormula(bmgr.and(itp, f2)).isUnsatisfiable();
     }

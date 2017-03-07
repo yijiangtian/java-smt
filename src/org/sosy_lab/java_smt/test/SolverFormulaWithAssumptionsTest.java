@@ -85,16 +85,18 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
       InterpolationHandle handle2 = env.push(term2);
       InterpolationHandle handle3 = env.push(term3);
 
-      assertThat(env.isUnsatWithAssumptions(
+      assertThat(
+              env.isUnsatWithAssumptions(
                   ImmutableList.of(bmgr.not(suffix1), bmgr.not(suffix2), suffix3)))
           .isTrue();
 
-      assertThat(env.getSeqInterpolants(
-              ImmutableList.of(
-                  ImmutableSet.of(firstPartForInterpolant),
-                  ImmutableSet.of(handle2, handle3)
-              )
-          ).toString()).doesNotContain("suffix");
+      assertThat(
+              env.getSeqInterpolants(
+                      ImmutableList.of(
+                          ImmutableSet.of(firstPartForInterpolant),
+                          ImmutableSet.of(handle2, handle3)))
+                  .toString())
+          .doesNotContain("suffix");
 
       assertThat(
               env.isUnsatWithAssumptions(
@@ -102,12 +104,12 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
           .isTrue();
 
       assertThat(
-          env.getSeqInterpolants(
-              ImmutableList.of(
-                  ImmutableSet.of(firstPartForInterpolant),
-                  ImmutableSet.of(handle2, handle3)
-              )
-          ).toString()).doesNotContain("suffix");
+              env.getSeqInterpolants(
+                      ImmutableList.of(
+                          ImmutableSet.of(firstPartForInterpolant),
+                          ImmutableSet.of(handle2, handle3)))
+                  .toString())
+          .doesNotContain("suffix");
     }
   }
 
@@ -150,15 +152,14 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
 
         for (int j = 0; j < i; j++) {
 
-          BooleanFormula itp = bmgr.and(env.getSeqInterpolants(
-              ImmutableList.of(
-                  ImmutableSet.of(ids.get(j)),
-                  ImmutableSet.copyOf(Iterables.concat(
-                      ids.subList(0, j),
-                      ids.subList(j + 1, ids.size())
-                  ))
-              )
-          ));
+          BooleanFormula itp =
+              bmgr.and(
+                  env.getSeqInterpolants(
+                      ImmutableList.of(
+                          ImmutableSet.of(ids.get(j)),
+                          ImmutableSet.copyOf(
+                              Iterables.concat(
+                                  ids.subList(0, j), ids.subList(j + 1, ids.size()))))));
           for (String var : mgr.extractVariables(itp).keySet()) {
             assertThat(var).doesNotContain("suffix");
           }

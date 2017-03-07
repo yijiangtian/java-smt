@@ -83,9 +83,10 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
     // convert to needed data-structure
     final ArrayBuffer<scala.collection.immutable.Set<Object>> args = new ArrayBuffer<>();
     for (Collection<InterpolationHandle> partition : partitions) {
-      args.$plus$eq(asScalaSet(
-          partition.stream().map(h -> (Integer) h.getValue()).collect(Collectors.toSet())
-      ).toSet());
+      args.$plus$eq(
+          asScalaSet(
+                  partition.stream().map(h -> (Integer) h.getValue()).collect(Collectors.toSet()))
+              .toSet());
     }
 
     // do the hard work
@@ -114,8 +115,7 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas,
-      int[] startOfSubTree) {
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
     throw new UnsupportedOperationException(
         "Direct generation of tree interpolants is not supported.\n"
             + "Use another solver or another strategy for interpolants.");

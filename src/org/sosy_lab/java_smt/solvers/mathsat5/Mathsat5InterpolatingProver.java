@@ -115,7 +115,8 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     }
   }
 
-  private BooleanFormula getInterpolant(List<InterpolationHandle> formulasOfA) throws SolverException {
+  private BooleanFormula getInterpolant(List<InterpolationHandle> formulasOfA)
+      throws SolverException {
     Preconditions.checkState(!closed);
 
     int[] groupsOfA = new int[formulasOfA.size()];
@@ -139,12 +140,12 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
   }
 
   @Override
-  public List<BooleanFormula> getSeqInterpolants(List<? extends Collection<InterpolationHandle>> partitionedFormulas)
-      throws SolverException {
+  public List<BooleanFormula> getSeqInterpolants(
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas) throws SolverException {
     final List<BooleanFormula> itps = new ArrayList<>();
     for (int i = 1; i < partitionedFormulas.size(); i++) {
-      itps.add(getInterpolant(
-          Lists.newArrayList(Iterables.concat(partitionedFormulas.subList(0, i)))));
+      itps.add(
+          getInterpolant(Lists.newArrayList(Iterables.concat(partitionedFormulas.subList(0, i)))));
     }
     return itps;
   }

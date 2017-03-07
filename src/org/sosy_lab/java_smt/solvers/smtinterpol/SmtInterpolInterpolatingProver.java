@@ -61,7 +61,8 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
   }
 
   @Override
-  public List<BooleanFormula> getSeqInterpolants(List<? extends Collection<InterpolationHandle>> partitionedTermNames)
+  public List<BooleanFormula> getSeqInterpolants(
+      List<? extends Collection<InterpolationHandle>> partitionedTermNames)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
@@ -82,8 +83,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedTermNames,
-      int[] startOfSubTree)
+      List<? extends Collection<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
