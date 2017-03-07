@@ -277,9 +277,4 @@ public final class Mathsat5SolverContext extends AbstractSolverContext {
   long addTerminationTest(long env) {
     return msat_set_termination_test(env, terminationTest);
   }
-
-  @Override
-  protected boolean supportsAssumptionSolving() {
-    return true;
-  }
 }

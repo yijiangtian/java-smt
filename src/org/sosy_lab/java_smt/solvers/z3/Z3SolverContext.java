@@ -269,9 +269,4 @@ final class Z3SolverContext extends AbstractSolverContext {
     Native.closeLog();
     Native.delContext(context);
   }
-
-  @Override
-  protected boolean supportsAssumptionSolving() {
-    return true;
-  }
 }

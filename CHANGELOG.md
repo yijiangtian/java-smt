@@ -1,5 +1,10 @@
 # JavaSMT ChangeLog
 
+## JavaSMT 2.0.0
+
+ - Remove assumption emulation feature (emulating assumption support for solvers
+    which don't support them) due to numerous correctness issues.
+
 ## JavaSMT 1.0.0
 
  - Floating point rounding mode can be now specified for all operations in

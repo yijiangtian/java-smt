@@ -24,11 +24,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
-import org.sosy_lab.java_smt.basicimpl.withAssumptionsWrapper.InterpolatingProverWithAssumptionsWrapper;
-import org.sosy_lab.java_smt.basicimpl.withAssumptionsWrapper.ProverWithAssumptionsWrapper;
 
 public abstract class AbstractSolverContext implements SolverContext {
 
@@ -47,46 +44,8 @@ public abstract class AbstractSolverContext implements SolverContext {
   public final ProverEnvironment newProverEnvironment(ProverOptions... options) {
     Set<ProverOptions> opts = EnumSet.noneOf(ProverOptions.class);
     Collections.addAll(opts, options);
-    ProverEnvironment out = newProverEnvironment0(opts);
-    if (!supportsAssumptionSolving()) {
-      // In the case we do not already have a prover environment with assumptions,
-      // we add a wrapper to it
-      out = new ProverWithAssumptionsWrapper(out);
-    }
-    return out;
+    return newProverEnvironment0(opts);
   }
 
   protected abstract ProverEnvironment newProverEnvironment0(Set<ProverOptions> options);
-
-  @SuppressWarnings("resource")
-  @Override
-  public final InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation() {
-
-    InterpolatingProverEnvironment<?> out = newProverEnvironmentWithInterpolation0();
-    if (!supportsAssumptionSolving()) {
-      // In the case we do not already have a prover environment with assumptions,
-      // we add a wrapper to it
-      out = new InterpolatingProverWithAssumptionsWrapper<>(out, fmgr);
-    }
-    return out;
-  }
-
-  protected abstract InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation0();
-
-  /**
-   * Whether the solver supports solving under some given assumptions (with all corresponding
-   * features) by itself, i.e., whether {@link
-   * ProverEnvironment#isUnsatWithAssumptions(java.util.Collection)} and {@link
-   * InterpolatingProverEnvironment#isUnsatWithAssumptions(java.util.Collection)} are fully
-   * implemented.
-   *
-   * <p>Otherwise, i.e., if this method returns {@code false}, the solver does not need to support
-   * this feature and may simply {@code throw UnsupportedOperationException} in the respective
-   * methods. This class will wrap the prover environments and provide an implementation of the
-   * feature.
-   *
-   * <p>This method is expected to always return the same value. Otherwise the behavior of this
-   * class is undefined.
-   */
-  protected abstract boolean supportsAssumptionSolving();
 }

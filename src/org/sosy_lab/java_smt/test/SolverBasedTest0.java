@@ -197,6 +197,18 @@ public abstract class SolverBasedTest0 {
         .isNotNull();
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  protected final void requireAssumptions() throws SolverException, InterruptedException {
+    try (ProverEnvironment env = context.newProverEnvironment()) {
+      env.isUnsatWithAssumptions(ImmutableList.of());
+    } catch (UnsupportedOperationException e) {
+      assume()
+          .withFailureMessage("Solver " + solverToUse() + " does not support assumptions.")
+          .that(e)
+          .isNull();
+    }
+  }
+
   /** Skip test if the solver does not support optimization. */
   protected final void requireOptimization() {
 

@@ -22,7 +22,6 @@ package org.sosy_lab.java_smt.test;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
-import static org.sosy_lab.java_smt.SolverContextFactory.Solvers.MATHSAT5;
 import static org.sosy_lab.java_smt.SolverContextFactory.Solvers.PRINCESS;
 import static org.sosy_lab.java_smt.api.SolverContext.ProverOptions.GENERATE_UNSAT_CORE;
 import static org.sosy_lab.java_smt.api.SolverContext.ProverOptions.GENERATE_UNSAT_CORE_OVER_ASSUMPTIONS;
@@ -58,6 +57,7 @@ public class ProverEnvironmentTest extends SolverBasedTest0 {
 
   @Test
   public void assumptionsTest() throws Exception {
+    requireAssumptions();
     BooleanFormula b = bmgr.makeVariable("b");
     BooleanFormula c = bmgr.makeVariable("c");
 
@@ -76,7 +76,8 @@ public class ProverEnvironmentTest extends SolverBasedTest0 {
     assume()
         .withFailureMessage("MathSAT can't construct models for SAT check with assumptions")
         .that(solver)
-        .isNotEqualTo(MATHSAT5);
+        .isNotEqualTo(Solvers.MATHSAT5);
+    requireAssumptions();
     BooleanFormula b = bmgr.makeVariable("b");
     BooleanFormula c = bmgr.makeVariable("c");
 
@@ -115,10 +116,7 @@ public class ProverEnvironmentTest extends SolverBasedTest0 {
 
   @Test
   public void unsatCoreWithAssumptionsTest() throws Exception {
-    assume()
-        .withFailureMessage("Princess and Mathsat5 do not support unsat core generation")
-        .that(solverToUse())
-        .isNoneOf(PRINCESS, MATHSAT5);
+    requireAssumptions();
     try (ProverEnvironment pe =
         context.newProverEnvironment(GENERATE_UNSAT_CORE_OVER_ASSUMPTIONS)) {
       pe.push();
