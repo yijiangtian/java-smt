@@ -47,7 +47,7 @@ public class InterpolationHandlerImpl<E> implements InterpolationHandle {
     if (pO == null || getClass() != pO.getClass()) {
       return false;
     }
-    InterpolationHandlerImpl that = (InterpolationHandlerImpl) pO;
+    InterpolationHandlerImpl<?> that = (InterpolationHandlerImpl<?>) pO;
     return handle.equals(that.handle);
   }
 
