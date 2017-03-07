@@ -25,83 +25,43 @@ import de.uni_freiburg.informatik.ultimate.logic.Annotation;
 import de.uni_freiburg.informatik.ultimate.logic.Term;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 
-class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver<String, String>
-    implements InterpolatingProverEnvironment<String> {
+class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
+    implements InterpolatingProverEnvironment {
 
   private final SmtInterpolFormulaManager mgr;
   private final SmtInterpolEnvironment env;
-
-  private final Map<String, Term> annotatedTerms; // Collection of termNames
 
   SmtInterpolInterpolatingProver(SmtInterpolFormulaManager pMgr) {
     super(pMgr);
     mgr = pMgr;
     env = mgr.createEnvironment();
-    annotatedTerms = new HashMap<>();
   }
 
   @Override
   public void pop() {
-    for (String removed : assertedFormulas.peek()) {
-      annotatedTerms.remove(removed);
-    }
     super.pop();
   }
 
   @Override
-  public String addConstraint(BooleanFormula f) {
+  public InterpolationHandle addConstraint(BooleanFormula f) {
     Preconditions.checkState(!isClosed());
     String termName = generateTermName();
     Term t = mgr.extractInfo(f);
     Term annotatedTerm = env.annotate(t, new Annotation(":named", termName));
     env.assertTerm(annotatedTerm);
-    assertedFormulas.peek().add(termName);
-    annotatedTerms.put(termName, t);
-    return termName;
+    assertedFormulas.peek().add(t);
+    return new InterpolationHandlerImpl<>(termName);
   }
 
   @Override
-  public BooleanFormula getInterpolant(List<String> pTermNamesOfA)
-      throws SolverException, InterruptedException {
-    Preconditions.checkState(!isClosed());
-
-    // SMTInterpol is not able to handle the trivial cases
-    // so we need to check them explicitly
-    if (pTermNamesOfA.isEmpty()) {
-      return mgr.getBooleanFormulaManager().makeBoolean(true);
-    } else if (pTermNamesOfA.containsAll(annotatedTerms.keySet())) {
-      return mgr.getBooleanFormulaManager().makeBoolean(false);
-    }
-
-    Set<String> termNamesOfA = new HashSet<>(pTermNamesOfA);
-
-    // calc difference: termNamesOfB := assertedFormulas - termNamesOfA
-    Set<String> termNamesOfB =
-        annotatedTerms
-            .keySet()
-            .stream()
-            .filter(n -> !termNamesOfA.contains(n))
-            .collect(Collectors.toSet());
-
-    // build 2 groups:  (and A1 A2 A3...) , (and B1 B2 B3...)
-    Term termA = buildConjunctionOfNamedTerms(termNamesOfA);
-    Term termB = buildConjunctionOfNamedTerms(termNamesOfB);
-
-    return getInterpolant(termA, termB);
-  }
-
-  @Override
-  public List<BooleanFormula> getSeqInterpolants(List<Set<String>> partitionedTermNames)
+  public List<BooleanFormula> getSeqInterpolants(List<? extends Collection<InterpolationHandle>> partitionedTermNames)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
@@ -122,7 +82,8 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver<String, Stri
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<Set<String>> partitionedTermNames, int[] startOfSubTree)
+      List<? extends Collection<InterpolationHandle>> partitionedTermNames,
+      int[] startOfSubTree)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
@@ -144,11 +105,11 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver<String, Stri
   }
 
   /**
-   * checks for a valid subtree-structure. This code is taken from SMTinterpol itself, where it is
+   * Checks for a valid subtree-structure. This code is taken from SMTinterpol itself, where it is
    * disabled.
    */
   private static boolean checkSubTrees(
-      List<Set<String>> partitionedTermNames, int[] startOfSubTree) {
+      List<? extends Collection<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree) {
     for (int i = 0; i < partitionedTermNames.size(); i++) {
       if (startOfSubTree[i] < 0) {
         throw new AssertionError("subtree array must not contain negative element");
@@ -178,14 +139,14 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver<String, Stri
     return mgr.encapsulateBooleanFormula(itp[0]);
   }
 
-  private Term buildConjunctionOfNamedTerms(Set<String> termNames) {
+  private Term buildConjunctionOfNamedTerms(Collection<InterpolationHandle> termNames) {
     Preconditions.checkState(!isClosed());
     Preconditions.checkArgument(!termNames.isEmpty());
 
     Term[] terms = new Term[termNames.size()];
     int i = 0;
-    for (String termName : termNames) {
-      terms[i] = env.term(termName);
+    for (InterpolationHandle termName : termNames) {
+      terms[i] = env.term((String) termName.getValue());
       i++;
     }
 
@@ -194,17 +155,5 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver<String, Stri
     } else {
       return Iterators.getOnlyElement(Iterators.forArray(terms));
     }
-  }
-
-  @Override
-  public void close() {
-    assertedFormulas.clear();
-    annotatedTerms.clear();
-    super.close();
-  }
-
-  @Override
-  protected Collection<Term> getAssertedTerms() {
-    return annotatedTerms.values();
   }
 }

@@ -36,7 +36,7 @@ import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
  * shutdown request via the {@link ShutdownNotifier}. It is not guaranteed, though, that solvers
  * respond in a timely manner (or at all) to shutdown or interrupt requests.
  */
-public interface ProverEnvironment extends BasicProverEnvironment<Void> {
+public interface ProverEnvironment extends BasicProverEnvironment {
 
   /**
    * Get an unsat core. This should be called only immediately after an {@link #isUnsat()} call that

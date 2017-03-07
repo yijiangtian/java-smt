@@ -27,7 +27,7 @@ import com.microsoft.z3.enumerations.Z3_lbool;
 import java.util.Collection;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 
-abstract class Z3SolverBasedProver<T> extends Z3AbstractProver<T> {
+abstract class Z3SolverBasedProver extends Z3AbstractProver {
 
   protected final long z3solver;
 

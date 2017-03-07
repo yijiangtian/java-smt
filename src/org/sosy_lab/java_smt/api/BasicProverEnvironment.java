@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
  * Super interface for {@link ProverEnvironment} and {@link InterpolatingProverEnvironment} that
  * provides only the common operations. In most cases, just use one of the two sub-interfaces
  */
-public interface BasicProverEnvironment<T> extends AutoCloseable {
+public interface BasicProverEnvironment extends AutoCloseable {
 
   /**
    * Push a backtracking point and add a formula to the environment stack, asserting it. The return
@@ -36,7 +36,7 @@ public interface BasicProverEnvironment<T> extends AutoCloseable {
    */
   @Nullable
   @CanIgnoreReturnValue
-  default T push(BooleanFormula f) {
+  default InterpolationHandle push(BooleanFormula f) {
     push();
     return addConstraint(f);
   }
@@ -44,10 +44,12 @@ public interface BasicProverEnvironment<T> extends AutoCloseable {
   /** Remove one formula from the environment stack. */
   void pop();
 
-  /** Add constraint to the context. */
+  /**
+   * Add constraint to the context.
+   **/
   @Nullable
   @CanIgnoreReturnValue
-  T addConstraint(BooleanFormula constraint);
+  InterpolationHandle addConstraint(BooleanFormula constraint);
 
   /** Create backtracking point. */
   void push();

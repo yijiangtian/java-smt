@@ -234,7 +234,7 @@ final class Z3SolverContext extends AbstractSolverContext {
   }
 
   @Override
-  protected InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation0() {
+  public InterpolatingProverEnvironment newProverEnvironmentWithInterpolation() {
     return new Z3InterpolatingProver(creator, z3params, logger, dumpFailedInterpolationQueries);
   }
 

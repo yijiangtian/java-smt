@@ -20,13 +20,13 @@
 package org.sosy_lab.java_smt.test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.TruthJUnit.assume;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +37,7 @@ import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverException;
 
@@ -56,34 +57,12 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
     return solver;
   }
 
-  /**
-   * Generate a prover environment depending on the parameter above. Can be overridden to
-   * parameterize the test.
-   *
-   * @throws InvalidConfigurationException overriding methods are allowed to throw this
-   */
-  @SuppressWarnings({"unchecked", "rawtypes", "CheckReturnValue"})
-  protected <T> InterpolatingProverEnvironment<T> newEnvironmentForTest()
-      throws InvalidConfigurationException, SolverException, InterruptedException {
-
-    // check if we support assumption-solving
-    try (InterpolatingProverEnvironment<?> env = context.newProverEnvironmentWithInterpolation()) {
-      env.isUnsatWithAssumptions(ImmutableList.of());
-    } catch (UnsupportedOperationException e) {
-      assume()
-          .withFailureMessage("Solver " + solverToUse() + " does not support assumption-solving")
-          .that(e)
-          .isNull();
-    }
-
-    return (InterpolatingProverEnvironment<T>) context.newProverEnvironmentWithInterpolation();
-  }
-
   @Test
   @SuppressWarnings("CheckReturnValue")
-  public <T> void basicAssumptionsTest()
+  public void basicAssumptionsTest()
       throws SolverException, InterruptedException, InvalidConfigurationException {
     requireInterpolation();
+    requireAssumptions();
 
     IntegerFormula v1 = imgr.makeVariable("v1");
     IntegerFormula v2 = imgr.makeVariable("v2");
@@ -100,32 +79,44 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
     BooleanFormula term3 =
         bmgr.or(bmgr.not(imgr.equal(v1, imgr.makeNumber(BigDecimal.ONE))), suffix3);
 
-    try (InterpolatingProverEnvironment<T> env = newEnvironmentForTest()) {
+    try (InterpolatingProverEnvironment env = context.newProverEnvironmentWithInterpolation()) {
 
-      T firstPartForInterpolant = env.push(term1);
-      env.push(term2);
-      env.push(term3);
+      InterpolationHandle firstPartForInterpolant = env.push(term1);
+      InterpolationHandle handle2 = env.push(term2);
+      InterpolationHandle handle3 = env.push(term3);
 
-      assertThat(
-              env.isUnsatWithAssumptions(
+      assertThat(env.isUnsatWithAssumptions(
                   ImmutableList.of(bmgr.not(suffix1), bmgr.not(suffix2), suffix3)))
           .isTrue();
-      assertThat(env.getInterpolant(Collections.singletonList(firstPartForInterpolant)).toString())
-          .doesNotContain("suffix");
+
+      assertThat(env.getSeqInterpolants(
+              ImmutableList.of(
+                  ImmutableSet.of(firstPartForInterpolant),
+                  ImmutableSet.of(handle2, handle3)
+              )
+          ).toString()).doesNotContain("suffix");
+
       assertThat(
               env.isUnsatWithAssumptions(
                   ImmutableList.of(bmgr.not(suffix1), bmgr.not(suffix3), suffix2)))
           .isTrue();
-      assertThat(env.getInterpolant(Collections.singletonList(firstPartForInterpolant)).toString())
-          .doesNotContain("suffix");
+
+      assertThat(
+          env.getSeqInterpolants(
+              ImmutableList.of(
+                  ImmutableSet.of(firstPartForInterpolant),
+                  ImmutableSet.of(handle2, handle3)
+              )
+          ).toString()).doesNotContain("suffix");
     }
   }
 
   @Test
   @SuppressWarnings("CheckReturnValue")
-  public <T> void assumptionsTest()
+  public void assumptionsTest()
       throws SolverException, InterruptedException, InvalidConfigurationException {
     requireInterpolation();
+    requireAssumptions();
 
     int n = 5;
 
@@ -145,9 +136,9 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
     List<BooleanFormula> toCheckUnsat = new ArrayList<>();
 
     for (int i = 2; i < n; i++) {
-      try (InterpolatingProverEnvironment<T> env = newEnvironmentForTest()) {
+      try (InterpolatingProverEnvironment env = context.newProverEnvironmentWithInterpolation()) {
 
-        List<T> ids = new ArrayList<>();
+        List<InterpolationHandle> ids = new ArrayList<>();
         for (int j = 0; j < i; j++) {
           ids.add(env.push(terms.get(j)));
         }
@@ -158,7 +149,16 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
             .isTrue();
 
         for (int j = 0; j < i; j++) {
-          BooleanFormula itp = env.getInterpolant(Collections.singletonList(ids.get(j)));
+
+          BooleanFormula itp = bmgr.and(env.getSeqInterpolants(
+              ImmutableList.of(
+                  ImmutableSet.of(ids.get(j)),
+                  ImmutableSet.copyOf(Iterables.concat(
+                      ids.subList(0, j),
+                      ids.subList(j + 1, ids.size())
+                  ))
+              )
+          ));
           for (String var : mgr.extractVariables(itp).keySet()) {
             assertThat(var).doesNotContain("suffix");
           }

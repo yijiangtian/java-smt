@@ -40,11 +40,10 @@ import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.SolverException;
 import scala.Enumeration.Value;
 
-abstract class PrincessAbstractProver<E, AF> implements BasicProverEnvironment<E> {
+abstract class PrincessAbstractProver implements BasicProverEnvironment {
 
   protected final SimpleAPI api;
   protected final PrincessFormulaManager mgr;
-  protected final Deque<List<AF>> assertedFormulas = new ArrayDeque<>(); // all terms on all levels
   private final Deque<Level> trackingStack = new ArrayDeque<>(); // symbols on all levels
   protected final ShutdownNotifier shutdownNotifier;
 
@@ -95,7 +94,6 @@ abstract class PrincessAbstractProver<E, AF> implements BasicProverEnvironment<E
   public final void push() {
     Preconditions.checkState(!closed);
     wasLastSatCheckSat = false;
-    assertedFormulas.push(new ArrayList<>());
     api.push();
     trackingStack.push(new Level());
   }
@@ -104,7 +102,6 @@ abstract class PrincessAbstractProver<E, AF> implements BasicProverEnvironment<E
   public void pop() {
     Preconditions.checkState(!closed);
     wasLastSatCheckSat = false;
-    assertedFormulas.pop();
     api.pop();
 
     // we have to recreate symbols on lower levels, because JavaSMT assumes "global" symbols.

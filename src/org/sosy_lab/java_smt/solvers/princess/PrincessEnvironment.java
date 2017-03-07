@@ -120,7 +120,7 @@ class PrincessEnvironment {
    */
   private final SimpleAPI api;
 
-  private final List<PrincessAbstractProver<?, ?>> registeredProvers = new ArrayList<>();
+  private final List<PrincessAbstractProver> registeredProvers = new ArrayList<>();
 
   PrincessEnvironment(
       Configuration config,
@@ -139,7 +139,7 @@ class PrincessEnvironment {
    * This method returns a new prover, that is registered in this environment. All variables are
    * shared in all registered APIs.
    */
-  PrincessAbstractProver<?, ?> getNewProver(
+  PrincessAbstractProver getNewProver(
       boolean useForInterpolation, PrincessFormulaManager mgr, PrincessFormulaCreator creator) {
 
     SimpleAPI newApi = getNewApi(useForInterpolation);
@@ -150,7 +150,7 @@ class PrincessEnvironment {
     arrayVariablesCache.values().forEach(newApi::addConstant);
     functionsCache.values().forEach(newApi::addFunction);
 
-    PrincessAbstractProver<?, ?> prover;
+    PrincessAbstractProver prover;
     if (useForInterpolation) {
       prover = new PrincessInterpolatingProver(mgr, creator, newApi, shutdownNotifier);
     } else {
@@ -218,7 +218,7 @@ class PrincessEnvironment {
     return minAtomsForAbbreviation;
   }
 
-  void unregisterStack(PrincessAbstractProver<?, ?> stack) {
+  void unregisterStack(PrincessAbstractProver stack) {
     assert registeredProvers.contains(stack) : "cannot unregister stack, it is not registered";
     registeredProvers.remove(stack);
   }
@@ -475,19 +475,19 @@ class PrincessEnvironment {
   }
 
   private void addSymbol(IFormula symbol) {
-    for (PrincessAbstractProver<?, ?> prover : registeredProvers) {
+    for (PrincessAbstractProver prover : registeredProvers) {
       prover.addSymbol(symbol);
     }
   }
 
   private void addSymbol(ITerm symbol) {
-    for (PrincessAbstractProver<?, ?> prover : registeredProvers) {
+    for (PrincessAbstractProver prover : registeredProvers) {
       prover.addSymbol(symbol);
     }
   }
 
   private void addFunction(IFunction funcDecl) {
-    for (PrincessAbstractProver<?, ?> prover : registeredProvers) {
+    for (PrincessAbstractProver prover : registeredProvers) {
       prover.addSymbol(funcDecl);
     }
   }

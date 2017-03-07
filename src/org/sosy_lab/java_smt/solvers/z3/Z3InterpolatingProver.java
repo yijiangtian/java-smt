@@ -20,9 +20,6 @@
 package org.sosy_lab.java_smt.solvers.z3;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
 import com.microsoft.z3.Native;
 import com.microsoft.z3.Z3Exception;
@@ -31,10 +28,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import javax.annotation.Nullable;
 import org.sosy_lab.common.io.MoreFiles;
@@ -43,13 +39,14 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 
-class Z3InterpolatingProver extends Z3SolverBasedProver<Long>
-    implements InterpolatingProverEnvironment<Long> {
+class Z3InterpolatingProver extends Z3SolverBasedProver implements InterpolatingProverEnvironment {
 
   private final LogManager logger;
 
@@ -77,10 +74,10 @@ class Z3InterpolatingProver extends Z3SolverBasedProver<Long>
   }
 
   @Override
-  public Long addConstraint(BooleanFormula f) {
+  public InterpolationHandlerImpl addConstraint(BooleanFormula f) {
     long e = super.addConstraint0(f);
     assertedFormulas.peek().add(e);
-    return e;
+    return new InterpolationHandlerImpl<>(e);
   }
 
   @Override
@@ -91,29 +88,8 @@ class Z3InterpolatingProver extends Z3SolverBasedProver<Long>
   }
 
   @Override
-  @SuppressWarnings({"unchecked", "varargs"})
-  public BooleanFormula getInterpolant(final List<Long> formulasOfA)
-      throws InterruptedException, SolverException {
-    Preconditions.checkState(!closed);
-
-    // calc difference: formulasOfB := assertedFormulas - formulasOfA
-    // we have to handle equal formulas on the stack,
-    // so we copy the whole stack and remove the formulas of A once.
-    final List<Long> formulasOfB = new LinkedList<>();
-    assertedFormulas.forEach(formulasOfB::addAll);
-    for (long af : formulasOfA) {
-      boolean check = formulasOfB.remove(af); // remove only first occurrence
-      assert check : "formula from A must be part of all asserted formulas";
-    }
-
-    // binary interpolant is a sequence interpolant of only 2 elements
-    return Iterables.getOnlyElement(
-        getSeqInterpolants(
-            ImmutableList.of(Sets.newHashSet(formulasOfA), Sets.newHashSet(formulasOfB))));
-  }
-
-  @Override
-  public List<BooleanFormula> getSeqInterpolants(List<Set<Long>> partitionedFormulas)
+  public List<BooleanFormula> getSeqInterpolants(
+        List<? extends Collection<InterpolationHandle>> partitionedFormulas)
       throws InterruptedException, SolverException {
     Preconditions.checkState(!closed);
     Preconditions.checkArgument(
@@ -125,18 +101,27 @@ class Z3InterpolatingProver extends Z3SolverBasedProver<Long>
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<Set<Long>> partitionedFormulas, int[] startOfSubTree)
-      throws InterruptedException, SolverException {
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas,
+      int[] startOfSubTree) throws InterruptedException, SolverException {
+
     Preconditions.checkState(!closed);
     final long[] conjunctionFormulas = new long[partitionedFormulas.size()];
 
     // build conjunction of each partition
     for (int i = 0; i < partitionedFormulas.size(); i++) {
+
+      Collection<InterpolationHandle> partition = partitionedFormulas.get(i);
+      int size = partition.size();
+      long[] elements = new long[size];
+
       long conjunction =
           Native.mkAnd(
               z3context,
-              partitionedFormulas.get(i).size(),
-              Longs.toArray(partitionedFormulas.get(i)));
+              size,
+              partition.stream().mapToLong(
+                  s -> (long) s.getValue()
+              ).toArray()
+          );
       Native.incRef(z3context, conjunction);
       conjunctionFormulas[i] = conjunction;
     }

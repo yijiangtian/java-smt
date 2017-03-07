@@ -23,10 +23,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 
-public class ReusableStackTheoremProver extends ReusableStackAbstractProver<Void, ProverEnvironment>
+public class ReusableStackTheoremProver extends ReusableStackAbstractProver<ProverEnvironment>
     implements ProverEnvironment {
 
   public ReusableStackTheoremProver(ProverEnvironment pDelegate) {
@@ -34,7 +35,7 @@ public class ReusableStackTheoremProver extends ReusableStackAbstractProver<Void
   }
 
   @Override
-  public Void addConstraint(BooleanFormula pConstraint) {
+  public InterpolationHandle addConstraint(BooleanFormula pConstraint) {
     return delegate.addConstraint(pConstraint);
   }
 

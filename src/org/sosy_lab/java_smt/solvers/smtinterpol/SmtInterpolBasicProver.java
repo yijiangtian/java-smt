@@ -37,12 +37,12 @@ import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.basicimpl.FormulaCreator;
 
-abstract class SmtInterpolBasicProver<T, AF> implements BasicProverEnvironment<T> {
+abstract class SmtInterpolBasicProver implements BasicProverEnvironment {
 
   private boolean closed = false;
   private final SmtInterpolEnvironment env;
   private final FormulaCreator<Term, Sort, SmtInterpolEnvironment, FunctionSymbol> creator;
-  protected final Deque<List<AF>> assertedFormulas = new ArrayDeque<>();
+  protected final Deque<List<Term>> assertedFormulas = new ArrayDeque<>();
 
   private static final String PREFIX = "term_"; // for termnames
   private static final UniqueIdGenerator termIdGenerator =
@@ -80,21 +80,25 @@ abstract class SmtInterpolBasicProver<T, AF> implements BasicProverEnvironment<T
   @Override
   public SmtInterpolModel getModel() {
     Preconditions.checkState(!closed);
-    return new SmtInterpolModel(env.getModel(), creator, getAssertedTerms());
+    return new SmtInterpolModel(env.getModel(), creator, getAssertedFormulas());
+  }
+
+  private Collection<Term> getAssertedFormulas() {
+    List<Term> out = new ArrayList<>();
+    assertedFormulas.forEach(out::addAll);
+    return out;
   }
 
   @Override
   public ImmutableList<ValueAssignment> getModelAssignments() throws SolverException {
     try (SmtInterpolModel model = getModel()) {
-      return model.modelToList();
+      return model.toList();
     }
   }
 
   protected static String generateTermName() {
     return PREFIX + termIdGenerator.getFreshId();
   }
-
-  protected abstract Collection<Term> getAssertedTerms();
 
   @Override
   public void close() {

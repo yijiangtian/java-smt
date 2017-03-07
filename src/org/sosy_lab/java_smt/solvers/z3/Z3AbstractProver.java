@@ -25,7 +25,7 @@ import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.SolverException;
 
-abstract class Z3AbstractProver<T> implements BasicProverEnvironment<T> {
+abstract class Z3AbstractProver implements BasicProverEnvironment {
   protected final Z3FormulaCreator creator;
   protected final long z3context;
 
@@ -48,7 +48,7 @@ abstract class Z3AbstractProver<T> implements BasicProverEnvironment<T> {
   public ImmutableList<ValueAssignment> getModelAssignments() throws SolverException {
     Preconditions.checkState(!closed);
     try (Z3Model model = getModel()) {
-      return model.modelToList();
+      return model.toList();
     }
   }
 }

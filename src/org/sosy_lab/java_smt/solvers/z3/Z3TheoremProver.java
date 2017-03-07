@@ -37,12 +37,13 @@ import javax.annotation.Nullable;
 import org.sosy_lab.common.UniqueIdGenerator;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.basicimpl.LongArrayBackedList;
 
-class Z3TheoremProver extends Z3SolverBasedProver<Void> implements ProverEnvironment {
+class Z3TheoremProver extends Z3SolverBasedProver implements ProverEnvironment {
 
   private final UniqueIdGenerator trackId = new UniqueIdGenerator();
   private final FormulaManager mgr;
@@ -64,7 +65,7 @@ class Z3TheoremProver extends Z3SolverBasedProver<Void> implements ProverEnviron
 
   @Override
   @Nullable
-  public Void addConstraint(BooleanFormula f) {
+  public InterpolationHandle addConstraint(BooleanFormula f) {
     Preconditions.checkState(!closed);
 
     if (storedConstraints != null) { // Unsat core generation is on.

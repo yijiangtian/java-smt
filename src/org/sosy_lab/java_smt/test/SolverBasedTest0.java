@@ -253,7 +253,7 @@ public abstract class SolverBasedTest0 {
    * Use this for checking assertions about ProverEnvironments with Truth: <code>
    * assertThatEnvironment(stack).is...()</code>.
    */
-  protected final ProverEnvironmentSubject assertThatEnvironment(BasicProverEnvironment<?> prover) {
+  protected final ProverEnvironmentSubject assertThatEnvironment(BasicProverEnvironment prover) {
     return assert_().about(proverEnvironment()).that(prover);
   }
 

@@ -23,19 +23,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
 
-class LoggingInterpolatingProverEnvironment<T> extends LoggingBasicProverEnvironment<T>
-    implements InterpolatingProverEnvironment<T> {
+class LoggingInterpolatingProverEnvironment extends LoggingBasicProverEnvironment
+    implements InterpolatingProverEnvironment {
 
-  private final InterpolatingProverEnvironment<T> wrapped;
+  private final InterpolatingProverEnvironment wrapped;
 
-  LoggingInterpolatingProverEnvironment(LogManager logger, InterpolatingProverEnvironment<T> ipe) {
+  LoggingInterpolatingProverEnvironment(LogManager logger, InterpolatingProverEnvironment ipe) {
     super(ipe, logger);
     this.wrapped = checkNotNull(ipe);
   }
@@ -50,16 +50,8 @@ class LoggingInterpolatingProverEnvironment<T> extends LoggingBasicProverEnviron
   }
 
   @Override
-  public BooleanFormula getInterpolant(List<T> formulasOfA)
-      throws SolverException, InterruptedException {
-    logger.log(Level.FINE, "formulasOfA:", formulasOfA);
-    BooleanFormula bf = wrapped.getInterpolant(formulasOfA);
-    logger.log(Level.FINE, "interpolant:", bf);
-    return bf;
-  }
-
-  @Override
-  public List<BooleanFormula> getSeqInterpolants(List<Set<T>> partitionedFormulas)
+  public List<BooleanFormula> getSeqInterpolants(
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
       throws SolverException, InterruptedException {
     logger.log(Level.FINE, "formulasOfA:", partitionedFormulas);
     List<BooleanFormula> bf = wrapped.getSeqInterpolants(partitionedFormulas);
@@ -69,7 +61,8 @@ class LoggingInterpolatingProverEnvironment<T> extends LoggingBasicProverEnviron
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<Set<T>> partitionedFormulas, int[] startOfSubTree)
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas,
+      int[] startOfSubTree)
       throws SolverException, InterruptedException {
     logger.log(Level.FINE, "formulasOfA:", partitionedFormulas);
     logger.log(Level.FINE, "startOfSubTree:", startOfSubTree);

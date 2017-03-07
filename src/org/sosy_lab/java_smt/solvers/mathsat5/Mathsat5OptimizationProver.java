@@ -49,11 +49,12 @@ import org.sosy_lab.common.UniqueIdGenerator;
 import org.sosy_lab.common.rationals.Rational;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 
-class Mathsat5OptimizationProver extends Mathsat5AbstractProver<Void>
+class Mathsat5OptimizationProver extends Mathsat5AbstractProver
     implements OptimizationProverEnvironment {
   private final UniqueIdGenerator idGenerator = new UniqueIdGenerator();
 
@@ -81,7 +82,7 @@ class Mathsat5OptimizationProver extends Mathsat5AbstractProver<Void>
 
   @Override
   @Nullable
-  public Void addConstraint(BooleanFormula constraint) {
+  public InterpolationHandle addConstraint(BooleanFormula constraint) {
     msat_assert_formula(curEnv, getMsatTerm(constraint));
     return null;
   }

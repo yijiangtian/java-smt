@@ -31,16 +31,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 
-class Mathsat5InterpolatingProver extends Mathsat5AbstractProver<Integer>
-    implements InterpolatingProverEnvironment<Integer> {
+class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
+    implements InterpolatingProverEnvironment {
 
   private static final ImmutableSet<String> ALLOWED_FAILURE_MESSAGES =
       ImmutableSet.of(
@@ -69,13 +73,13 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver<Integer>
   }
 
   @Override
-  public Integer addConstraint(BooleanFormula f) {
+  public InterpolationHandle addConstraint(BooleanFormula f) {
     Preconditions.checkState(!closed);
     int group = msat_create_itp_group(curEnv);
     msat_set_itp_group(curEnv, group);
     long t = creator.extractInfo(f);
     msat_assert_formula(curEnv, t);
-    return group;
+    return new InterpolationHandlerImpl<>(group);
   }
 
   @Override
@@ -111,14 +115,13 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver<Integer>
     }
   }
 
-  @Override
-  public BooleanFormula getInterpolant(List<Integer> formulasOfA) throws SolverException {
+  private BooleanFormula getInterpolant(List<InterpolationHandle> formulasOfA) throws SolverException {
     Preconditions.checkState(!closed);
 
     int[] groupsOfA = new int[formulasOfA.size()];
     int i = 0;
-    for (Integer f : formulasOfA) {
-      groupsOfA[i++] = f;
+    for (InterpolationHandle f : formulasOfA) {
+      groupsOfA[i++] = (Integer) f.getValue();
     }
 
     long itp;
@@ -136,26 +139,23 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver<Integer>
   }
 
   @Override
-  public List<BooleanFormula> getSeqInterpolants(List<Set<Integer>> partitionedFormulas) {
-    // TODO is fallback to loop sound?
-
-    //final List<BooleanFormula> itps = new ArrayList<>();
-    //for (int i = 0; i < partitionedFormulas.size(); i++) {
-    //  itps.add(getInterpolant(
-    //      Lists.newArrayList(Iterables.concat(partitionedFormulas.subList(0, i)))));
-    //}
-    //return itps;
-
-    throw new UnsupportedOperationException(
-        "directly receiving an inductive sequence of interpolants is not supported."
-            + "Use another solver or another strategy for interpolants.");
+  public List<BooleanFormula> getSeqInterpolants(List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+      throws SolverException {
+    final List<BooleanFormula> itps = new ArrayList<>();
+    for (int i = 1; i < partitionedFormulas.size(); i++) {
+      itps.add(getInterpolant(
+          Lists.newArrayList(Iterables.concat(partitionedFormulas.subList(0, i)))));
+    }
+    return itps;
   }
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<Set<Integer>> partitionedFormulas, int[] startOfSubTree) {
+      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
+
+    // todo
     throw new UnsupportedOperationException(
-        "directly receiving tree interpolants is not supported."
+        "Tree interpolant generation is not supported. "
             + "Use another solver or another strategy for interpolants.");
   }
 }

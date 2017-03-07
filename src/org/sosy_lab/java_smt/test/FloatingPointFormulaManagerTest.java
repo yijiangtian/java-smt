@@ -39,6 +39,7 @@ import org.sosy_lab.java_smt.api.FloatingPointFormula;
 import org.sosy_lab.java_smt.api.FormulaType;
 import org.sosy_lab.java_smt.api.FormulaType.FloatingPointType;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.NumeralFormula;
@@ -402,14 +403,15 @@ public class FloatingPointFormulaManagerTest extends SolverBasedTest0 {
     FloatingPointFormula var = fpmgr.makeVariable("x", singlePrecType);
     BooleanFormula f1 = fpmgr.equalWithFPSemantics(var, zero);
     BooleanFormula f2 = bmgr.not(fpmgr.isZero(var));
-    try (InterpolatingProverEnvironment<Object> prover =
-        (InterpolatingProverEnvironment<Object>) context.newProverEnvironmentWithInterpolation()) {
-      Object itpGroup1 = prover.push(f1);
-      prover.push(f2);
+    try (InterpolatingProverEnvironment prover =
+         context.newProverEnvironmentWithInterpolation()) {
+      InterpolationHandle itpGroup1 = prover.push(f1);
+      InterpolationHandle itpGroup2 = prover.push(f2);
 
       assertThatEnvironment(prover).isUnsatisfiable();
 
-      BooleanFormula itp = prover.getInterpolant(ImmutableList.of(itpGroup1));
+      BooleanFormula itp = bmgr.and(
+          prover.getSeqInterpolants2(ImmutableList.of(itpGroup1, itpGroup2)));
       assertThatFormula(f1).implies(itp);
       assertThatFormula(bmgr.and(itp, f2)).isUnsatisfiable();
     }

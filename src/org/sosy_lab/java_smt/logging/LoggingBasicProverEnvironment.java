@@ -26,25 +26,26 @@ import java.util.logging.Level;
 import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.SolverException;
 
 /** Wraps a basic prover environment with a logging object. */
-class LoggingBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
+class LoggingBasicProverEnvironment implements BasicProverEnvironment {
 
-  private final BasicProverEnvironment<T> wrapped;
+  private final BasicProverEnvironment wrapped;
   final LogManager logger;
 
   private int level = 0;
 
-  LoggingBasicProverEnvironment(BasicProverEnvironment<T> pWrapped, LogManager pLogger) {
+  LoggingBasicProverEnvironment(BasicProverEnvironment pWrapped, LogManager pLogger) {
     wrapped = checkNotNull(pWrapped);
     logger = checkNotNull(pLogger);
   }
 
   @Override
-  public T push(BooleanFormula f) {
+  public InterpolationHandle push(BooleanFormula f) {
     logger.log(Level.FINE, "up to level " + level++);
     logger.log(Level.FINE, "formula pushed:", f);
     return wrapped.push(f);
@@ -57,7 +58,7 @@ class LoggingBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
   }
 
   @Override
-  public T addConstraint(BooleanFormula constraint) {
+  public InterpolationHandle addConstraint(BooleanFormula constraint) {
     return wrapped.addConstraint(constraint);
   }
 

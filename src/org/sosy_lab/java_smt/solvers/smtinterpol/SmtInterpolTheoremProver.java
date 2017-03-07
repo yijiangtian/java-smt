@@ -27,7 +27,6 @@ import de.uni_freiburg.informatik.ultimate.logic.Annotation;
 import de.uni_freiburg.informatik.ultimate.logic.FunctionSymbol;
 import de.uni_freiburg.informatik.ultimate.logic.Sort;
 import de.uni_freiburg.informatik.ultimate.logic.Term;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,12 +36,13 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.basicimpl.FormulaCreator;
 
-class SmtInterpolTheoremProver extends SmtInterpolBasicProver<Void, Term>
+class SmtInterpolTheoremProver extends SmtInterpolBasicProver
     implements ProverEnvironment {
 
   private final SmtInterpolFormulaManager mgr;
@@ -88,7 +88,7 @@ class SmtInterpolTheoremProver extends SmtInterpolBasicProver<Void, Term>
 
   @Override
   @Nullable
-  public Void addConstraint(BooleanFormula constraint) {
+  public InterpolationHandle addConstraint(BooleanFormula constraint) {
     Preconditions.checkState(!isClosed());
     Term t = mgr.extractInfo(constraint);
     if (generateUnsatCores) {
@@ -125,12 +125,5 @@ class SmtInterpolTheoremProver extends SmtInterpolBasicProver<Void, Term>
       callback.apply(Lists.transform(Arrays.asList(model), creator::encapsulateBoolean));
     }
     return callback.getResult();
-  }
-
-  @Override
-  protected Collection<Term> getAssertedTerms() {
-    List<Term> result = new ArrayList<>();
-    assertedFormulas.forEach(result::addAll);
-    return result;
   }
 }

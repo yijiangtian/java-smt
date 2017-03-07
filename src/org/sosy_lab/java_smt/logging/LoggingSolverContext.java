@@ -51,8 +51,8 @@ public final class LoggingSolverContext implements SolverContext {
   }
 
   @Override
-  public InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation() {
-    return new LoggingInterpolatingProverEnvironment<>(
+  public InterpolatingProverEnvironment newProverEnvironmentWithInterpolation() {
+    return new LoggingInterpolatingProverEnvironment(
         logger, delegate.newProverEnvironmentWithInterpolation());
   }
 

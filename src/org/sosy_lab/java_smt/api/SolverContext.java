@@ -74,7 +74,7 @@ public interface SolverContext extends AutoCloseable {
    * is able to handle satisfiability tests with assumptions please consider implementing the {@link
    * InterpolatingProverEnvironment} interface, and return an Object of this type here.
    */
-  InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation();
+  InterpolatingProverEnvironment newProverEnvironmentWithInterpolation();
 
   /**
    * Create a fresh new {@link OptimizationProverEnvironment} which encapsulates an assertion stack

@@ -31,10 +31,11 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.common.rationals.Rational;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 
-class Z3OptimizationProver extends Z3AbstractProver<Void> implements OptimizationProverEnvironment {
+class Z3OptimizationProver extends Z3AbstractProver implements OptimizationProverEnvironment {
 
   private final LogManager logger;
   private final long z3optContext;
@@ -48,7 +49,7 @@ class Z3OptimizationProver extends Z3AbstractProver<Void> implements Optimizatio
 
   @Override
   @Nullable
-  public Void addConstraint(BooleanFormula constraint) {
+  public InterpolationHandle addConstraint(BooleanFormula constraint) {
     Preconditions.checkState(!closed);
     long z3Constraint = creator.extractInfo(constraint);
     Native.optimizeAssert(z3context, z3optContext, z3Constraint);

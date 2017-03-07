@@ -34,11 +34,12 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import org.sosy_lab.common.ShutdownNotifier;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import scala.Option;
 
-class PrincessTheoremProver extends PrincessAbstractProver<Void, IExpression>
+class PrincessTheoremProver extends PrincessAbstractProver
     implements ProverEnvironment {
 
   PrincessTheoremProver(
@@ -51,10 +52,9 @@ class PrincessTheoremProver extends PrincessAbstractProver<Void, IExpression>
 
   @Override
   @Nullable
-  public Void addConstraint(BooleanFormula constraint) {
+  public InterpolationHandle addConstraint(BooleanFormula constraint) {
     Preconditions.checkState(!closed);
     final IFormula t = (IFormula) mgr.extractInfo(constraint);
-    assertedFormulas.peek().add(t);
     addConstraint0(t);
     return null;
   }

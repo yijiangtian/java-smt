@@ -94,7 +94,7 @@ public class TimeoutTest extends SolverBasedTest0 {
   }
 
   @SuppressWarnings("CheckReturnValue")
-  private void testBasicProverTimeout(Supplier<BasicProverEnvironment<?>> proverConstructor)
+  private void testBasicProverTimeout(Supplier<BasicProverEnvironment> proverConstructor)
       throws Exception {
     HardIntegerFormulaGenerator gen = new HardIntegerFormulaGenerator(imgr, bmgr);
     BooleanFormula instance = gen.generate(20);
@@ -111,7 +111,7 @@ public class TimeoutTest extends SolverBasedTest0 {
             }
           }
         };
-    try (BasicProverEnvironment<?> pe = proverConstructor.get()) {
+    try (BasicProverEnvironment pe = proverConstructor.get()) {
       pe.push(instance);
       t.start();
       pe.isUnsat();

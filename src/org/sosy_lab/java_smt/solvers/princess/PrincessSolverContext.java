@@ -80,7 +80,7 @@ public final class PrincessSolverContext extends AbstractSolverContext {
 
   @SuppressWarnings("resource")
   @Override
-  protected InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation0() {
+  public InterpolatingProverEnvironment newProverEnvironmentWithInterpolation() {
     return new ReusableStackInterpolatingProver<>(
         (PrincessInterpolatingProver) creator.getEnv().getNewProver(true, manager, creator));
   }

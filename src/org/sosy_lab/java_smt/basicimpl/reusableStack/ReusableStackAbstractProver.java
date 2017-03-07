@@ -28,13 +28,13 @@ import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.SolverException;
 
-abstract class ReusableStackAbstractProver<T, D extends BasicProverEnvironment<T>>
-    implements BasicProverEnvironment<T> {
+abstract class ReusableStackAbstractProver<T extends BasicProverEnvironment>
+    implements BasicProverEnvironment {
 
-  D delegate;
+  T delegate;
   private int size;
 
-  ReusableStackAbstractProver(D pDelegate) {
+  ReusableStackAbstractProver(T pDelegate) {
     delegate = checkNotNull(pDelegate);
     delegate.push(); // create initial empty level that can be popped on close().
   }
