@@ -58,8 +58,7 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
 
   @Test
   @SuppressWarnings("CheckReturnValue")
-  public void basicAssumptionsTest()
-      throws SolverException, InterruptedException {
+  public void basicAssumptionsTest() throws SolverException, InterruptedException {
     requireInterpolation();
     requireAssumptions();
 
@@ -114,8 +113,7 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
 
   @Test
   @SuppressWarnings("CheckReturnValue")
-  public void assumptionsTest()
-      throws SolverException, InterruptedException {
+  public void assumptionsTest() throws SolverException, InterruptedException {
     requireInterpolation();
     requireAssumptions();
 

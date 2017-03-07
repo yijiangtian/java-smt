@@ -497,7 +497,7 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
       List<BooleanFormula> itps =
           stack.getTreeInterpolants(
               ImmutableList.of(TA, TB, TC, TR1, TD, TR2), // post-order
-              new int[]{0, 0, 2, 0, 4, 0}); // left-most node in current subtree
+              new int[] {0, 0, 2, 0, 4, 0}); // left-most node in current subtree
 
       stack.pop(); // clear stack, such that we can re-use the solver
       stack.pop();
