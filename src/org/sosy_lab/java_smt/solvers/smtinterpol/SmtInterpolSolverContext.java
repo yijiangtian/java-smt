@@ -85,7 +85,7 @@ public class SmtInterpolSolverContext extends AbstractSolverContext {
 
   @Override
   public InterpolatingProverEnvironment newProverEnvironmentWithInterpolation() {
-    return new ReusableStackInterpolatingProver<>(environment.getInterpolator(manager));
+    return new ReusableStackInterpolatingProver(environment.getInterpolator(manager));
   }
 
   @Override

@@ -112,8 +112,6 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
       Collection<InterpolationHandle> partition = partitionedFormulas.get(i);
       int size = partition.size();
-      long[] elements = new long[size];
-
       long conjunction =
           Native.mkAnd(
               z3context, size, partition.stream().mapToLong(s -> (long) s.getValue()).toArray());

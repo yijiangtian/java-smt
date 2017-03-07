@@ -33,7 +33,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
@@ -60,7 +59,7 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
   @Test
   @SuppressWarnings("CheckReturnValue")
   public void basicAssumptionsTest()
-      throws SolverException, InterruptedException, InvalidConfigurationException {
+      throws SolverException, InterruptedException {
     requireInterpolation();
     requireAssumptions();
 
@@ -116,7 +115,7 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
   @Test
   @SuppressWarnings("CheckReturnValue")
   public void assumptionsTest()
-      throws SolverException, InterruptedException, InvalidConfigurationException {
+      throws SolverException, InterruptedException {
     requireInterpolation();
     requireAssumptions();
 

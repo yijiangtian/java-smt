@@ -60,12 +60,6 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
     return solver;
   }
 
-  /** Generate a prover environment depending on the parameter above. */
-  @SuppressWarnings("unchecked")
-  private <T> InterpolatingProverEnvironment newEnvironmentForTest() {
-    return context.newProverEnvironmentWithInterpolation();
-  }
-
   private static final UniqueIdGenerator index = new UniqueIdGenerator(); // to get different names
 
   @Test
@@ -73,7 +67,7 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
   public void simpleInterpolation() throws Exception {
     requireInterpolation();
 
-    try (InterpolatingProverEnvironment prover = newEnvironmentForTest()) {
+    try (InterpolatingProverEnvironment prover = context.newProverEnvironmentWithInterpolation()) {
       IntegerFormula x, y, z;
       x = imgr.makeVariable("x");
       y = imgr.makeVariable("y");
@@ -96,69 +90,70 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
   public void binaryInterpolation() throws SolverException, InterruptedException {
     requireInterpolation();
 
-    InterpolatingProverEnvironment stack = newEnvironmentForTest();
+    try (InterpolatingProverEnvironment stack = context.newProverEnvironmentWithInterpolation()) {
 
-    int i = index.getFreshId();
+      int i = index.getFreshId();
 
-    IntegerFormula zero = imgr.makeNumber(0);
-    IntegerFormula one = imgr.makeNumber(1);
+      IntegerFormula zero = imgr.makeNumber(0);
+      IntegerFormula one = imgr.makeNumber(1);
 
-    IntegerFormula a = imgr.makeVariable("a" + i);
-    IntegerFormula b = imgr.makeVariable("b" + i);
-    IntegerFormula c = imgr.makeVariable("c" + i);
+      IntegerFormula a = imgr.makeVariable("a" + i);
+      IntegerFormula b = imgr.makeVariable("b" + i);
+      IntegerFormula c = imgr.makeVariable("c" + i);
 
-    // build formula:  1 = A = B = C = 0
-    BooleanFormula A = imgr.equal(one, a);
-    BooleanFormula B = imgr.equal(a, b);
-    BooleanFormula C = imgr.equal(b, c);
-    BooleanFormula D = imgr.equal(c, zero);
+      // build formula:  1 = A = B = C = 0
+      BooleanFormula A = imgr.equal(one, a);
+      BooleanFormula B = imgr.equal(a, b);
+      BooleanFormula C = imgr.equal(b, c);
+      BooleanFormula D = imgr.equal(c, zero);
 
-    InterpolationHandle TA = stack.push(A);
-    InterpolationHandle TB = stack.push(B);
-    InterpolationHandle TC = stack.push(C);
-    InterpolationHandle TD = stack.push(D);
+      InterpolationHandle TA = stack.push(A);
+      InterpolationHandle TB = stack.push(B);
+      InterpolationHandle TC = stack.push(C);
+      InterpolationHandle TD = stack.push(D);
 
-    assertThatEnvironment(stack).isUnsatisfiable();
+      assertThatEnvironment(stack).isUnsatisfiable();
 
-    BooleanFormula itpA =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB, TC, TD))));
+      BooleanFormula itpA =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB, TC, TD))));
 
-    BooleanFormula itpAB =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TA, TB), ImmutableSet.of(TC, TD))));
+      BooleanFormula itpAB =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TA, TB), ImmutableSet.of(TC, TD))));
 
-    BooleanFormula itpABC =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TA, TB, TC), ImmutableSet.of(TD))));
+      BooleanFormula itpABC =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TA, TB, TC), ImmutableSet.of(TD))));
 
-    BooleanFormula itpD =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TD), ImmutableSet.of(TA, TB, TC))));
+      BooleanFormula itpD =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TD), ImmutableSet.of(TA, TB, TC))));
 
-    BooleanFormula itpDC =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TD, TC), ImmutableSet.of(TA, TB))));
+      BooleanFormula itpDC =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TD, TC), ImmutableSet.of(TA, TB))));
 
-    BooleanFormula itpDCB =
-        bmgr.and(
-            stack.getSeqInterpolants(
-                ImmutableList.of(ImmutableSet.of(TD, TC, TB), ImmutableSet.of(TA))));
+      BooleanFormula itpDCB =
+          bmgr.and(
+              stack.getSeqInterpolants(
+                  ImmutableList.of(ImmutableSet.of(TD, TC, TB), ImmutableSet.of(TA))));
 
-    stack.pop(); // clear stack, such that we can re-use the solver
-    stack.pop();
-    stack.pop();
-    stack.pop();
+      stack.pop(); // clear stack, such that we can re-use the solver
+      stack.pop();
+      stack.pop();
+      stack.pop();
 
-    // we check here the stricter properties for sequential interpolants,
-    // but this simple example should work for all solvers
-    checkItpSequence(stack, ImmutableList.of(A, B, C, D), ImmutableList.of(itpA, itpAB, itpABC));
-    checkItpSequence(stack, ImmutableList.of(D, C, B, A), ImmutableList.of(itpD, itpDC, itpDCB));
+      // we check here the stricter properties for sequential interpolants,
+      // but this simple example should work for all solvers
+      checkItpSequence(stack, ImmutableList.of(A, B, C, D), ImmutableList.of(itpA, itpAB, itpABC));
+      checkItpSequence(stack, ImmutableList.of(D, C, B, A), ImmutableList.of(itpD, itpDC, itpDCB));
+    }
   }
 
   @Test
@@ -166,34 +161,35 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
   public void binaryInterpolation1() throws SolverException, InterruptedException {
     requireInterpolation();
 
-    InterpolatingProverEnvironment stack = newEnvironmentForTest();
+    try (InterpolatingProverEnvironment stack = context.newProverEnvironmentWithInterpolation()) {
 
-    // build formula:  1 = A = B = C = 0
-    BooleanFormula A = bmgr.makeBoolean(false);
-    BooleanFormula B = bmgr.makeBoolean(false);
+      // build formula:  1 = A = B = C = 0
+      BooleanFormula A = bmgr.makeBoolean(false);
+      BooleanFormula B = bmgr.makeBoolean(false);
 
-    InterpolationHandle TA = stack.push(A);
-    InterpolationHandle TB = stack.push(B);
+      InterpolationHandle TA = stack.push(A);
+      InterpolationHandle TB = stack.push(B);
 
-    assertThatEnvironment(stack).isUnsatisfiable();
+      assertThatEnvironment(stack).isUnsatisfiable();
 
-    BooleanFormula itpA =
-        bmgr.and(
-            stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB))));
-    BooleanFormula itpB =
-        bmgr.and(
-            stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TB), ImmutableSet.of(TA))));
+      BooleanFormula itpA =
+          bmgr.and(
+              stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB))));
+      BooleanFormula itpB =
+          bmgr.and(
+              stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TB), ImmutableSet.of(TA))));
 
-    stack.pop(); // clear stack, such that we can re-use the solver
-    stack.pop();
+      stack.pop(); // clear stack, such that we can re-use the solver
+      stack.pop();
 
-    // want to see non-determinism in all solvers? try this:
-    // System.out.println(solver + ": " + itpA);
+      // want to see non-determinism in all solvers? try this:
+      // System.out.println(solver + ": " + itpA);
 
-    // we check here the stricter properties for sequential interpolants,
-    // but this simple example should work for all solvers
-    checkItpSequence(stack, ImmutableList.of(A, B), ImmutableList.of(itpA));
-    checkItpSequence(stack, ImmutableList.of(B, A), ImmutableList.of(itpB));
+      // we check here the stricter properties for sequential interpolants,
+      // but this simple example should work for all solvers
+      checkItpSequence(stack, ImmutableList.of(A, B), ImmutableList.of(itpA));
+      checkItpSequence(stack, ImmutableList.of(B, A), ImmutableList.of(itpB));
+    }
   }
 
   private void requireTreeItp() {
@@ -209,52 +205,53 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
   public void sequentialInterpolation() throws SolverException, InterruptedException {
     requireInterpolation();
 
-    InterpolatingProverEnvironment stack = newEnvironmentForTest();
+    try (InterpolatingProverEnvironment stack = context.newProverEnvironmentWithInterpolation()) {
 
-    int i = index.getFreshId();
+      int i = index.getFreshId();
 
-    IntegerFormula zero = imgr.makeNumber(0);
-    IntegerFormula one = imgr.makeNumber(1);
+      IntegerFormula zero = imgr.makeNumber(0);
+      IntegerFormula one = imgr.makeNumber(1);
 
-    IntegerFormula a = imgr.makeVariable("a" + i);
-    IntegerFormula b = imgr.makeVariable("b" + i);
-    IntegerFormula c = imgr.makeVariable("c" + i);
+      IntegerFormula a = imgr.makeVariable("a" + i);
+      IntegerFormula b = imgr.makeVariable("b" + i);
+      IntegerFormula c = imgr.makeVariable("c" + i);
 
-    // build formula:  1 = A = B = C = 0
-    BooleanFormula A = imgr.equal(one, a);
-    BooleanFormula B = imgr.equal(a, b);
-    BooleanFormula C = imgr.equal(b, c);
-    BooleanFormula D = imgr.equal(c, zero);
+      // build formula:  1 = A = B = C = 0
+      BooleanFormula A = imgr.equal(one, a);
+      BooleanFormula B = imgr.equal(a, b);
+      BooleanFormula C = imgr.equal(b, c);
+      BooleanFormula D = imgr.equal(c, zero);
 
-    Set<InterpolationHandle> TA = Sets.newHashSet(stack.push(A));
-    Set<InterpolationHandle> TB = Sets.newHashSet(stack.push(B));
-    Set<InterpolationHandle> TC = Sets.newHashSet(stack.push(C));
-    Set<InterpolationHandle> TD = Sets.newHashSet(stack.push(D));
+      Set<InterpolationHandle> TA = Sets.newHashSet(stack.push(A));
+      Set<InterpolationHandle> TB = Sets.newHashSet(stack.push(B));
+      Set<InterpolationHandle> TC = Sets.newHashSet(stack.push(C));
+      Set<InterpolationHandle> TD = Sets.newHashSet(stack.push(D));
 
-    assertThatEnvironment(stack).isUnsatisfiable();
+      assertThatEnvironment(stack).isUnsatisfiable();
 
-    List<BooleanFormula> itps1 = stack.getSeqInterpolants(ImmutableList.of(TA, TB, TC, TD));
-    List<BooleanFormula> itps2 = stack.getSeqInterpolants(ImmutableList.of(TD, TC, TB, TA));
-    List<BooleanFormula> itps3 = stack.getSeqInterpolants(ImmutableList.of(TA, TC, TB, TD));
+      List<BooleanFormula> itps1 = stack.getSeqInterpolants(ImmutableList.of(TA, TB, TC, TD));
+      List<BooleanFormula> itps2 = stack.getSeqInterpolants(ImmutableList.of(TD, TC, TB, TA));
+      List<BooleanFormula> itps3 = stack.getSeqInterpolants(ImmutableList.of(TA, TC, TB, TD));
 
-    List<BooleanFormula> itps4 =
-        stack.getSeqInterpolants(ImmutableList.of(TA, TA, TA, TB, TC, TD, TD));
-    List<BooleanFormula> itps5 =
-        stack.getSeqInterpolants(ImmutableList.of(TA, TA, TB, TC, TD, TA, TD));
-    List<BooleanFormula> itps6 =
-        stack.getSeqInterpolants(ImmutableList.of(TB, TC, TD, TA, TA, TA, TD));
+      List<BooleanFormula> itps4 =
+          stack.getSeqInterpolants(ImmutableList.of(TA, TA, TA, TB, TC, TD, TD));
+      List<BooleanFormula> itps5 =
+          stack.getSeqInterpolants(ImmutableList.of(TA, TA, TB, TC, TD, TA, TD));
+      List<BooleanFormula> itps6 =
+          stack.getSeqInterpolants(ImmutableList.of(TB, TC, TD, TA, TA, TA, TD));
 
-    stack.pop(); // clear stack, such that we can re-use the solver
-    stack.pop();
-    stack.pop();
-    stack.pop();
+      stack.pop(); // clear stack, such that we can re-use the solver
+      stack.pop();
+      stack.pop();
+      stack.pop();
 
-    checkItpSequence(stack, ImmutableList.of(A, B, C, D), itps1);
-    checkItpSequence(stack, ImmutableList.of(D, C, B, A), itps2);
-    checkItpSequence(stack, ImmutableList.of(A, C, B, D), itps3);
-    checkItpSequence(stack, ImmutableList.of(A, A, A, C, B, D, D), itps4);
-    checkItpSequence(stack, ImmutableList.of(A, A, B, C, D, A, D), itps5);
-    checkItpSequence(stack, ImmutableList.of(B, C, D, A, A, A, D), itps6);
+      checkItpSequence(stack, ImmutableList.of(A, B, C, D), itps1);
+      checkItpSequence(stack, ImmutableList.of(D, C, B, A), itps2);
+      checkItpSequence(stack, ImmutableList.of(A, C, B, D), itps3);
+      checkItpSequence(stack, ImmutableList.of(A, A, A, C, B, D, D), itps4);
+      checkItpSequence(stack, ImmutableList.of(A, A, B, C, D, A, D), itps5);
+      checkItpSequence(stack, ImmutableList.of(B, C, D, A, A, A, D), itps6);
+    }
   }
 
   @Test
@@ -262,66 +259,67 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
 
     requireTreeItp();
 
-    InterpolatingProverEnvironment stack = newEnvironmentForTest();
+    try (InterpolatingProverEnvironment stack = context.newProverEnvironmentWithInterpolation()) {
 
-    int i = index.getFreshId();
+      int i = index.getFreshId();
 
-    IntegerFormula zero = imgr.makeNumber(0);
-    IntegerFormula one = imgr.makeNumber(1);
+      IntegerFormula zero = imgr.makeNumber(0);
+      IntegerFormula one = imgr.makeNumber(1);
 
-    IntegerFormula a = imgr.makeVariable("a" + i);
-    IntegerFormula b = imgr.makeVariable("b" + i);
-    IntegerFormula c = imgr.makeVariable("c" + i);
-    IntegerFormula d = imgr.makeVariable("d" + i);
+      IntegerFormula a = imgr.makeVariable("a" + i);
+      IntegerFormula b = imgr.makeVariable("b" + i);
+      IntegerFormula c = imgr.makeVariable("c" + i);
+      IntegerFormula d = imgr.makeVariable("d" + i);
 
-    // build formula:  1 = A = B = C = D = 0
-    BooleanFormula A = imgr.equal(one, a);
-    BooleanFormula B = imgr.equal(a, b);
-    BooleanFormula C = imgr.equal(b, c);
-    BooleanFormula D = imgr.equal(c, d);
-    BooleanFormula E = imgr.equal(d, zero);
+      // build formula:  1 = A = B = C = D = 0
+      BooleanFormula A = imgr.equal(one, a);
+      BooleanFormula B = imgr.equal(a, b);
+      BooleanFormula C = imgr.equal(b, c);
+      BooleanFormula D = imgr.equal(c, d);
+      BooleanFormula E = imgr.equal(d, zero);
 
-    testTreeInterpolants0(stack, A, B, C, D, E);
-    testTreeInterpolants0(stack, A, B, C, E, D);
-    testTreeInterpolants0(stack, A, B, D, C, E);
-    testTreeInterpolants0(stack, A, B, D, E, C);
-    testTreeInterpolants0(stack, A, B, E, C, D);
-    testTreeInterpolants0(stack, A, B, E, D, C);
+      testTreeInterpolants0(stack, A, B, C, D, E);
+      testTreeInterpolants0(stack, A, B, C, E, D);
+      testTreeInterpolants0(stack, A, B, D, C, E);
+      testTreeInterpolants0(stack, A, B, D, E, C);
+      testTreeInterpolants0(stack, A, B, E, C, D);
+      testTreeInterpolants0(stack, A, B, E, D, C);
 
-    testTreeInterpolants0(stack, bmgr.not(A), A, A, A, A);
-    testTreeInterpolants0(stack, bmgr.not(A), A, A, A, B);
-    testTreeInterpolants0(stack, bmgr.not(A), A, A, B, A);
-    testTreeInterpolants0(stack, bmgr.not(A), A, B, A, A);
-    testTreeInterpolants0(stack, bmgr.not(A), A, A, B, B);
-    testTreeInterpolants0(stack, bmgr.not(A), A, B, B, B);
+      testTreeInterpolants0(stack, bmgr.not(A), A, A, A, A);
+      testTreeInterpolants0(stack, bmgr.not(A), A, A, A, B);
+      testTreeInterpolants0(stack, bmgr.not(A), A, A, B, A);
+      testTreeInterpolants0(stack, bmgr.not(A), A, B, A, A);
+      testTreeInterpolants0(stack, bmgr.not(A), A, A, B, B);
+      testTreeInterpolants0(stack, bmgr.not(A), A, B, B, B);
 
-    testTreeInterpolants1(stack, A, B, C, D, E);
-    testTreeInterpolants1(stack, A, B, C, E, D);
-    testTreeInterpolants1(stack, A, B, D, C, E);
-    testTreeInterpolants1(stack, A, B, D, E, C);
-    testTreeInterpolants1(stack, A, B, E, C, D);
-    testTreeInterpolants1(stack, A, B, E, D, C);
+      testTreeInterpolants1(stack, A, B, C, D, E);
+      testTreeInterpolants1(stack, A, B, C, E, D);
+      testTreeInterpolants1(stack, A, B, D, C, E);
+      testTreeInterpolants1(stack, A, B, D, E, C);
+      testTreeInterpolants1(stack, A, B, E, C, D);
+      testTreeInterpolants1(stack, A, B, E, D, C);
 
-    testTreeInterpolants1(stack, bmgr.not(A), A, A, A, A);
-    testTreeInterpolants1(stack, bmgr.not(A), A, A, A, B);
-    testTreeInterpolants1(stack, bmgr.not(A), A, A, B, A);
-    testTreeInterpolants1(stack, bmgr.not(A), A, B, A, A);
-    testTreeInterpolants1(stack, bmgr.not(A), A, A, B, B);
-    testTreeInterpolants1(stack, bmgr.not(A), A, B, B, B);
+      testTreeInterpolants1(stack, bmgr.not(A), A, A, A, A);
+      testTreeInterpolants1(stack, bmgr.not(A), A, A, A, B);
+      testTreeInterpolants1(stack, bmgr.not(A), A, A, B, A);
+      testTreeInterpolants1(stack, bmgr.not(A), A, B, A, A);
+      testTreeInterpolants1(stack, bmgr.not(A), A, A, B, B);
+      testTreeInterpolants1(stack, bmgr.not(A), A, B, B, B);
 
-    testTreeInterpolants2(stack, A, B, C, D, E);
-    testTreeInterpolants2(stack, A, B, C, E, D);
-    testTreeInterpolants2(stack, A, B, D, C, E);
-    testTreeInterpolants2(stack, A, B, D, E, C);
-    testTreeInterpolants2(stack, A, B, E, C, D);
-    testTreeInterpolants2(stack, A, B, E, D, C);
+      testTreeInterpolants2(stack, A, B, C, D, E);
+      testTreeInterpolants2(stack, A, B, C, E, D);
+      testTreeInterpolants2(stack, A, B, D, C, E);
+      testTreeInterpolants2(stack, A, B, D, E, C);
+      testTreeInterpolants2(stack, A, B, E, C, D);
+      testTreeInterpolants2(stack, A, B, E, D, C);
 
-    testTreeInterpolants2(stack, bmgr.not(A), A, A, A, A);
-    testTreeInterpolants2(stack, bmgr.not(A), A, A, A, B);
-    testTreeInterpolants2(stack, bmgr.not(A), A, A, B, A);
-    testTreeInterpolants2(stack, bmgr.not(A), A, B, A, A);
-    testTreeInterpolants2(stack, bmgr.not(A), A, A, B, B);
-    testTreeInterpolants2(stack, bmgr.not(A), A, B, B, B);
+      testTreeInterpolants2(stack, bmgr.not(A), A, A, A, A);
+      testTreeInterpolants2(stack, bmgr.not(A), A, A, A, B);
+      testTreeInterpolants2(stack, bmgr.not(A), A, A, B, A);
+      testTreeInterpolants2(stack, bmgr.not(A), A, B, A, A);
+      testTreeInterpolants2(stack, bmgr.not(A), A, A, B, B);
+      testTreeInterpolants2(stack, bmgr.not(A), A, B, B, B);
+    }
   }
 
   @SuppressWarnings({"unchecked", "varargs"})
@@ -458,62 +456,63 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
 
     requireTreeItp();
 
-    InterpolatingProverEnvironment stack = newEnvironmentForTest();
+    try (InterpolatingProverEnvironment stack = context.newProverEnvironmentWithInterpolation()) {
 
-    int i = index.getFreshId();
+      int i = index.getFreshId();
 
-    IntegerFormula one = imgr.makeNumber(1);
-    IntegerFormula five = imgr.makeNumber(5);
+      IntegerFormula one = imgr.makeNumber(1);
+      IntegerFormula five = imgr.makeNumber(5);
 
-    IntegerFormula a = imgr.makeVariable("a" + i);
-    IntegerFormula b = imgr.makeVariable("b" + i);
-    IntegerFormula c = imgr.makeVariable("c" + i);
-    IntegerFormula d = imgr.makeVariable("d" + i);
-    IntegerFormula e = imgr.makeVariable("e" + i);
+      IntegerFormula a = imgr.makeVariable("a" + i);
+      IntegerFormula b = imgr.makeVariable("b" + i);
+      IntegerFormula c = imgr.makeVariable("c" + i);
+      IntegerFormula d = imgr.makeVariable("d" + i);
+      IntegerFormula e = imgr.makeVariable("e" + i);
 
-    // build formula:  1 = A = B = C = D+1 and D = E = 5
-    BooleanFormula A = imgr.equal(one, a);
-    BooleanFormula B = imgr.equal(a, b);
-    BooleanFormula R1 = imgr.equal(b, c);
-    BooleanFormula C = imgr.equal(c, imgr.add(d, one));
-    BooleanFormula R2 = imgr.equal(d, e);
-    BooleanFormula D = imgr.equal(e, five);
+      // build formula:  1 = A = B = C = D+1 and D = E = 5
+      BooleanFormula A = imgr.equal(one, a);
+      BooleanFormula B = imgr.equal(a, b);
+      BooleanFormula R1 = imgr.equal(b, c);
+      BooleanFormula C = imgr.equal(c, imgr.add(d, one));
+      BooleanFormula R2 = imgr.equal(d, e);
+      BooleanFormula D = imgr.equal(e, five);
 
-    Set<InterpolationHandle> TA = Sets.newHashSet(stack.push(A));
-    Set<InterpolationHandle> TB = Sets.newHashSet(stack.push(B));
-    Set<InterpolationHandle> TR1 = Sets.newHashSet(stack.push(R1));
-    Set<InterpolationHandle> TC = Sets.newHashSet(stack.push(C));
-    Set<InterpolationHandle> TR2 = Sets.newHashSet(stack.push(R2));
-    Set<InterpolationHandle> TD = Sets.newHashSet(stack.push(D));
+      Set<InterpolationHandle> TA = Sets.newHashSet(stack.push(A));
+      Set<InterpolationHandle> TB = Sets.newHashSet(stack.push(B));
+      Set<InterpolationHandle> TR1 = Sets.newHashSet(stack.push(R1));
+      Set<InterpolationHandle> TC = Sets.newHashSet(stack.push(C));
+      Set<InterpolationHandle> TR2 = Sets.newHashSet(stack.push(R2));
+      Set<InterpolationHandle> TD = Sets.newHashSet(stack.push(D));
 
-    assertThatEnvironment(stack).isUnsatisfiable();
+      assertThatEnvironment(stack).isUnsatisfiable();
 
-    // we build a simple tree:
-    // A
-    // |
-    // B  C
-    // | /
-    // R1 D
-    // | /
-    // R2
-    List<BooleanFormula> itps =
-        stack.getTreeInterpolants(
-            ImmutableList.of(TA, TB, TC, TR1, TD, TR2), // post-order
-            new int[] {0, 0, 2, 0, 4, 0}); // left-most node in current subtree
+      // we build a simple tree:
+      // A
+      // |
+      // B  C
+      // | /
+      // R1 D
+      // | /
+      // R2
+      List<BooleanFormula> itps =
+          stack.getTreeInterpolants(
+              ImmutableList.of(TA, TB, TC, TR1, TD, TR2), // post-order
+              new int[]{0, 0, 2, 0, 4, 0}); // left-most node in current subtree
 
-    stack.pop(); // clear stack, such that we can re-use the solver
-    stack.pop();
-    stack.pop();
-    stack.pop();
-    stack.pop();
-    stack.pop();
+      stack.pop(); // clear stack, such that we can re-use the solver
+      stack.pop();
+      stack.pop();
+      stack.pop();
+      stack.pop();
+      stack.pop();
 
-    checkImplies(stack, A, itps.get(0));
-    checkImplies(stack, bmgr.and(itps.get(0), B), itps.get(1));
-    checkImplies(stack, C, itps.get(2));
-    checkImplies(stack, bmgr.and(itps.get(1), itps.get(2), R1), itps.get(3));
-    checkImplies(stack, D, itps.get(4));
-    checkImplies(stack, bmgr.and(itps.get(3), itps.get(4), R2), bmgr.makeBoolean(false));
+      checkImplies(stack, A, itps.get(0));
+      checkImplies(stack, bmgr.and(itps.get(0), B), itps.get(1));
+      checkImplies(stack, C, itps.get(2));
+      checkImplies(stack, bmgr.and(itps.get(1), itps.get(2), R1), itps.get(3));
+      checkImplies(stack, D, itps.get(4));
+      checkImplies(stack, bmgr.and(itps.get(3), itps.get(4), R2), bmgr.makeBoolean(false));
+    }
   }
 
   private void checkItpSequence(

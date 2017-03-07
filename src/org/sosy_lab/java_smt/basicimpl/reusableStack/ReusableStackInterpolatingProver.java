@@ -26,7 +26,7 @@ import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
 
-public class ReusableStackInterpolatingProver<T>
+public class ReusableStackInterpolatingProver
     extends ReusableStackAbstractProver<InterpolatingProverEnvironment>
     implements InterpolatingProverEnvironment {
 
