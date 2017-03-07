@@ -74,7 +74,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
   }
 
   @Override
-  public InterpolationHandlerImpl addConstraint(BooleanFormula f) {
+  public InterpolationHandlerImpl<Long> addConstraint(BooleanFormula f) {
     long e = super.addConstraint0(f);
     assertedFormulas.peek().add(e);
     return new InterpolationHandlerImpl<>(e);
