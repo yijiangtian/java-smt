@@ -23,10 +23,8 @@ import static com.google.common.truth.Truth.assert_;
 import static com.google.common.truth.TruthJUnit.assume;
 import static org.sosy_lab.java_smt.test.ProverEnvironmentSubject.proverEnvironment;
 
-import com.google.common.truth.FailureStrategy;
-import com.google.common.truth.SubjectFactory;
+import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import org.junit.After;
 import org.junit.Before;
@@ -45,9 +43,11 @@ import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.FloatingPointFormulaManager;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 import org.sosy_lab.java_smt.api.RationalFormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
+import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.UFManager;
 
 /**
@@ -255,19 +255,5 @@ public abstract class SolverBasedTest0 {
    */
   protected final ProverEnvironmentSubject assertThatEnvironment(BasicProverEnvironment prover) {
     return assert_().about(proverEnvironment()).that(prover);
-  }
-
-  @Deprecated
-  protected final JavaOptionalSubject assertThatOptional(Optional<?> pOptional) {
-    return assert_()
-        .about(
-            new SubjectFactory<JavaOptionalSubject, Optional<?>>() {
-              @Override
-              public JavaOptionalSubject getSubject(
-                  FailureStrategy pFailureStrategy, Optional<?> pOptional) {
-                return new JavaOptionalSubject(pFailureStrategy, pOptional);
-              }
-            })
-        .that(pOptional);
   }
 }
