@@ -2,8 +2,10 @@
 
 ## JavaSMT 2.0.0
 
- - Remove assumption emulation feature (emulating assumption support for solvers
+ - Removes assumption emulation feature (emulating assumption support for solvers
     which don't support them) due to numerous correctness issues.
+ - Adds `InterpolatingProverEnvironment#getSeqInterpolants2`: a syntax sugar for computing
+    sequence interpolants, where every sub-element of a list corresponds to a single formula.
 
 ## JavaSMT 1.0.0
 

@@ -81,6 +81,16 @@ public interface InterpolatingProverEnvironment<T> extends BasicProverEnvironmen
       throws SolverException, InterruptedException;
 
   /**
+   * Compute an inductive sequence of interpolants.
+   * Syntax sugar over the method {@link #getSeqInterpolants} for the case
+   * where all elements of the list contain only one handle.
+   */
+  default List<BooleanFormula> getSeqInterpolants2(List<InterpolationHandle> partitionedFormulas)
+      throws SolverException, InterruptedException {
+    return getSeqInterpolants(Lists.transform(partitionedFormulas, ImmutableSet::of));
+  }
+
+  /**
    * Compute a sequence of interpolants. The nesting array describes the start of the subtree for
    * tree interpolants. For inductive sequences of interpolants use a nesting array completely
    * filled with 0.
