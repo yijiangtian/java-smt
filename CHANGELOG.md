@@ -2,8 +2,8 @@
 
 ## JavaSMT 2.0.0
 
- - Removes `InterpolatingProverEnvironment#getInterpolant` as it can be easily emulated
-   using sequence interpolants.
+ - Changes `InterpolatingProverEnvironment#getInterpolant` to require both
+   sides of the interpolation query as arguments, in order to avoid statefulness.
  - Enables sequence interpolation with MathSAT
  - Removes confusing `<?>` generic out of
    `InterpolatingProverEnvironment` in favour of an explicit class

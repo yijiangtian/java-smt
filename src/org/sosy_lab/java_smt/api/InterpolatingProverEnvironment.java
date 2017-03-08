@@ -19,6 +19,7 @@
  */
 package org.sosy_lab.java_smt.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -49,6 +50,7 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
     return BasicProverEnvironment.super.push(f);
   }
 
+
   /**
    * Compute an inductive sequence of interpolants over a list of interpolation handlers, generated
    * with {@link #push(BooleanFormula)} and {@link #addConstraint(BooleanFormula)}. Each list
@@ -67,6 +69,19 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
   List<BooleanFormula> getSeqInterpolants(
       List<? extends Iterable<InterpolationHandle>> partitionedFormulas)
       throws SolverException, InterruptedException;
+
+  /**
+   * @return interpolant between the conjunction of all formulas represented by their respective
+   * handles in {@code sideA} and the conjunction of all formulas in {@code sideB}.
+   */
+  default BooleanFormula getInterpolant(
+      Iterable<InterpolationHandle> sideA,
+      Iterable<InterpolationHandle> sideB
+  ) throws SolverException, InterruptedException {
+    List<BooleanFormula> l = getSeqInterpolants(ImmutableList.of(sideA, sideB));
+    assert l.size() == 1;
+    return l.get(0);
+  }
 
   /**
    * Compute an inductive sequence of interpolants. Syntax sugar over the method {@link
