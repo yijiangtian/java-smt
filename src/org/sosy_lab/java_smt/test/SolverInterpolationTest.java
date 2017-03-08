@@ -81,7 +81,7 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
       assertThat(check).named("formulas must be contradicting").isTrue();
 
       // we actually only check for a successful execution here, the result is irrelevant.
-      prover.getSeqInterpolants2(ImmutableList.of(id1, id2));
+      prover.getInterpolant(id1, id2);
     }
   }
 
@@ -115,34 +115,22 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
       assertThatEnvironment(stack).isUnsatisfiable();
 
       BooleanFormula itpA =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB, TC, TD))));
+              stack.getInterpolant(ImmutableSet.of(TA), ImmutableSet.of(TB, TC, TD));
 
-      BooleanFormula itpAB =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TA, TB), ImmutableSet.of(TC, TD))));
+      BooleanFormula itpAB = stack.getInterpolant(
+                  ImmutableSet.of(TA, TB), ImmutableSet.of(TC, TD));
 
-      BooleanFormula itpABC =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TA, TB, TC), ImmutableSet.of(TD))));
+      BooleanFormula itpABC = stack.getInterpolant(
+                  ImmutableSet.of(TA, TB, TC), ImmutableSet.of(TD));
 
       BooleanFormula itpD =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TD), ImmutableSet.of(TA, TB, TC))));
+              stack.getInterpolant(ImmutableSet.of(TD), ImmutableSet.of(TA, TB, TC));
 
       BooleanFormula itpDC =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TD, TC), ImmutableSet.of(TA, TB))));
+          stack.getInterpolant(ImmutableSet.of(TD, TC), ImmutableSet.of(TA, TB));
 
-      BooleanFormula itpDCB =
-          bmgr.and(
-              stack.getSeqInterpolants(
-                  ImmutableList.of(ImmutableSet.of(TD, TC, TB), ImmutableSet.of(TA))));
+      BooleanFormula itpDCB = stack.getInterpolant(
+                  ImmutableSet.of(TD, TC, TB), ImmutableSet.of(TA));
 
       stack.pop(); // clear stack, such that we can re-use the solver
       stack.pop();
@@ -172,12 +160,8 @@ public class SolverInterpolationTest extends SolverBasedTest0 {
 
       assertThatEnvironment(stack).isUnsatisfiable();
 
-      BooleanFormula itpA =
-          bmgr.and(
-              stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TA), ImmutableSet.of(TB))));
-      BooleanFormula itpB =
-          bmgr.and(
-              stack.getSeqInterpolants(ImmutableList.of(ImmutableSet.of(TB), ImmutableSet.of(TA))));
+      BooleanFormula itpA = stack.getInterpolant(TA, TB);
+      BooleanFormula itpB = stack.getInterpolant(TB, TA);
 
       stack.pop(); // clear stack, such that we can re-use the solver
       stack.pop();

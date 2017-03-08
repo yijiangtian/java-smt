@@ -409,8 +409,7 @@ public class FloatingPointFormulaManagerTest extends SolverBasedTest0 {
 
       assertThatEnvironment(prover).isUnsatisfiable();
 
-      BooleanFormula itp =
-          bmgr.and(prover.getSeqInterpolants2(ImmutableList.of(itpGroup1, itpGroup2)));
+      BooleanFormula itp = prover.getInterpolant(itpGroup1, itpGroup2);
       assertThatFormula(f1).implies(itp);
       assertThatFormula(bmgr.and(itp, f2)).isUnsatisfiable();
     }

@@ -84,6 +84,18 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
   }
 
   /**
+   * @return interpolant between {@code formulaA} and {@code formulaB}.
+   */
+  default BooleanFormula getInterpolant(
+      InterpolationHandle formulaA,
+      InterpolationHandle formulaB
+  ) throws SolverException, InterruptedException {
+    List<BooleanFormula> l = getSeqInterpolants2(ImmutableList.of(formulaA, formulaB));
+    assert l.size() == 1;
+    return l.get(0);
+  }
+
+  /**
    * Compute an inductive sequence of interpolants. Syntax sugar over the method {@link
    * #getSeqInterpolants} for the case where all elements of the list contain only one handle.
    */

@@ -3,7 +3,9 @@
 ## JavaSMT 2.0.0
 
  - Changes `InterpolatingProverEnvironment#getInterpolant` to require both
-   sides of the interpolation query as arguments, in order to avoid statefulness.
+   sides of the interpolation query as arguments, in order to avoid implicit statefulness.
+ - Adds shortcut method `InterpolatingProverEnvironment#getInterpolant(InterpolationHandle,
+   InterpolationHandle)` for computing an interpolant over two formulas.
  - Enables sequence interpolation with MathSAT
  - Removes confusing `<?>` generic out of
    `InterpolatingProverEnvironment` in favour of an explicit class
