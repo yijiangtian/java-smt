@@ -31,11 +31,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
@@ -115,11 +115,12 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     }
   }
 
-  private BooleanFormula getInterpolant(Stream<InterpolationHandle> formulasOfA)
+  private BooleanFormula getInterpolant(Iterable<InterpolationHandle> formulasOfA)
       throws SolverException {
     Preconditions.checkState(!closed);
 
-    int[] groupsOfA = formulasOfA.mapToInt(s -> (int) s.getValue()).toArray();
+    int[] groupsOfA = StreamSupport.stream(formulasOfA.spliterator(), true)
+        .mapToInt(s -> (int) s.getValue()).toArray();
 
     try {
       return creator.encapsulateBoolean(msat_get_interpolant(curEnv, groupsOfA));
@@ -140,11 +141,7 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
 
     for (int i = 1; i < partitionedFormulas.size(); i++) {
       itps.add(
-          getInterpolant(
-              partitionedFormulas.subList(0, i)
-                  .stream()
-                  .flatMap(s -> StreamSupport.stream(s.spliterator(), false))
-          )
+          getInterpolant(Iterables.concat(partitionedFormulas.subList(0, i)))
       );
     }
     return itps;
