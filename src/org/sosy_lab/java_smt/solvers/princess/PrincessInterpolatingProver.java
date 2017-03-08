@@ -26,9 +26,9 @@ import ap.SimpleAPI;
 import ap.parser.IFormula;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.sosy_lab.common.ShutdownNotifier;
 import org.sosy_lab.common.UniqueIdGenerator;
 import org.sosy_lab.java_smt.api.BooleanFormula;
@@ -77,16 +77,16 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      final List<? extends Collection<InterpolationHandle>> partitions) throws SolverException {
+      final List<? extends Iterable<InterpolationHandle>> partitions) throws SolverException {
     Preconditions.checkState(!closed);
 
     // convert to needed data-structure
     final ArrayBuffer<scala.collection.immutable.Set<Object>> args = new ArrayBuffer<>();
-    for (Collection<InterpolationHandle> partition : partitions) {
+    for (Iterable<InterpolationHandle> partition : partitions) {
       args.$plus$eq(
           asScalaSet(
-                  partition.stream().map(h -> (Integer) h.getValue()).collect(Collectors.toSet()))
-              .toSet());
+              StreamSupport.stream(partition.spliterator(), false)
+                  .map(h -> (int) h.getValue()).collect(Collectors.toSet())).toSet());
     }
 
     // do the hard work
@@ -115,7 +115,7 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
     throw new UnsupportedOperationException(
         "Direct generation of tree interpolants is not supported.\n"
             + "Use another solver or another strategy for interpolants.");

@@ -31,12 +31,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
@@ -115,19 +115,14 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     }
   }
 
-  private BooleanFormula getInterpolant(List<InterpolationHandle> formulasOfA)
+  private BooleanFormula getInterpolant(Stream<InterpolationHandle> formulasOfA)
       throws SolverException {
     Preconditions.checkState(!closed);
 
-    int[] groupsOfA = new int[formulasOfA.size()];
-    int i = 0;
-    for (InterpolationHandle f : formulasOfA) {
-      groupsOfA[i++] = (Integer) f.getValue();
-    }
+    int[] groupsOfA = formulasOfA.mapToInt(s -> (int) s.getValue()).toArray();
 
-    long itp;
     try {
-      itp = msat_get_interpolant(curEnv, groupsOfA);
+      return creator.encapsulateBoolean(msat_get_interpolant(curEnv, groupsOfA));
     } catch (IllegalArgumentException e) {
       if (ALLOWED_FAILURE_MESSAGES.contains(e.getMessage())) {
         // This is not a bug in our code,
@@ -136,23 +131,28 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
       }
       throw e;
     }
-    return creator.encapsulateBoolean(itp);
   }
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas) throws SolverException {
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas) throws SolverException {
     final List<BooleanFormula> itps = new ArrayList<>();
+
     for (int i = 1; i < partitionedFormulas.size(); i++) {
       itps.add(
-          getInterpolant(Lists.newArrayList(Iterables.concat(partitionedFormulas.subList(0, i)))));
+          getInterpolant(
+              partitionedFormulas.subList(0, i)
+                  .stream()
+                  .flatMap(s -> StreamSupport.stream(s.spliterator(), false))
+          )
+      );
     }
     return itps;
   }
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree) {
 
     // todo
     throw new UnsupportedOperationException(

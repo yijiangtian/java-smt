@@ -65,7 +65,7 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
    *     incomplete).
    */
   List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas)
       throws SolverException, InterruptedException;
 
   /**
@@ -107,7 +107,7 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
    *     procedure is incomplete
    */
   List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
       throws SolverException, InterruptedException;
 
   /**

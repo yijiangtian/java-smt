@@ -41,14 +41,14 @@ public class ReusableStackInterpolatingProver
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> pPartitionedFormulas)
+      List<? extends Iterable<InterpolationHandle>> pPartitionedFormulas)
       throws SolverException, InterruptedException {
     return delegate.getSeqInterpolants(pPartitionedFormulas);
   }
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> pPartitionedFormulas, int[] pStartOfSubTree)
+      List<? extends Iterable<InterpolationHandle>> pPartitionedFormulas, int[] pStartOfSubTree)
       throws SolverException, InterruptedException {
     return delegate.getTreeInterpolants(pPartitionedFormulas, pStartOfSubTree);
   }

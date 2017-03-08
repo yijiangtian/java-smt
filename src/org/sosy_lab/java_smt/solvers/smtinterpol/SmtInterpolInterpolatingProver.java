@@ -24,8 +24,8 @@ import com.google.common.collect.Iterators;
 import de.uni_freiburg.informatik.ultimate.logic.Annotation;
 import de.uni_freiburg.informatik.ultimate.logic.Term;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.StreamSupport;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
@@ -62,7 +62,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedTermNames)
+      List<? extends Iterable<InterpolationHandle>> partitionedTermNames)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
@@ -83,7 +83,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree)
+      List<? extends Iterable<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree)
       throws SolverException, InterruptedException {
     Preconditions.checkState(!isClosed());
 
@@ -109,7 +109,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
    * disabled.
    */
   private static boolean checkSubTrees(
-      List<? extends Collection<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree) {
+      List<? extends Iterable<InterpolationHandle>> partitionedTermNames, int[] startOfSubTree) {
     for (int i = 0; i < partitionedTermNames.size(); i++) {
       if (startOfSubTree[i] < 0) {
         throw new AssertionError("subtree array must not contain negative element");
@@ -139,16 +139,12 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     return mgr.encapsulateBooleanFormula(itp[0]);
   }
 
-  private Term buildConjunctionOfNamedTerms(Collection<InterpolationHandle> termNames) {
+  private Term buildConjunctionOfNamedTerms(Iterable<InterpolationHandle> termNames) {
     Preconditions.checkState(!isClosed());
-    Preconditions.checkArgument(!termNames.isEmpty());
 
-    Term[] terms = new Term[termNames.size()];
-    int i = 0;
-    for (InterpolationHandle termName : termNames) {
-      terms[i] = env.term((String) termName.getValue());
-      i++;
-    }
+    Term[] terms = StreamSupport.stream(termNames.spliterator(), false)
+        .map(t -> env.term((String) t.getValue()))
+        .toArray(Term[]::new);
 
     if (terms.length > 1) {
       return env.term("and", terms);

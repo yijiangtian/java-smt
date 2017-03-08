@@ -28,10 +28,10 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import org.sosy_lab.common.io.MoreFiles;
 import org.sosy_lab.common.io.PathCounterTemplate;
@@ -89,7 +89,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas)
       throws InterruptedException, SolverException {
     Preconditions.checkState(!closed);
     Preconditions.checkArgument(
@@ -101,7 +101,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
       throws InterruptedException, SolverException {
 
     Preconditions.checkState(!closed);
@@ -110,11 +110,13 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
     // build conjunction of each partition
     for (int i = 0; i < partitionedFormulas.size(); i++) {
 
-      Collection<InterpolationHandle> partition = partitionedFormulas.get(i);
-      int size = partition.size();
+      Iterable<InterpolationHandle> partition = partitionedFormulas.get(i);
+      long[] args = StreamSupport.stream(partition.spliterator(), false)
+          .mapToLong(s -> (long) s.getValue()).toArray();
+//      int size = partition.size();
       long conjunction =
           Native.mkAnd(
-              z3context, size, partition.stream().mapToLong(s -> (long) s.getValue()).toArray());
+              z3context, args.length, args);
       Native.incRef(z3context, conjunction);
       conjunctionFormulas[i] = conjunction;
     }

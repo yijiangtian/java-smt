@@ -51,7 +51,7 @@ class LoggingInterpolatingProverEnvironment extends LoggingBasicProverEnvironmen
 
   @Override
   public List<BooleanFormula> getSeqInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas)
       throws SolverException, InterruptedException {
     logger.log(Level.FINE, "formulasOfA:", partitionedFormulas);
     List<BooleanFormula> bf = wrapped.getSeqInterpolants(partitionedFormulas);
@@ -61,7 +61,7 @@ class LoggingInterpolatingProverEnvironment extends LoggingBasicProverEnvironmen
 
   @Override
   public List<BooleanFormula> getTreeInterpolants(
-      List<? extends Collection<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
+      List<? extends Iterable<InterpolationHandle>> partitionedFormulas, int[] startOfSubTree)
       throws SolverException, InterruptedException {
     logger.log(Level.FINE, "formulasOfA:", partitionedFormulas);
     logger.log(Level.FINE, "startOfSubTree:", startOfSubTree);
