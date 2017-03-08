@@ -92,8 +92,6 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
       List<? extends Iterable<InterpolationHandle>> partitionedFormulas)
       throws InterruptedException, SolverException {
     Preconditions.checkState(!closed);
-    Preconditions.checkArgument(
-        partitionedFormulas.size() >= 2, "at least 2 partitions needed for interpolation");
 
     // a 'tree' with all subtrees starting at 0 is called a 'sequence'
     return getTreeInterpolants(partitionedFormulas, new int[partitionedFormulas.size()]);
@@ -113,7 +111,6 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
       Iterable<InterpolationHandle> partition = partitionedFormulas.get(i);
       long[] args = StreamSupport.stream(partition.spliterator(), false)
           .mapToLong(s -> (long) s.getValue()).toArray();
-//      int size = partition.size();
       long conjunction =
           Native.mkAnd(
               z3context, args.length, args);
