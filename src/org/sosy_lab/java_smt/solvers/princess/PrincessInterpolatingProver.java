@@ -85,8 +85,10 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
     for (Iterable<InterpolationHandle> partition : partitions) {
       args.$plus$eq(
           asScalaSet(
-              StreamSupport.stream(partition.spliterator(), false)
-                  .map(h -> (int) h.getValue()).collect(Collectors.toSet())).toSet());
+                  StreamSupport.stream(partition.spliterator(), false)
+                      .map(h -> (int) h.getValue())
+                      .collect(Collectors.toSet()))
+              .toSet());
     }
 
     // do the hard work

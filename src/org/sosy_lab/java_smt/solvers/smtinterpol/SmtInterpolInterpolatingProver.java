@@ -142,9 +142,10 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
   private Term buildConjunctionOfNamedTerms(Iterable<InterpolationHandle> termNames) {
     Preconditions.checkState(!isClosed());
 
-    Term[] terms = StreamSupport.stream(termNames.spliterator(), false)
-        .map(t -> env.term((String) t.getValue()))
-        .toArray(Term[]::new);
+    Term[] terms =
+        StreamSupport.stream(termNames.spliterator(), false)
+            .map(t -> env.term((String) t.getValue()))
+            .toArray(Term[]::new);
 
     if (terms.length > 1) {
       return env.term("and", terms);

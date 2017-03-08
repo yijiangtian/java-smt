@@ -109,11 +109,11 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
     for (int i = 0; i < partitionedFormulas.size(); i++) {
 
       Iterable<InterpolationHandle> partition = partitionedFormulas.get(i);
-      long[] args = StreamSupport.stream(partition.spliterator(), false)
-          .mapToLong(s -> (long) s.getValue()).toArray();
-      long conjunction =
-          Native.mkAnd(
-              z3context, args.length, args);
+      long[] args =
+          StreamSupport.stream(partition.spliterator(), false)
+              .mapToLong(s -> (long) s.getValue())
+              .toArray();
+      long conjunction = Native.mkAnd(z3context, args.length, args);
       Native.incRef(z3context, conjunction);
       conjunctionFormulas[i] = conjunction;
     }

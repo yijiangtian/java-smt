@@ -88,9 +88,10 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
                   ImmutableList.of(bmgr.not(suffix1), bmgr.not(suffix2), suffix3)))
           .isTrue();
 
-      assertThat(env.getInterpolant(
-                  ImmutableSet.of(firstPartForInterpolant),
-                  ImmutableSet.of(handle2, handle3)).toString())
+      assertThat(
+              env.getInterpolant(
+                      ImmutableSet.of(firstPartForInterpolant), ImmutableSet.of(handle2, handle3))
+                  .toString())
           .doesNotContain("suffix");
 
       assertThat(
@@ -98,9 +99,11 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
                   ImmutableList.of(bmgr.not(suffix1), bmgr.not(suffix3), suffix2)))
           .isTrue();
 
-      assertThat(env.getInterpolant(
-          ImmutableSet.of(firstPartForInterpolant),
-          ImmutableSet.of(handle2, handle3)).toString()).doesNotContain("suffix");
+      assertThat(
+              env.getInterpolant(
+                      ImmutableSet.of(firstPartForInterpolant), ImmutableSet.of(handle2, handle3))
+                  .toString())
+          .doesNotContain("suffix");
     }
   }
 
@@ -142,9 +145,10 @@ public class SolverFormulaWithAssumptionsTest extends SolverBasedTest0 {
 
         for (int j = 0; j < i; j++) {
 
-          BooleanFormula itp = env.getInterpolant(
-                      ImmutableSet.of(ids.get(j)),
-                      Iterables.concat(ids.subList(0, j), ids.subList(j + 1, ids.size())));
+          BooleanFormula itp =
+              env.getInterpolant(
+                  ImmutableSet.of(ids.get(j)),
+                  Iterables.concat(ids.subList(0, j), ids.subList(j + 1, ids.size())));
           for (String var : mgr.extractVariables(itp).keySet()) {
             assertThat(var).doesNotContain("suffix");
           }

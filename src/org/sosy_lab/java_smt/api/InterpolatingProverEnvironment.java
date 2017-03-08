@@ -50,7 +50,6 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
     return BasicProverEnvironment.super.push(f);
   }
 
-
   /**
    * Compute an inductive sequence of interpolants over a list of interpolation handlers, generated
    * with {@link #push(BooleanFormula)} and {@link #addConstraint(BooleanFormula)}. Each list
@@ -72,24 +71,19 @@ public interface InterpolatingProverEnvironment extends BasicProverEnvironment {
 
   /**
    * @return interpolant between the conjunction of all formulas represented by their respective
-   * handles in {@code sideA} and the conjunction of all formulas in {@code sideB}.
+   *     handles in {@code sideA} and the conjunction of all formulas in {@code sideB}.
    */
   default BooleanFormula getInterpolant(
-      Iterable<InterpolationHandle> sideA,
-      Iterable<InterpolationHandle> sideB
-  ) throws SolverException, InterruptedException {
+      Iterable<InterpolationHandle> sideA, Iterable<InterpolationHandle> sideB)
+      throws SolverException, InterruptedException {
     List<BooleanFormula> l = getSeqInterpolants(ImmutableList.of(sideA, sideB));
     assert l.size() == 1;
     return l.get(0);
   }
 
-  /**
-   * @return interpolant between {@code formulaA} and {@code formulaB}.
-   */
-  default BooleanFormula getInterpolant(
-      InterpolationHandle formulaA,
-      InterpolationHandle formulaB
-  ) throws SolverException, InterruptedException {
+  /** @return interpolant between {@code formulaA} and {@code formulaB}. */
+  default BooleanFormula getInterpolant(InterpolationHandle formulaA, InterpolationHandle formulaB)
+      throws SolverException, InterruptedException {
     List<BooleanFormula> l = getSeqInterpolants2(ImmutableList.of(formulaA, formulaB));
     assert l.size() == 1;
     return l.get(0);

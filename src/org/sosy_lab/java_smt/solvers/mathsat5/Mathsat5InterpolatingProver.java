@@ -119,8 +119,10 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
       throws SolverException {
     Preconditions.checkState(!closed);
 
-    int[] groupsOfA = StreamSupport.stream(formulasOfA.spliterator(), true)
-        .mapToInt(s -> (int) s.getValue()).toArray();
+    int[] groupsOfA =
+        StreamSupport.stream(formulasOfA.spliterator(), true)
+            .mapToInt(s -> (int) s.getValue())
+            .toArray();
 
     try {
       return creator.encapsulateBoolean(msat_get_interpolant(curEnv, groupsOfA));
@@ -140,9 +142,7 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     final List<BooleanFormula> itps = new ArrayList<>();
 
     for (int i = 1; i < partitionedFormulas.size(); i++) {
-      itps.add(
-          getInterpolant(Iterables.concat(partitionedFormulas.subList(0, i)))
-      );
+      itps.add(getInterpolant(Iterables.concat(partitionedFormulas.subList(0, i))));
     }
     return itps;
   }
