@@ -33,8 +33,7 @@ import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
  *
  * <p>All solving methods are expected to throw {@link SolverException} if the solver fails to solve
  * the given query, and {@link InterruptedException} if a thread interrupt was requested or a
- * shutdown request via the {@link ShutdownNotifier}. It is not guaranteed, though, that solvers
- * respond in a timely manner (or at all) to shutdown or interrupt requests.
+ * shutdown request via the {@link ShutdownNotifier}.
  */
 public interface ProverEnvironment extends BasicProverEnvironment {
 
@@ -66,7 +65,9 @@ public interface ProverEnvironment extends BasicProverEnvironment {
 
   /**
    * Returns an UNSAT core (if it exists, otherwise {@code Optional.empty()}), over the chosen
-   * assumptions. Does NOT require the {@link ProverOptions#GENERATE_UNSAT_CORE} option to work.
+   * assumptions.
+   * Does NOT require the {@link ProverOptions#GENERATE_UNSAT_CORE} option to work.
+   * Does NOT require a previous call to {@code isUnsatWithAssumptions}.
    *
    * @param assumptions Selected assumptions
    * @return Empty optional if the constraints with assumptions are satisfiable, subset of

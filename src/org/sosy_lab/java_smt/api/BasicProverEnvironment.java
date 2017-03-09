@@ -24,15 +24,15 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import javax.annotation.Nullable;
 
 /**
- * Super interface for {@link ProverEnvironment} and {@link InterpolatingProverEnvironment} that
- * provides only the common operations. In most cases, just use one of the two sub-interfaces
+ * Super interface for {@link ProverEnvironment}, {@link InterpolatingProverEnvironment}
+ * and {@link OptimizationProverEnvironment}.
  */
 public interface BasicProverEnvironment extends AutoCloseable {
 
   /**
    * Push a backtracking point and add a formula to the environment stack, asserting it. The return
-   * value may be used to identify this formula later on in a query (this depends on the sub-type of
-   * the environment).
+   * value may be used to identify this formula for interpolation when
+   * {@link InterpolatingProverEnvironment} is used, and is {@code null} otherwise.
    */
   @Nullable
   @CanIgnoreReturnValue
@@ -44,38 +44,40 @@ public interface BasicProverEnvironment extends AutoCloseable {
   /** Remove one formula from the environment stack. */
   void pop();
 
-  /** Add constraint to the context. */
+  /** Add constraint to the context. The return value may be used to identify this formula for
+   * interpolation in {@link InterpolatingProverEnvironment}, and is {@code null} otherwise.
+   */
   @Nullable
   @CanIgnoreReturnValue
   InterpolationHandle addConstraint(BooleanFormula constraint);
 
-  /** Create backtracking point. */
+  /** Create a backtracking point. */
   void push();
 
-  /** Check whether the conjunction of all formulas on the stack is unsatisfiable. */
+  /** @return whether the conjunction of all formulas on the stack is unsatisfiable. */
   boolean isUnsat() throws SolverException, InterruptedException;
 
   /**
-   * Get a satisfying assignment. This should be called only immediately after an {@link #isUnsat()}
-   * call that returned <code>false</code>. A model might contain additional symbols with their
-   * evaluation, if a solver uses its own temporary symbols. There should be at least an
-   * value-assignment for each free symbol.
+   * Get a satisfying assignment to the set of constraints.
+   * May be partial, may include assignments to temporary symbols created by a solver.
+   *
+   * <p>This should be called only immediately after an {@link #isUnsat()}
+   * call that returned {@code false}.
    */
   Model getModel() throws SolverException;
 
   /**
-   * Get a list of satisfying assignments. This is equivalent to <code>
-   * ImmutableList.copyOf(getModel())</code>, but removes the need for calling {@link
-   * Model#close()}.
+   * Get a list of satisfying assignments from the generated model.
+   * Equivalent to serializing a model obtained with {@link #getModel()},
+   * yet removes the need for resource management.
    *
-   * <p>Note that if you need to iterate multiple times over the model it may be more efficient to
-   * use this method instead of {@link #getModel()} (depending on the solver).
+   * <p>Depending on the solver, using this method might be more efficient than iterating
+   * multiple times over the model obtained by {@link #getModel()}.
    */
   ImmutableList<Model.ValueAssignment> getModelAssignments() throws SolverException;
 
   /**
-   * Closes the prover environment. The object should be discarded, and should not be used after
-   * closing.
+   * Close the prover environment. The environment should not be used after closing.
    */
   @Override
   void close();
