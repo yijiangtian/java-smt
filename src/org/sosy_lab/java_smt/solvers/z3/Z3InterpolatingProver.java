@@ -44,7 +44,7 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
-import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandleImpl;
 
 class Z3InterpolatingProver extends Z3SolverBasedProver implements InterpolatingProverEnvironment {
 
@@ -74,10 +74,10 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
   }
 
   @Override
-  public InterpolationHandlerImpl<Long> addConstraint(BooleanFormula f) {
+  public InterpolationHandleImpl addConstraint(BooleanFormula f) {
     long e = super.addConstraint0(f);
     assertedFormulas.peek().add(e);
-    return new InterpolationHandlerImpl<>(e);
+    return new InterpolationHandleImpl(e);
   }
 
   @Override
@@ -111,7 +111,7 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
       Iterable<InterpolationHandle> partition = partitionedFormulas.get(i);
       long[] args =
           StreamSupport.stream(partition.spliterator(), false)
-              .mapToLong(s -> (long) s.getValue())
+              .mapToLong(s -> (long) ((InterpolationHandleImpl) s).getValue())
               .toArray();
       long conjunction = Native.mkAnd(z3context, args.length, args);
       Native.incRef(z3context, conjunction);

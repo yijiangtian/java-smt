@@ -30,7 +30,7 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandleImpl;
 
 class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     implements InterpolatingProverEnvironment {
@@ -57,7 +57,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     Term annotatedTerm = env.annotate(t, new Annotation(":named", termName));
     env.assertTerm(annotatedTerm);
     assertedFormulas.peek().add(t);
-    return new InterpolationHandlerImpl<>(termName);
+    return new InterpolationHandleImpl<>(termName);
   }
 
   @Override
@@ -144,7 +144,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
 
     Term[] terms =
         StreamSupport.stream(termNames.spliterator(), false)
-            .map(t -> env.term((String) t.getValue()))
+            .map(t -> env.term((String) ((InterpolationHandleImpl) t).getValue()))
             .toArray(Term[]::new);
 
     if (terms.length > 1) {

@@ -26,5 +26,4 @@ package org.sosy_lab.java_smt.api;
  * <p>See {@link InterpolatingProverEnvironment}.
  */
 public interface InterpolationHandle {
-  Object getValue();
 }

@@ -41,7 +41,7 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandleImpl;
 
 class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     implements InterpolatingProverEnvironment {
@@ -79,7 +79,7 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
     msat_set_itp_group(curEnv, group);
     long t = creator.extractInfo(f);
     msat_assert_formula(curEnv, t);
-    return new InterpolationHandlerImpl<>(group);
+    return new InterpolationHandleImpl(group);
   }
 
   @Override
@@ -121,7 +121,7 @@ class Mathsat5InterpolatingProver extends Mathsat5AbstractProver
 
     int[] groupsOfA =
         StreamSupport.stream(formulasOfA.spliterator(), true)
-            .mapToInt(s -> (int) s.getValue())
+            .mapToInt(s -> (int) ((InterpolationHandleImpl) s).getValue())
             .toArray();
 
     try {

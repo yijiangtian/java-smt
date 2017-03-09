@@ -23,19 +23,15 @@ package org.sosy_lab.java_smt.basicimpl;
 import java.util.Objects;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 
-/**
- * Implementation for {@link org.sosy_lab.java_smt.api.InterpolationHandle} where the handle is
- * given by a native pointer.
- */
-public class InterpolationHandlerImpl<E> implements InterpolationHandle {
-  private final E handle;
+/** Implementation for {@link org.sosy_lab.java_smt.api.InterpolationHandle}. */
+public class InterpolationHandleImpl implements InterpolationHandle {
+  private final Object handle;
 
-  public InterpolationHandlerImpl(E pHandle) {
+  public InterpolationHandleImpl(Object pHandle) {
     handle = pHandle;
   }
 
-  @Override
-  public E getValue() {
+  public Object getValue() {
     return handle;
   }
 
@@ -47,7 +43,7 @@ public class InterpolationHandlerImpl<E> implements InterpolationHandle {
     if (pO == null || getClass() != pO.getClass()) {
       return false;
     }
-    InterpolationHandlerImpl<?> that = (InterpolationHandlerImpl<?>) pO;
+    InterpolationHandleImpl that = (InterpolationHandleImpl) pO;
     return handle.equals(that.handle);
   }
 
