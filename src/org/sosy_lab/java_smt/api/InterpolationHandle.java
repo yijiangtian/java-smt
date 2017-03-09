@@ -20,36 +20,11 @@
 
 package org.sosy_lab.java_smt.api;
 
-import java.util.Objects;
-
 /**
  * Handle used for interpolation queries.
+ *
+ * <p>See {@link InterpolatingProverEnvironment}.
  */
-public final class InterpolationHandle {
-  private final Object handle;
-
-  public InterpolationHandle(Object pHandle) {
-    handle = pHandle;
-  }
-
-  public Object getValue() {
-    return handle;
-  }
-
-  @Override
-  public boolean equals(Object pO) {
-    if (this == pO) {
-      return true;
-    }
-    if (pO == null || getClass() != pO.getClass()) {
-      return false;
-    }
-    InterpolationHandle that = (InterpolationHandle) pO;
-    return handle.equals(that.handle);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(handle);
-  }
+public interface InterpolationHandle {
+  Object getValue();
 }

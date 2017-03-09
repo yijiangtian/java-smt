@@ -35,6 +35,7 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 import scala.collection.Seq;
 import scala.collection.mutable.ArrayBuffer;
 
@@ -71,7 +72,7 @@ class PrincessInterpolatingProver extends PrincessAbstractProver
     // which represents formulae belonging to all partitions.
     api.setPartitionNumber(-1);
 
-    return new InterpolationHandle(termIndex);
+    return new InterpolationHandlerImpl<>(termIndex);
   }
 
   @Override
