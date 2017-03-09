@@ -57,7 +57,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     Term annotatedTerm = env.annotate(t, new Annotation(":named", termName));
     env.assertTerm(annotatedTerm);
     assertedFormulas.peek().add(t);
-    return new InterpolationHandleImpl<>(termName);
+    return new InterpolationHandleImpl(termName);
   }
 
   @Override
