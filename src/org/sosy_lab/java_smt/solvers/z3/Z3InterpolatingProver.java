@@ -44,7 +44,6 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
-import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 
 class Z3InterpolatingProver extends Z3SolverBasedProver implements InterpolatingProverEnvironment {
 
@@ -74,10 +73,10 @@ class Z3InterpolatingProver extends Z3SolverBasedProver implements Interpolating
   }
 
   @Override
-  public InterpolationHandlerImpl<Long> addConstraint(BooleanFormula f) {
+  public InterpolationHandle addConstraint(BooleanFormula f) {
     long e = super.addConstraint0(f);
     assertedFormulas.peek().add(e);
-    return new InterpolationHandlerImpl<>(e);
+    return new InterpolationHandle(e);
   }
 
   @Override

@@ -30,7 +30,6 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.InterpolationHandle;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.basicimpl.InterpolationHandlerImpl;
 
 class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     implements InterpolatingProverEnvironment {
@@ -57,7 +56,7 @@ class SmtInterpolInterpolatingProver extends SmtInterpolBasicProver
     Term annotatedTerm = env.annotate(t, new Annotation(":named", termName));
     env.assertTerm(annotatedTerm);
     assertedFormulas.peek().add(t);
-    return new InterpolationHandlerImpl<>(termName);
+    return new InterpolationHandle(termName);
   }
 
   @Override
