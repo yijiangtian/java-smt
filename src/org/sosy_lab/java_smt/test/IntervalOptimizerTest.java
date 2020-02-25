@@ -19,7 +19,12 @@
  */
 
 package org.sosy_lab.java_smt.test;
+import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
+import org.sosy_lab.common.configuration.Configuration;
+import org.sosy_lab.common.log.LogManager;
+import org.sosy_lab.common.log.BasicLogManager;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.api.SolverContext;
@@ -28,10 +33,14 @@ import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 public class IntervalOptimizerTest {
 
   public static void main(String[] args) throws InvalidConfigurationException {
+    Configuration config = Configuration.fromCmdLineArguments(args);
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
 
     ProverEnvironmentSubjectTest test = new ProverEnvironmentSubjectTest();
     test.setupFormulas();
-    SolverContext context = SolverContextFactory.createSolverContext(test.solverToUse());
+    SolverContext context = SolverContextFactory.createSolverContext(config, logger, shutdown
+        .getNotifier(), Solvers.SMTINTERPOL);
     ProverEnvironment env = context.newProverEnvironment(ProverOptions.GENERATE_MODELS);
   }
 }
