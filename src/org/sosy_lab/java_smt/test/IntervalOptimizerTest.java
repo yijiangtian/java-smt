@@ -39,7 +39,8 @@ import org.sosy_lab.java_smt.basicimpl.withAssumptionsWrapper.ProverWithAssumpti
 
 public class IntervalOptimizerTest {
 
-  public static void main(String[] args) throws InvalidConfigurationException {
+  public static void main(String[] args) throws InvalidConfigurationException,
+                                                InterruptedException {
     Configuration config = Configuration.fromCmdLineArguments(args);
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
@@ -66,6 +67,7 @@ public class IntervalOptimizerTest {
         );
 
     ProverWithAssumptionsWrapper wrapper = new ProverWithAssumptionsWrapper(env);
+    wrapper.addConstraint(constraint);
 
   }
 }
