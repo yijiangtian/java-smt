@@ -68,6 +68,7 @@ public class IntervalOptimizerTest {
 
     ProverWithAssumptionsWrapper wrapper = new ProverWithAssumptionsWrapper(env);
     wrapper.addConstraint(constraint);
+    env.addConstraint(constraint);
 
   }
 }
