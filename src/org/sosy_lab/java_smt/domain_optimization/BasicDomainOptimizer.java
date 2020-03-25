@@ -20,14 +20,33 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
+import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 
-public interface DomainOptimizer {
+public class BasicDomainOptimizer implements DomainOptimizer{
+  private final SolverContext delegate;
+  private final ProverEnvironment wrapped;
 
-    DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped);
+  public BasicDomainOptimizer(SolverContext delegate, ProverEnvironment wrapped) {
+    this.delegate = delegate;
+    this.wrapped = wrapped;
+    FormulaManager fManager = delegate.getFormulaManager();
+    IntegerFormulaManager ifmgr = fManager.getIntegerFormulaManager();
+    BooleanFormulaManager bfmgr = fManager.getBooleanFormulaManager();
 
-    void calculateDomains(Formula f);
+  }
 
+  @Override
+  public DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped) {
+    return new BasicDomainOptimizer(delegate, wrapped);
+  }
+
+  @Override
+  public void calculateDomains(Formula f) {
+
+  }
 }
