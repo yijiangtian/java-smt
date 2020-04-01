@@ -23,6 +23,7 @@ package org.sosy_lab.java_smt.domain_optimization;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Model;
+import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
 import java.util.Collection;
@@ -41,7 +42,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public void pop() {
-
+        wrapped.pop();
     }
 
     @Override
@@ -51,7 +52,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public void push() {
-
+        wrapped.push();
     }
 
     @Override
@@ -87,5 +88,9 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
     @Override
     public <R> R allSat(AllSatCallback<R> callback, List<BooleanFormula> important) throws InterruptedException, SolverException {
         return null;
+    }
+
+    public SolverContext getDelegate() {
+        return this.optimizer.getDelegate();
     }
 }

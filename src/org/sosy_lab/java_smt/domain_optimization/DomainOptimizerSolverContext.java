@@ -39,7 +39,7 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public FormulaManager getFormulaManager() {
-    return null;
+    return delegate.getFormulaManager();
   }
 
   @Override
@@ -71,5 +71,8 @@ public class DomainOptimizerSolverContext implements SolverContext {
   @Override
   public void close() {
 
+  }
+  public ProverEnvironment getWrapped() {
+    return this.optimizer.getWrapped();
   }
 }

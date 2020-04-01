@@ -20,13 +20,10 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import org.sosy_lab.java_smt.api.Formula;
-import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.FormulaType;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 
-public class BasicDomainOptimizer<T extends Formula> implements DomainOptimizer{
+public class BasicDomainOptimizer implements DomainOptimizer{
   private final SolverContext delegate;
   private final ProverEnvironment wrapped;
 
@@ -34,24 +31,23 @@ public class BasicDomainOptimizer<T extends Formula> implements DomainOptimizer{
     this.delegate = delegate;
     this.wrapped = wrapped;
   }
+  @Override
+  public SolverContext getDelegate() {
+    return this.delegate;
+  }
+  @Override
+  public ProverEnvironment getWrapped() {
+    return this.wrapped;
+  }
+
+  @Override
+  public void test() {
+    System.out.println("test");
+  }
 
   @Override
   public DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped) {
-    return new BasicDomainOptimizer<>(delegate, wrapped);
-  }
-
-  @Override
-  public void getType(DomainOptimizer optimizer, Formula f) {
-    SolverContext delegate = this.delegate;
-    FormulaManager fManager = delegate.getFormulaManager();
-    FormulaType<T> type = (FormulaType<T>) fManager.getFormulaType(f);
-
-    if (type.isBooleanType()) {
-      System.out.println("Boolean");
-    }
-    if (type.isIntegerType()) {
-      System.out.println("Integer");
-    }
-
+    return new BasicDomainOptimizer(delegate, wrapped);
   }
 }
+

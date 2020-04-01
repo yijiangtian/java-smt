@@ -20,14 +20,14 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 
 public interface DomainOptimizer {
 
+    SolverContext getDelegate();
+    ProverEnvironment getWrapped();
+    void test();
     DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped);
-
-    void calculateDomains(Formula f);
 
 }
