@@ -25,7 +25,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProverEnvironment<Void>
 implements ProverEnvironment {
 
-    DomainOptimizerProverEnvironment(DomainOptimizer optimizer, ProverEnvironment pe) {
+    public DomainOptimizerProverEnvironment(DomainOptimizer optimizer, ProverEnvironment pe) {
         super(pe, optimizer);
     }
 

@@ -27,15 +27,23 @@ import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
+import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 
 public class DomainOptimizerTest {
 
-  public static void main(String[] args) throws InvalidConfigurationException {
+  public static void main(String[] args) throws InvalidConfigurationException,
+                                                InterruptedException, SolverException {
     Configuration config = Configuration.fromCmdLineArguments(args);
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
@@ -45,6 +53,27 @@ public class DomainOptimizerTest {
     ProverEnvironment wrapped = delegate.newProverEnvironment(ProverOptions.GENERATE_MODELS);
 
     DomainOptimizer optimizer = new BasicDomainOptimizer(delegate, wrapped);
+
+    DomainOptimizerProverEnvironment environment = new DomainOptimizerProverEnvironment(optimizer, wrapped);
+
+    FormulaManager fmgr = delegate.getFormulaManager();
+    BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+
+    IntegerFormula a = imgr.makeVariable("a"),
+        b = imgr.makeVariable("b"),
+        c = imgr.makeVariable("c");
+    BooleanFormula constraint = bmgr.or(
+        imgr.equal(
+            imgr.add(a, b), c
+        ),
+        imgr.equal(
+            imgr.add(a, c), imgr.multiply(imgr.makeNumber(2), b)
+        )
+    );
+    environment.push(constraint);
+    boolean isUnsat = environment.isUnsat();
+    System.out.println(isUnsat);
     optimizer.test();
   }
 }

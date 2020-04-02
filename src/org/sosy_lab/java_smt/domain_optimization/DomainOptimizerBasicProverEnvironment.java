@@ -62,7 +62,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-        return false;
+        return wrapped.isUnsat();
     }
 
     @Override
