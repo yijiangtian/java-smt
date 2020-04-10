@@ -20,6 +20,10 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import java.util.Map;
+import java.util.Set;
+import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 
@@ -27,7 +31,9 @@ public interface DomainOptimizer {
 
     SolverContext getDelegate();
     ProverEnvironment getWrapped();
-    void test();
-    DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped);
+    void visit(Formula f);
+    DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped,
+                           BooleanFormula query, Set<BooleanFormula> constraints);
+    Set<String> getVariables();
 
 }
