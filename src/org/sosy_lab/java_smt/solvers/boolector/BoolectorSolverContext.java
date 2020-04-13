@@ -39,6 +39,7 @@ import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
 import org.sosy_lab.java_smt.basicimpl.reusableStack.ReusableStackTheoremProver;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 public final class BoolectorSolverContext extends AbstractSolverContext {
 
@@ -125,6 +126,11 @@ public final class BoolectorSolverContext extends AbstractSolverContext {
       closed = true;
       BtorJNI.boolector_delete(creator.getEnv());
     }
+  }
+
+  @Override
+  public DomainOptimizer getDomainOptimizer() {
+    return null;
   }
 
   @SuppressWarnings("resource")

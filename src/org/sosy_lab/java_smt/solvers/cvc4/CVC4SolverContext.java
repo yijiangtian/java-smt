@@ -37,6 +37,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearArithmetic;
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 public final class CVC4SolverContext extends AbstractSolverContext {
 
@@ -122,6 +123,11 @@ public final class CVC4SolverContext extends AbstractSolverContext {
       creator.getEnv().delete();
       creator = null;
     }
+  }
+
+  @Override
+  public DomainOptimizer getDomainOptimizer() {
+    return null;
   }
 
   @Override

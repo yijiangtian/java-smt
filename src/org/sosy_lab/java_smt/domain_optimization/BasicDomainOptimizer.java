@@ -20,11 +20,14 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import java.util.HashSet;
+
+import java.util.LinkedHashSet;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
@@ -34,7 +37,7 @@ import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 public class BasicDomainOptimizer implements DomainOptimizer{
   private final SolverContext delegate;
   private final ProverEnvironment wrapped;
-  final Set<String> usedVariables = new HashSet<>();
+  final Set<IntegerFormula> usedVariables = new LinkedHashSet<>();
   final BooleanFormula query;
   final Set<BooleanFormula> constraints;
 
@@ -76,14 +79,18 @@ public class BasicDomainOptimizer implements DomainOptimizer{
 
           @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
-            usedVariables.add(name);
+            FormulaManager fmgr = delegate.getFormulaManager();
+            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+            IntegerFormula var = imgr.makeVariable(name);
+            usedVariables.add(var);
+            SolutionSet domain = new SolutionSet(var, delegate.getDomainOptimizer());
             return TraversalProcess.CONTINUE;
           }
         };
     fmgr.visitRecursively(f, nameExtractor);
         }
 
-  public Set<String> getVariables() {
+  public Set<IntegerFormula> getVariables() {
     return this.usedVariables;
   }
 

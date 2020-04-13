@@ -47,6 +47,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public T addConstraint(BooleanFormula constraint) throws InterruptedException {
+        wrapped.addConstraint(constraint);
         return null;
     }
 
@@ -57,22 +58,22 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public boolean isUnsat() throws SolverException, InterruptedException {
-        return false;
-    }
-
-    @Override
-    public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
         return wrapped.isUnsat();
     }
 
     @Override
+    public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
+        return wrapped.isUnsatWithAssumptions(assumptions);
+    }
+
+    @Override
     public Model getModel() throws SolverException {
-        return null;
+        return wrapped.getModel();
     }
 
     @Override
     public List<BooleanFormula> getUnsatCore() {
-        return null;
+        return wrapped.getUnsatCore();
     }
 
     @Override

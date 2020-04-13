@@ -72,6 +72,12 @@ public class DomainOptimizerSolverContext implements SolverContext {
   public void close() {
 
   }
+
+  @Override
+  public DomainOptimizer getDomainOptimizer() {
+    return this.optimizer;
+  }
+
   public ProverEnvironment getWrapped() {
     return this.optimizer.getWrapped();
   }

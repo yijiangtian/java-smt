@@ -35,6 +35,7 @@ import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearAr
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
 import org.sosy_lab.java_smt.basicimpl.reusableStack.ReusableStackInterpolatingProver;
 import org.sosy_lab.java_smt.basicimpl.reusableStack.ReusableStackTheoremProver;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 public final class PrincessSolverContext extends AbstractSolverContext {
 
@@ -117,6 +118,11 @@ public final class PrincessSolverContext extends AbstractSolverContext {
 
   @Override
   public void close() {}
+
+  @Override
+  public DomainOptimizer getDomainOptimizer() {
+    return null;
+  }
 
   @Override
   protected boolean supportsAssumptionSolving() {

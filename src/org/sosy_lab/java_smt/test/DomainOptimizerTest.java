@@ -22,6 +22,7 @@ package org.sosy_lab.java_smt.test;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
@@ -78,7 +79,7 @@ public class DomainOptimizerTest {
     BooleanFormula constraint_3 =
         imgr.lessOrEquals(
             imgr.subtract(y,imgr.makeNumber(3)),imgr.makeNumber(7));
-    Set<BooleanFormula> constraints = new HashSet<>();
+    Set<BooleanFormula> constraints = new LinkedHashSet<>();
     constraints.add(constraint_1);
     constraints.add(constraint_2);
     constraints.add(constraint_3);
@@ -94,10 +95,9 @@ public class DomainOptimizerTest {
     System.out.println(isUnsat);
 
     optimizer.visit(query);
-    Set<String> usedVariables = optimizer.getVariables();
-    Iterator<String> itr = usedVariables.iterator();
-    while (itr.hasNext()) {
-      System.out.println(itr.next());
+    Set<IntegerFormula> usedVariables = optimizer.getVariables();
+    for (IntegerFormula var : usedVariables) {
+      System.out.println(var.toString());
     }
   }
 }

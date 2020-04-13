@@ -21,6 +21,7 @@
 package org.sosy_lab.java_smt.api;
 
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Instances of this interface provide access to an SMT solver. A single SolverContext should be
@@ -123,4 +124,8 @@ public interface SolverContext extends AutoCloseable {
    */
   @Override
   void close();
+
+  DomainOptimizer getDomainOptimizer();
 }
+
+

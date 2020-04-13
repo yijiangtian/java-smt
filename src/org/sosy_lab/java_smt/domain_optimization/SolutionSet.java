@@ -20,21 +20,32 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import java.util.Map;
-import java.util.Set;
-import org.sosy_lab.java_smt.api.BooleanFormula;
-import org.sosy_lab.java_smt.api.Formula;
+
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
-import org.sosy_lab.java_smt.api.SolverContext;
 
-public interface DomainOptimizer {
+public class SolutionSet {
 
-    SolverContext getDelegate();
-    ProverEnvironment getWrapped();
-    void visit(Formula f);
-    DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped,
-                           BooleanFormula query, Set<BooleanFormula> constraints);
-    Set<IntegerFormula> getVariables();
+  private final IntegerFormula var;
+  private final DomainOptimizer optimizer;
+  private Integer[] bounds = new Integer[2];
+
+  public SolutionSet(IntegerFormula variable, DomainOptimizer pOptimizer) {
+    this.var = variable;
+    this.optimizer = pOptimizer;
+    this.setLowerBound(Integer.MIN_VALUE);
+    this.setUpperBound(Integer.MAX_VALUE);
+  }
+
+  public void setLowerBound(Integer lBound) {
+    this.bounds[0] = lBound;
+  }
+
+  public void setUpperBound(Integer uBound) {
+    this.bounds[1] = uBound;
+  }
+
+  public Integer[] getBounds() {
+    return this.bounds;
+  }
 
 }
