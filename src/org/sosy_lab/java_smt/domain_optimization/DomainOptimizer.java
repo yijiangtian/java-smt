@@ -37,4 +37,6 @@ public interface DomainOptimizer {
                            BooleanFormula query, Set<BooleanFormula> constraints);
     Set<IntegerFormula> getVariables();
 
+    void pushVariable(IntegerFormula pVar);
+    void pushDomain(IntegerFormula var, SolutionSet domain);
 }

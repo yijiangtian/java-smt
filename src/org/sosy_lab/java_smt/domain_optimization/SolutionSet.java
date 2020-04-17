@@ -21,11 +21,12 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 
+import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 
 public class SolutionSet {
 
-  private final IntegerFormula var;
+  private final Formula var;
   private final DomainOptimizer optimizer;
   private Integer[] bounds = new Integer[2];
 
@@ -46,6 +47,14 @@ public class SolutionSet {
 
   public Integer[] getBounds() {
     return this.bounds;
+  }
+
+  public Integer getLowerBound() {
+    return this.bounds[0];
+  }
+
+  public Integer getUpperBound() {
+    return this.bounds[1];
   }
 
 }

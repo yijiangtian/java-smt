@@ -21,18 +21,16 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
-import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
-import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
-import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
-import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
+
 
 public class BasicDomainOptimizer implements DomainOptimizer{
   private final SolverContext delegate;
@@ -40,6 +38,9 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   final Set<IntegerFormula> usedVariables = new LinkedHashSet<>();
   final BooleanFormula query;
   final Set<BooleanFormula> constraints;
+  private LinkedHashMap<IntegerFormula, SolutionSet> domainDictionary = new LinkedHashMap<>();
+  DomainOptimizerProverEnvironment env;
+  DomainOptimizerFormulaFactory factory;
 
   public BasicDomainOptimizer(SolverContext delegate, ProverEnvironment wrapped,
                               BooleanFormula query, Set<BooleanFormula> constraints) {
@@ -48,6 +49,8 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     this.wrapped = wrapped;
     this.query = query;
     this.constraints = constraints;
+    this.env = new DomainOptimizerProverEnvironment(this, wrapped);
+    this.factory = new DomainOptimizerFormulaFactory(env, this);
   }
 
   @Override
@@ -68,30 +71,23 @@ public class BasicDomainOptimizer implements DomainOptimizer{
 
 
   public void visit(Formula f) {
-    SolverContext delegate = getDelegate();
-    FormulaManager fmgr = delegate.getFormulaManager();
-    FormulaVisitor<TraversalProcess> nameExtractor =
-        new DefaultFormulaVisitor<>() {
-          @Override
-          protected TraversalProcess visitDefault(Formula formula) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitFreeVariable(Formula formula, String name) {
-            FormulaManager fmgr = delegate.getFormulaManager();
-            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            IntegerFormula var = imgr.makeVariable(name);
-            usedVariables.add(var);
-            SolutionSet domain = new SolutionSet(var, delegate.getDomainOptimizer());
-            return TraversalProcess.CONTINUE;
-          }
-        };
-    fmgr.visitRecursively(f, nameExtractor);
-        }
+    this.factory.visit(f);
+  }
 
   public Set<IntegerFormula> getVariables() {
     return this.usedVariables;
+  }
+
+  public Set<BooleanFormula> getConstraints() {
+    return this.constraints;
+  }
+
+  public void pushVariable(IntegerFormula var) {
+    this.usedVariables.add(var);
+  }
+
+  public void pushDomain(IntegerFormula var, SolutionSet domain) {
+    this.domainDictionary.put(var, domain);
   }
 
 }
