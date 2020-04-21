@@ -30,6 +30,7 @@ import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
+import org.sosy_lab.java_smt.api.SolverException;
 
 
 public class BasicDomainOptimizer implements DomainOptimizer{
@@ -37,18 +38,17 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   private final ProverEnvironment wrapped;
   final Set<IntegerFormula> usedVariables = new LinkedHashSet<>();
   final BooleanFormula query;
-  final Set<BooleanFormula> constraints;
+  final Set<BooleanFormula> constraints = new LinkedHashSet<>();;
   private LinkedHashMap<IntegerFormula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaFactory factory;
 
   public BasicDomainOptimizer(SolverContext delegate, ProverEnvironment wrapped,
-                              BooleanFormula query, Set<BooleanFormula> constraints) {
+                              BooleanFormula query) {
 
     this.delegate = delegate;
     this.wrapped = wrapped;
     this.query = query;
-    this.constraints = constraints;
     this.env = new DomainOptimizerProverEnvironment(this, wrapped);
     this.factory = new DomainOptimizerFormulaFactory(env, this);
   }
@@ -65,8 +65,8 @@ public class BasicDomainOptimizer implements DomainOptimizer{
 
   @Override
   public DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped,
-                                BooleanFormula query, Set<BooleanFormula> constraints) {
-    return new BasicDomainOptimizer(delegate, wrapped, query, constraints);
+                                BooleanFormula query) {
+    return new BasicDomainOptimizer(delegate, wrapped, query);
   }
 
 
@@ -86,9 +86,26 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     this.usedVariables.add(var);
   }
 
+  public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
+    this.env.addConstraint(constraint);
+    this.constraints.add(constraint);
+  }
+
   public void pushDomain(IntegerFormula var, SolutionSet domain) {
     this.domainDictionary.put(var, domain);
   }
 
-}
+  public void pushQuery(BooleanFormula query) throws InterruptedException {
+    this.env.push(query);
+  }
 
+  public boolean isUnsat() throws SolverException, InterruptedException {
+    return this.env.isUnsat();
+  }
+
+  public SolutionSet getSolutionSet(IntegerFormula var) {
+    SolutionSet domain = this.domainDictionary.get(var);
+    return domain;
+  }
+
+}

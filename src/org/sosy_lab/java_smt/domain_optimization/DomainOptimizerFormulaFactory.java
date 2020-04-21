@@ -21,6 +21,8 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 
+import java.util.LinkedHashMap;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
@@ -43,7 +45,7 @@ public class DomainOptimizerFormulaFactory {
     this.delegate = opt.getDelegate();
   }
 
-  //converts variables to tuples consisting of variables and their solution sets
+  //forms tuples of variables along with their domains
   public void visit(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> nameExtractor =
@@ -65,5 +67,25 @@ public class DomainOptimizerFormulaFactory {
           }
         };
     fmgr.visitRecursively(f, nameExtractor);
+  }
+
+  public void processConstraint(Formula f) {
+    FormulaManager fmgr = delegate.getFormulaManager();
+    FormulaVisitor<TraversalProcess> constraintExtractor =
+        new DefaultFormulaVisitor<>() {
+          @Override
+          protected TraversalProcess visitDefault(Formula f) {
+            return TraversalProcess.CONTINUE;
+          }
+          @Override
+          public TraversalProcess visitFreeVariable(Formula formula, String name) {
+            FormulaManager fmgr = delegate.getFormulaManager();
+            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+            IntegerFormula var = imgr.makeVariable(name);
+            SolutionSet domain = opt.getSolutionSet(var);
+            //TODO: access constraint in order to adjust lower and upper bounds of solution-set
+            return TraversalProcess.CONTINUE;
+          }
+        };
   }
 }
