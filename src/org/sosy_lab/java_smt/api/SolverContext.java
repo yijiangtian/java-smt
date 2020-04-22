@@ -125,7 +125,6 @@ public interface SolverContext extends AutoCloseable {
   @Override
   void close();
 
-  DomainOptimizer getDomainOptimizer();
 }
 
 
