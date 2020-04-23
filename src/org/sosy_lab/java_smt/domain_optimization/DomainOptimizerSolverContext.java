@@ -44,38 +44,33 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public ProverEnvironment newProverEnvironment(ProverOptions... options) {
-    return null;
+    return delegate.newProverEnvironment(options);
   }
 
   @Override
   public InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation(
       ProverOptions... options) {
-    return null;
+    return delegate.newProverEnvironmentWithInterpolation(options);
   }
 
   @Override
   public OptimizationProverEnvironment newOptimizationProverEnvironment(ProverOptions... options) {
-    return null;
+    return newOptimizationProverEnvironment(options);
   }
 
   @Override
   public String getVersion() {
-    return null;
+    return delegate.getVersion();
   }
 
   @Override
   public Solvers getSolverName() {
-    return null;
+    return delegate.getSolverName();
   }
 
   @Override
   public void close() {
 
-  }
-
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return this.optimizer;
   }
 
   public ProverEnvironment getWrapped() {
