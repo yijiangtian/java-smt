@@ -26,52 +26,43 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
-
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
-import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
 
 public class BasicDomainOptimizer implements DomainOptimizer{
-  private final SolverContext delegate;
-  private final ProverEnvironment wrapped;
+  private final DomainOptimizerSolverContext delegate;
+  private final DomainOptimizerProverEnvironment wrapped;
   final Set<IntegerFormula> usedVariables = new LinkedHashSet<>();
   final BooleanFormula query;
-  final Set<BooleanFormula> constraints = new LinkedHashSet<>();;
+  final Set<BooleanFormula> constraints = new LinkedHashSet<>();
   private LinkedHashMap<IntegerFormula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
-  DomainOptimizerFormulaFactory factory;
+  DomainOptimizerFormulaRegister register;
 
-  public BasicDomainOptimizer(SolverContext delegate, ProverEnvironment wrapped,
+  public BasicDomainOptimizer(DomainOptimizerSolverContext delegate,
+                              DomainOptimizerProverEnvironment wrapped,
                               BooleanFormula query) {
 
     this.delegate = delegate;
     this.wrapped = wrapped;
     this.query = query;
-    this.env = new DomainOptimizerProverEnvironment(this, wrapped);
-    this.factory = new DomainOptimizerFormulaFactory(env, this);
+    this.register = new DomainOptimizerFormulaRegister(wrapped, this);
   }
 
   @Override
-  public SolverContext getDelegate() {
+  public DomainOptimizerSolverContext getDelegate() {
     return this.delegate;
   }
 
   @Override
-  public ProverEnvironment getWrapped() {
+  public DomainOptimizerProverEnvironment getWrapped() {
     return this.wrapped;
-  }
-
-  @Override
-  public DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped,
-                                BooleanFormula query) {
-    return new BasicDomainOptimizer(delegate, wrapped, query);
   }
 
 
   public void visit(Formula f) {
-    this.factory.visit(f);
+    this.register.visit(f);
   }
 
   public Set<IntegerFormula> getVariables() {
@@ -87,7 +78,8 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
-    this.env.addConstraint(constraint);
+    this.wrapped.addConstraint(constraint);
+    this.register.processConstraint(constraint);
     this.constraints.add(constraint);
   }
 
@@ -96,11 +88,11 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   public void pushQuery(BooleanFormula query) throws InterruptedException {
-    this.env.push(query);
+    this.wrapped.push(query);
   }
 
   public boolean isUnsat() throws SolverException, InterruptedException {
-    return this.env.isUnsat();
+    return this.wrapped.isUnsat();
   }
 
   public SolutionSet getSolutionSet(IntegerFormula var) {

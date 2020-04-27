@@ -21,12 +21,13 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 import org.sosy_lab.java_smt.api.ProverEnvironment;
+import org.sosy_lab.java_smt.api.SolverContext;
 
 public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProverEnvironment<Void>
 implements ProverEnvironment {
 
-    public DomainOptimizerProverEnvironment(DomainOptimizer optimizer, ProverEnvironment pe) {
-        super(pe, optimizer);
+    public DomainOptimizerProverEnvironment(SolverContext delegate) {
+        super(delegate);
     }
 
 }

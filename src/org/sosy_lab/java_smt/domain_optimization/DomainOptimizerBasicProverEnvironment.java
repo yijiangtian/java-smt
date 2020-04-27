@@ -23,6 +23,7 @@ package org.sosy_lab.java_smt.domain_optimization;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Model;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
@@ -32,48 +33,49 @@ import java.util.Optional;
 
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
-    private final BasicProverEnvironment<T> wrapped;
-    final DomainOptimizer optimizer;
+    final SolverContext delegate;
+    private final ProverEnvironment wrapped;
 
-    DomainOptimizerBasicProverEnvironment(BasicProverEnvironment<T> wrapped, DomainOptimizer optimizer) {
-        this.wrapped = wrapped;
-        this.optimizer = optimizer;
+
+    DomainOptimizerBasicProverEnvironment(SolverContext delegate) {
+        this.delegate = delegate;
+        this.wrapped = delegate.newProverEnvironment();
     }
 
     @Override
     public void pop() {
-        wrapped.pop();
+        this.wrapped.pop();
     }
 
     @Override
     public T addConstraint(BooleanFormula constraint) throws InterruptedException {
-        wrapped.addConstraint(constraint);
+        this.wrapped.addConstraint(constraint);
         return null;
     }
 
     @Override
     public void push() {
-        wrapped.push();
+        this.wrapped.push();
     }
 
     @Override
     public boolean isUnsat() throws SolverException, InterruptedException {
-        return wrapped.isUnsat();
+        return this.wrapped.isUnsat();
     }
 
     @Override
     public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-        return wrapped.isUnsatWithAssumptions(assumptions);
+        return this.wrapped.isUnsatWithAssumptions(assumptions);
     }
 
     @Override
     public Model getModel() throws SolverException {
-        return wrapped.getModel();
+        return this.wrapped.getModel();
     }
 
     @Override
     public List<BooleanFormula> getUnsatCore() {
-        return wrapped.getUnsatCore();
+        return this.wrapped.getUnsatCore();
     }
 
     @Override
@@ -91,7 +93,4 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
         return null;
     }
 
-    public SolverContext getDelegate() {
-        return this.optimizer.getDelegate();
-    }
 }

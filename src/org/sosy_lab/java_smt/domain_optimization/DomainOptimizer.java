@@ -24,17 +24,13 @@ import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
-import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
 public interface DomainOptimizer {
 
-    SolverContext getDelegate();
-    ProverEnvironment getWrapped();
+    DomainOptimizerSolverContext getDelegate();
+    DomainOptimizerProverEnvironment getWrapped();
     void visit(Formula f);
-    DomainOptimizer create(SolverContext delegate, ProverEnvironment wrapped,
-                           BooleanFormula query);
     Set<IntegerFormula> getVariables();
     Set<BooleanFormula> getConstraints();
 

@@ -20,10 +20,6 @@
 
 package org.sosy_lab.java_smt.test;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
@@ -34,17 +30,15 @@ import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.BooleanFormulaManager;
-import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
-import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 
 public class DomainOptimizerTest {
 
@@ -56,8 +50,8 @@ public class DomainOptimizerTest {
 
     SolverContext delegate = SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    ProverEnvironment wrapped = delegate.newProverEnvironment(ProverOptions.GENERATE_MODELS);
-
+    DomainOptimizerSolverContext context = new DomainOptimizerSolverContext(delegate);
+    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(context);
 
 
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -79,25 +73,22 @@ public class DomainOptimizerTest {
     BooleanFormula constraint_3 =
         imgr.lessOrEquals(
             imgr.subtract(y,imgr.makeNumber(3)),imgr.makeNumber(7));
-    Set<BooleanFormula> constraints = new LinkedHashSet<>();
-    constraints.add(constraint_1);
-    constraints.add(constraint_2);
-    constraints.add(constraint_3);
 
-    DomainOptimizer optimizer = new BasicDomainOptimizer(delegate, wrapped, query, constraints);
+    DomainOptimizer optimizer = new BasicDomainOptimizer(context, wrapped, query);
 
-    DomainOptimizerProverEnvironment environment = new DomainOptimizerProverEnvironment(optimizer, wrapped);
-    environment.push(query);
-    environment.addConstraint(constraint_1);
-    environment.addConstraint(constraint_2);
-    environment.addConstraint(constraint_3);
-    boolean isUnsat = environment.isUnsat();
+    optimizer.pushQuery(query);
+    optimizer.visit(query);
+    optimizer.pushConstraint(constraint_1);
+    optimizer.pushConstraint(constraint_2);
+    //optimizer.pushConstraint(constraint_3);
+    boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
-    optimizer.visit(query);
     Set<IntegerFormula> usedVariables = optimizer.getVariables();
     for (IntegerFormula var : usedVariables) {
       System.out.println(var.toString());
     }
+    Set<BooleanFormula> constraints = optimizer.getConstraints();
+    System.out.println(constraints.size());
   }
 }
