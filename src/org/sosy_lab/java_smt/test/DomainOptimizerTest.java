@@ -39,6 +39,7 @@ import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
+import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 
 public class DomainOptimizerTest {
 
@@ -87,6 +88,8 @@ public class DomainOptimizerTest {
     Set<IntegerFormula> usedVariables = optimizer.getVariables();
     for (IntegerFormula var : usedVariables) {
       System.out.println(var.toString());
+      SolutionSet domain = new SolutionSet(var, optimizer);
+      domain.show();
     }
     Set<BooleanFormula> constraints = optimizer.getConstraints();
     System.out.println(constraints.size());

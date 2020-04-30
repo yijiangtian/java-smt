@@ -57,4 +57,9 @@ public class SolutionSet {
     return this.bounds[1];
   }
 
+  public void show() {
+    System.out.println("lBound: " + bounds[0]);
+    System.out.println("uBound: " + bounds[1]);
+  }
+
 }
