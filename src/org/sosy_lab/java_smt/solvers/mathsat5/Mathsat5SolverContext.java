@@ -295,10 +295,6 @@ public final class Mathsat5SolverContext extends AbstractSolverContext {
     }
   }
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
 
   long addTerminationTest(long env) {
     Preconditions.checkState(!closed, "solver context is already closed");

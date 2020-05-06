@@ -119,10 +119,7 @@ public final class PrincessSolverContext extends AbstractSolverContext {
   @Override
   public void close() {}
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
+
 
   @Override
   protected boolean supportsAssumptionSolving() {

@@ -128,10 +128,6 @@ public final class BoolectorSolverContext extends AbstractSolverContext {
     }
   }
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
 
   @SuppressWarnings("resource")
   @Override

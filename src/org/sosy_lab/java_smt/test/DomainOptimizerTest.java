@@ -81,14 +81,14 @@ public class DomainOptimizerTest {
     optimizer.visit(query);
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
-    //optimizer.pushConstraint(constraint_3);
+    optimizer.pushConstraint(constraint_3);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
     Set<IntegerFormula> usedVariables = optimizer.getVariables();
     for (IntegerFormula var : usedVariables) {
       System.out.println(var.toString());
-      SolutionSet domain = new SolutionSet(var, optimizer);
+      SolutionSet domain = optimizer.getSolutionSet(var);
       domain.show();
     }
     Set<BooleanFormula> constraints = optimizer.getConstraints();

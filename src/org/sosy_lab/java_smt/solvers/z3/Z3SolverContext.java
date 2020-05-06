@@ -298,10 +298,6 @@ final class Z3SolverContext extends AbstractSolverContext {
     }
   }
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
 
   @Override
   protected boolean supportsAssumptionSolving() {

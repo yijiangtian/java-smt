@@ -125,10 +125,7 @@ public final class CVC4SolverContext extends AbstractSolverContext {
     }
   }
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
+
 
   @Override
   public Solvers getSolverName() {

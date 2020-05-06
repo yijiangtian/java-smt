@@ -20,8 +20,10 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import edu.nyu.acsys.CVC4.FunctionType;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
@@ -81,13 +83,13 @@ public class DomainOptimizerFormulaRegister {
                                                 FunctionDeclaration<?> pFunctionDeclaration) {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             FunctionDeclarationKind declaration = pFunctionDeclaration.getKind();
-
+            System.out.println(declaration.toString());
             //iterate through the function arguments and retrieve the corresponding variables in the
             //domain-dictionary
             for (Formula argument: pArgs) {
                 IntegerFormula var = imgr.makeVariable(argument.toString());
                 //if a number is encountered, the visitConstant-method is called
-                if (argument.toString().matches(".*\\d.*")) {
+                if (argument.toString().matches("[0-9]+")) {
                   visitConstant(var, argument);
                 }
             }
@@ -97,30 +99,45 @@ public class DomainOptimizerFormulaRegister {
             SolutionSet domain_2 = opt.getSolutionSet(var_2);
 
             //SolutionSets of the variables are adjusted according to the function-declaration
-            if (declaration.toString().equals("LTE")) {
-              if (var_2.toString().matches(".*\\d.*")) {
-                Integer val_2 = Integer.parseInt(var_2.toString());
-                System.out.println(val_2);
-                domain_1.setUpperBound(val_2);
-              }
-              else if (var_1.toString().matches(".*\\d.*")) {
-                Integer val_1 = Integer.parseInt(var_1.toString());
-                System.out.println(val_1);
-                domain_2.setLowerBound(val_1);
-              }
-            }
+            switch (declaration.toString()) {
+              case "LTE":
+                if (var_2.toString().matches(".*\\d.*")) {
+                  Integer val_2 = Integer.parseInt(var_2.toString());
+                  System.out.println(val_2);
+                  if (var_1.toString().contains(" ")) {
+                    processConstraint(var_1);
+                    break;
+                  }
+                  domain_1.setUpperBound(val_2);
 
-            else if (declaration.toString().equals("GTE")) {
-              if (var_2.toString().matches(".*\\d.*")) {
-                Integer val_2 = Integer.parseInt(var_2.toString());
-                System.out.println(val_2);
-                domain_1.setLowerBound(val_2);
-              }
-              else if (var_1.toString().matches(".*\\d.*")) {
-                Integer val_1 = Integer.parseInt(var_1.toString());
-                System.out.println(val_1);
-                domain_2.setUpperBound(val_1);
-              }
+                } else if (var_1.toString().matches(".*\\d.*")) {
+                  Integer val_1 = Integer.parseInt(var_1.toString());
+                  System.out.println(val_1);
+                  if (var_2.toString().contains(" ")) {
+                    processConstraint(var_2);
+                    break;
+                  }
+                  domain_2.setLowerBound(val_1);
+                }
+                break;
+              case "GTE":
+                if (var_2.toString().matches(".*\\d.*")) {
+                  Integer val_2 = Integer.parseInt(var_2.toString());
+                  System.out.println(val_2);
+                  domain_1.setLowerBound(val_2);
+                } else if (var_1.toString().matches(".*\\d.*")) {
+                  Integer val_1 = Integer.parseInt(var_1.toString());
+                  System.out.println(val_1);
+                  domain_2.setUpperBound(val_1);
+                }
+                break;
+              case "SUB":
+                if (var_2.toString().matches(".*\\d.*")) {
+                  Integer val_2 = Integer.parseInt(var_2.toString());
+                  System.out.println(val_2);
+                  domain_1.setLowerBound(val_2);
+                }
+                break;
             }
 
             return TraversalProcess.CONTINUE;
