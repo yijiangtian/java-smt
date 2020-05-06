@@ -20,10 +20,12 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import edu.nyu.acsys.CVC4.FunctionType;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
@@ -39,6 +41,9 @@ public class DomainOptimizerFormulaRegister {
   private final DomainOptimizerProverEnvironment env;
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
+
+  //when parsing a constraint,the data for every path is stored in here
+  private LinkedHashMap<Integer,String> declarations = new LinkedHashMap<>();
 
   public DomainOptimizerFormulaRegister(DomainOptimizerProverEnvironment env,
                                        DomainOptimizer opt) {
@@ -72,6 +77,10 @@ public class DomainOptimizerFormulaRegister {
 
   public void processConstraint(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
+    if (declarations.size() > 1) {
+      declarations = sortHashMapByValues(declarations);
+    }
+
     FormulaVisitor<TraversalProcess> constraintExtractor =
         new DefaultFormulaVisitor<>() {
           @Override
@@ -83,7 +92,6 @@ public class DomainOptimizerFormulaRegister {
                                                 FunctionDeclaration<?> pFunctionDeclaration) {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             FunctionDeclarationKind declaration = pFunctionDeclaration.getKind();
-            System.out.println(declaration.toString());
             //iterate through the function arguments and retrieve the corresponding variables in the
             //domain-dictionary
             for (Formula argument: pArgs) {
@@ -97,13 +105,14 @@ public class DomainOptimizerFormulaRegister {
             SolutionSet domain_1 = opt.getSolutionSet(var_1);
             IntegerFormula var_2 = (IntegerFormula) pArgs.get(1);
             SolutionSet domain_2 = opt.getSolutionSet(var_2);
-
             //SolutionSets of the variables are adjusted according to the function-declaration
             switch (declaration.toString()) {
               case "LTE":
                 if (var_2.toString().matches(".*\\d.*")) {
                   Integer val_2 = Integer.parseInt(var_2.toString());
-                  System.out.println(val_2);
+                  declarations.put(val_2, declaration.toString());
+                  //if argument 1 is a formula rather than a variable or a constant, the tree is
+                  //searched recursively
                   if (var_1.toString().contains(" ")) {
                     processConstraint(var_1);
                     break;
@@ -112,7 +121,8 @@ public class DomainOptimizerFormulaRegister {
 
                 } else if (var_1.toString().matches(".*\\d.*")) {
                   Integer val_1 = Integer.parseInt(var_1.toString());
-                  System.out.println(val_1);
+                  declarations.put(val_1, declaration.toString());
+                  //analog for the case of argument 2 being a formula
                   if (var_2.toString().contains(" ")) {
                     processConstraint(var_2);
                     break;
@@ -123,23 +133,21 @@ public class DomainOptimizerFormulaRegister {
               case "GTE":
                 if (var_2.toString().matches(".*\\d.*")) {
                   Integer val_2 = Integer.parseInt(var_2.toString());
-                  System.out.println(val_2);
+                  declarations.put(val_2, declaration.toString());
                   domain_1.setLowerBound(val_2);
                 } else if (var_1.toString().matches(".*\\d.*")) {
                   Integer val_1 = Integer.parseInt(var_1.toString());
-                  System.out.println(val_1);
+                  declarations.put(val_1, declaration.toString());
                   domain_2.setUpperBound(val_1);
                 }
                 break;
               case "SUB":
                 if (var_2.toString().matches(".*\\d.*")) {
                   Integer val_2 = Integer.parseInt(var_2.toString());
-                  System.out.println(val_2);
                   domain_1.setLowerBound(val_2);
                 }
                 break;
             }
-
             return TraversalProcess.CONTINUE;
           }
           @Override
@@ -153,4 +161,40 @@ public class DomainOptimizerFormulaRegister {
         };
     fmgr.visitRecursively(f, constraintExtractor);
   }
+
+
+  /*
+        sorting method for declarations, serving the purpose of aggregating the data gathered when
+        processing the constraints
+         */
+  public LinkedHashMap<Integer, String> sortHashMapByValues(
+      HashMap<Integer, String> passedMap) {
+    List<Integer> mapKeys = new ArrayList<>(passedMap.keySet());
+    List<String> mapValues = new ArrayList<>(passedMap.values());
+    Collections.sort(mapValues);
+    Collections.sort(mapKeys);
+
+    LinkedHashMap<Integer, String> sortedMap =
+        new LinkedHashMap<>();
+
+    Iterator<String> valueIt = mapValues.iterator();
+    while (valueIt.hasNext()) {
+      String val = valueIt.next();
+      Iterator<Integer> keyIt = mapKeys.iterator();
+
+      while (keyIt.hasNext()) {
+        Integer key = keyIt.next();
+        String comp1 = passedMap.get(key);
+        String comp2 = val;
+
+        if (comp1.equals(comp2)) {
+          keyIt.remove();
+          sortedMap.put(key, val);
+          break;
+        }
+      }
+    }
+    return sortedMap;
+  }
+
 }
