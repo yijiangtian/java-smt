@@ -61,40 +61,49 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
 
+  @Override
   public void visit(Formula f) {
     this.register.visit(f);
   }
 
+  @Override
   public Set<IntegerFormula> getVariables() {
     return this.usedVariables;
   }
 
+  @Override
   public Set<BooleanFormula> getConstraints() {
     return this.constraints;
   }
 
+  @Override
   public void pushVariable(IntegerFormula var) {
     this.usedVariables.add(var);
   }
 
+  @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.wrapped.addConstraint(constraint);
     this.register.processConstraint(constraint);
     this.constraints.add(constraint);
   }
 
+  @Override
   public void pushDomain(IntegerFormula var, SolutionSet domain) {
     this.domainDictionary.put(var, domain);
   }
 
-  public void pushQuery(BooleanFormula query) throws InterruptedException {
-    this.wrapped.push(query);
+  @Override
+  public void pushQuery(BooleanFormula newQuery) throws InterruptedException {
+    this.wrapped.push(newQuery);
   }
 
+  @Override
   public boolean isUnsat() throws SolverException, InterruptedException {
     return this.wrapped.isUnsat();
   }
 
+  @Override
   public SolutionSet getSolutionSet(IntegerFormula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
