@@ -57,7 +57,6 @@ import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearArithmetic;
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 import org.sosy_lab.java_smt.solvers.mathsat5.Mathsat5NativeApi.TerminationTest;
 
 public final class Mathsat5SolverContext extends AbstractSolverContext {
@@ -294,7 +293,6 @@ public final class Mathsat5SolverContext extends AbstractSolverContext {
       msat_destroy_config(mathsatConfig);
     }
   }
-
 
   long addTerminationTest(long env) {
     Preconditions.checkState(!closed, "solver context is already closed");

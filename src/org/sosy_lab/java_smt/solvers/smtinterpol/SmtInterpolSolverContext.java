@@ -35,7 +35,6 @@ import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearAr
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
 import org.sosy_lab.java_smt.basicimpl.reusableStack.ReusableStackInterpolatingProver;
 import org.sosy_lab.java_smt.basicimpl.reusableStack.ReusableStackTheoremProver;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 public final class SmtInterpolSolverContext extends AbstractSolverContext {
 
