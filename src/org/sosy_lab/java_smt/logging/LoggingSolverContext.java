@@ -28,7 +28,6 @@ import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /** {@link SolverContext} that wraps all prover environments in their logging versions. */
 public final class LoggingSolverContext implements SolverContext {
@@ -78,6 +77,4 @@ public final class LoggingSolverContext implements SolverContext {
   public void close() {
     delegate.close();
   }
-
-
 }

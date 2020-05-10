@@ -47,7 +47,6 @@ import org.sosy_lab.java_smt.api.OptimizationProverEnvironment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearArithmetic;
 import org.sosy_lab.java_smt.basicimpl.AbstractSolverContext;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 @Options(prefix = "solver.z3")
 final class Z3SolverContext extends AbstractSolverContext {
@@ -297,7 +296,6 @@ final class Z3SolverContext extends AbstractSolverContext {
       Native.delContext(context);
     }
   }
-
 
   @Override
   protected boolean supportsAssumptionSolving() {
