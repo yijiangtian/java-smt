@@ -79,8 +79,5 @@ public final class LoggingSolverContext implements SolverContext {
     delegate.close();
   }
 
-  @Override
-  public DomainOptimizer getDomainOptimizer() {
-    return null;
-  }
+
 }
