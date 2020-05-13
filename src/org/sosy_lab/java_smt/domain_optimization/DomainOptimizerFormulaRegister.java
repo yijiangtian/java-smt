@@ -21,10 +21,7 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.TreeMap;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
@@ -37,12 +34,23 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
+import scala.Int;
+
+class Function {
+  List<Formula> args;
+  FunctionDeclaration<?> declaration;
+  public Function(List<Formula> args, FunctionDeclaration<?> declaration) {
+    this.args = args;
+    this.declaration = declaration;
+  }
+}
 
 public class DomainOptimizerFormulaRegister {
 
   private final DomainOptimizerProverEnvironment env;
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
+  private Function functionBuffer;
 
   enum argTypes {
     VAR,
@@ -75,7 +83,6 @@ public class DomainOptimizerFormulaRegister {
             opt.pushVariable(var);
             SolutionSet domain = new SolutionSet(var, opt);
             opt.pushDomain(var, domain);
-            TreeMap<Integer, String> declarations = new TreeMap<>();
             return TraversalProcess.CONTINUE;
           }
         };
@@ -105,6 +112,8 @@ public class DomainOptimizerFormulaRegister {
           public argTypes visitFunction(
               Formula f, List<Formula> pArgs,
               FunctionDeclaration<?> pFunctionDeclaration) {
+            Function buffer = new Function(pArgs, pFunctionDeclaration);
+            putToBuffer(buffer);
             return argTypes.FUNC;
           }
 
@@ -120,6 +129,13 @@ public class DomainOptimizerFormulaRegister {
     return fmgr.visit(f, getFormulaType);
   }
 
+  public void putToBuffer(Function f) {
+    this.functionBuffer = f;
+  }
+
+  public Function readFromBuffer() {
+    return this.functionBuffer;
+  }
 
     public void processConstraint (Formula f){
       FormulaManager fmgr = delegate.getFormulaManager();
@@ -145,7 +161,12 @@ public class DomainOptimizerFormulaRegister {
                 if (getFormulaType(argument) == argTypes.CONST) {
                   visitConstant(var, argument);
                 }
-
+                if (getFormulaType(argument) == argTypes.FUNC) {
+                  Function func = readFromBuffer();
+                  List<Formula> args = func.args;
+                  IntegerFormula variable = digDeeper(args);
+                  System.out.println(variable.toString());
+                }
               }
               IntegerFormula var_1 = (IntegerFormula) pArgs.get(0);
               SolutionSet domain_1 = opt.getSolutionSet(var_1);
@@ -153,6 +174,7 @@ public class DomainOptimizerFormulaRegister {
               SolutionSet domain_2 = opt.getSolutionSet(var_2);
               //SolutionSets of the variables are adjusted according to the function-declaration
               switch (declaration.toString()) {
+
                 case "LTE":
                   if (getFormulaType(var_2) == argTypes.CONST) {
                     Integer val_2 = Integer.parseInt(var_2.toString());
@@ -160,17 +182,14 @@ public class DomainOptimizerFormulaRegister {
                       processConstraint(var_1);
                       break;
                     }
-                    domain_1.addDeclaration(declaration.toString(), val_2);
                     domain_1.setUpperBound(val_2);
 
                   } else if (getFormulaType(var_1) == argTypes.CONST) {
                     Integer val_1 = Integer.parseInt(var_1.toString());
-                    if (var_2.toString().contains(" ")) {
-
+                    if (getFormulaType(var_2) == argTypes.FUNC) {
                       processConstraint(var_2);
                       break;
                     }
-                    domain_2.addDeclaration(declaration.toString(), val_1);
                     domain_2.setLowerBound(val_1);
                   }
                   break;
@@ -185,12 +204,11 @@ public class DomainOptimizerFormulaRegister {
                   break;
 
                 case "SUB":
-                  if (var_2.toString().matches(".*\\d.*")) {
+                  if (getFormulaType(var_2) == argTypes.CONST) {
                     Integer val_2 = Integer.parseInt(var_2.toString());
-                    domain_1.addDeclaration(declaration.toString(), val_2);
+                    IntegerFormula decl = imgr.add(var_1, var_2);
+                    //domain_1.addDeclaration(decl);
                   }
-
-
               }
               return TraversalProcess.CONTINUE;
             }
@@ -208,32 +226,14 @@ public class DomainOptimizerFormulaRegister {
       fmgr.visitRecursively(f, constraintExtractor);
     }
 
-
-  public ArrayList<argTypes> getArgTypes(Formula f,List<Formula> pArgs) {
-    ArrayList<argTypes> types = new ArrayList<>();
-
-    for (Formula arg : pArgs) {
-      if (getFormulaType(arg) == argTypes.VAR) {
-        types.add(argTypes.VAR);
-      }
-      if (getFormulaType(arg) == argTypes.CONST) {
-        types.add(argTypes.CONST);
-      }
-      else {
-        types.add(argTypes.FUNC);
-      }
-    }
-    return types;
-  }
-  public FunctionDeclaration<?> getFunctionDeclaration(Formula f,List<Formula> pArgs,
-                                                       FunctionDeclaration<?> pFunctionDeclaration) {
-    return pFunctionDeclaration;
-  }
-
-  public Formula getVariable(List<Formula> args) {
+  public IntegerFormula digDeeper(List<Formula> args) {
     for (Formula var : args) {
-      if (getFormulaType(var) == argTypes.VAR) {
-        return var;
+      if (getFormulaType(var) == argTypes.FUNC) {
+        Function buffer = readFromBuffer();
+        var = digDeeper(buffer.args);
+        if (getFormulaType(var) == argTypes.VAR) {
+          return (IntegerFormula) var;
+        }
       }
     }
     return null;
