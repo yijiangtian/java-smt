@@ -48,6 +48,8 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.FloatingPointRoundingMode;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearArithmetic;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 import org.sosy_lab.java_smt.logging.LoggingSolverContext;
 import org.sosy_lab.java_smt.solvers.boolector.BoolectorSolverContext;
 import org.sosy_lab.java_smt.solvers.cvc4.CVC4SolverContext;
@@ -96,6 +98,9 @@ public class SolverContextFactory {
 
   @Option(secure = true, description = "Log solver actions, this may be slow!")
   private boolean useLogger = false;
+
+  @Option(secure = true, description = "Whether to use DomainOptimizer")
+  private boolean useDomainOptimizer = true;
 
   @Option(secure = true, description = "Default rounding mode for floating point operations.")
   private FloatingPointRoundingMode floatingPointRoundingMode =
@@ -157,6 +162,12 @@ public class SolverContextFactory {
   /** Create new context with solver chosen according to the supplied configuration. */
   public SolverContext generateContext() throws InvalidConfigurationException {
     return generateContext(solver);
+  }
+
+  public DomainOptimizerSolverContext generateDomainOptimizerSolverContext()
+      throws InvalidConfigurationException {
+    SolverContext context = generateContext();
+    return new DomainOptimizerSolverContext(context);
   }
 
   /** Create new context with solver name supplied. */

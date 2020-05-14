@@ -33,10 +33,10 @@ import org.sosy_lab.java_smt.api.SolverException;
 public class BasicDomainOptimizer implements DomainOptimizer{
   private final DomainOptimizerSolverContext delegate;
   private final DomainOptimizerProverEnvironment wrapped;
-  final Set<IntegerFormula> usedVariables = new LinkedHashSet<>();
+  final Set<Formula> usedVariables = new LinkedHashSet<>();
   final BooleanFormula query;
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
-  private LinkedHashMap<IntegerFormula, SolutionSet> domainDictionary = new LinkedHashMap<>();
+  private LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaRegister register;
 
@@ -67,7 +67,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public Set<IntegerFormula> getVariables() {
+  public Set<Formula> getVariables() {
     return this.usedVariables;
   }
 
@@ -77,7 +77,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void pushVariable(IntegerFormula var) {
+  public void pushVariable(Formula var) {
     this.usedVariables.add(var);
   }
 
@@ -89,7 +89,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void pushDomain(IntegerFormula var, SolutionSet domain) {
+  public void pushDomain(Formula var, SolutionSet domain) {
     this.domainDictionary.put(var, domain);
   }
 
@@ -104,7 +104,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public SolutionSet getSolutionSet(IntegerFormula var) {
+  public SolutionSet getSolutionSet(Formula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
   }

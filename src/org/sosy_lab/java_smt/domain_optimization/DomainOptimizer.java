@@ -31,15 +31,15 @@ public interface DomainOptimizer {
     DomainOptimizerSolverContext getDelegate();
     DomainOptimizerProverEnvironment getWrapped();
     void visit(Formula f);
-    Set<IntegerFormula> getVariables();
+    Set<Formula> getVariables();
     Set<BooleanFormula> getConstraints();
 
-    void pushVariable(IntegerFormula pVar);
-    void pushDomain(IntegerFormula var, SolutionSet domain);
+    void pushVariable(Formula pVar);
+    void pushDomain(Formula var, SolutionSet domain);
     void pushConstraint(BooleanFormula constraint) throws InterruptedException;
     void pushQuery(BooleanFormula query) throws InterruptedException;
 
     boolean isUnsat() throws SolverException, InterruptedException;
 
-    SolutionSet getSolutionSet(IntegerFormula var);
+    SolutionSet getSolutionSet(Formula var);
 }

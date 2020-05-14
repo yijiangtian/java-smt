@@ -20,9 +20,7 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
@@ -34,7 +32,6 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
-import scala.Int;
 
 class Function {
   List<Formula> args;
@@ -221,19 +218,17 @@ public class DomainOptimizerFormulaRegister {
               opt.pushDomain(constant, domain);
               return TraversalProcess.CONTINUE;
             }
-
           };
       fmgr.visitRecursively(f, constraintExtractor);
     }
 
   public IntegerFormula digDeeper(List<Formula> args) {
     for (Formula var : args) {
-      if (getFormulaType(var) == argTypes.FUNC) {
-        Function buffer = readFromBuffer();
-        var = digDeeper(buffer.args);
         if (getFormulaType(var) == argTypes.VAR) {
+          opt.pushVariable(var);
+          SolutionSet domain = new SolutionSet(var, opt);
+          opt.pushDomain(var, domain);
           return (IntegerFormula) var;
-        }
       }
     }
     return null;

@@ -20,7 +20,8 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-
+import java.util.Stack;
+import java.util.TreeMap;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 
@@ -28,9 +29,10 @@ public class SolutionSet {
 
   private final Formula var;
   private final DomainOptimizer optimizer;
+  private Stack<IntegerFormula> declarations;
   private Integer[] bounds = new Integer[2];
 
-  public SolutionSet(IntegerFormula variable, DomainOptimizer pOptimizer) {
+  public SolutionSet(Formula variable, DomainOptimizer pOptimizer) {
     this.var = variable;
     this.optimizer = pOptimizer;
     this.setLowerBound(Integer.MIN_VALUE);
@@ -56,6 +58,16 @@ public class SolutionSet {
   public Integer getUpperBound() {
     return this.bounds[1];
   }
+
+  public Stack<IntegerFormula> getDeclarations() {
+    return this.declarations;
+  }
+
+  public void addDeclaration(IntegerFormula declaration) {
+    this.declarations.push(declaration);
+    System.out.println(this.declarations);
+  }
+
 
   public void show() {
     System.out.println("lBound: " + bounds[0]);

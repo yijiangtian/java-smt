@@ -30,6 +30,7 @@ import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.BooleanFormulaManager;
+import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
@@ -85,8 +86,8 @@ public class DomainOptimizerTest {
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
-    Set<IntegerFormula> usedVariables = optimizer.getVariables();
-    for (IntegerFormula var : usedVariables) {
+    Set<Formula> usedVariables = optimizer.getVariables();
+    for (Formula var : usedVariables) {
       System.out.println(var.toString());
       SolutionSet domain = optimizer.getSolutionSet(var);
       domain.show();
