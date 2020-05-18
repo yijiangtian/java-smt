@@ -21,8 +21,10 @@
 package org.sosy_lab.java_smt.test;
 
 import java.util.Set;
+import java.util.Stack;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
+import org.sosy_lab.common.configuration.ConfigurationBuilder;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
@@ -46,16 +48,17 @@ public class DomainOptimizerTest {
 
   public static void main(String[] args) throws InvalidConfigurationException,
                                                 InterruptedException, SolverException {
-    Configuration config = Configuration.fromCmdLineArguments(args);
+    ConfigurationBuilder builder = Configuration.builder();
+    //builder.setOption("useDomainOptimizer", "true");
+    Configuration config = builder.build();
+
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
 
     SolverContext delegate = SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    DomainOptimizerSolverContext context = new DomainOptimizerSolverContext(delegate);
-    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(context);
-
-
+    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(delegate);
+    
     FormulaManager fmgr = delegate.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
@@ -76,7 +79,8 @@ public class DomainOptimizerTest {
         imgr.lessOrEquals(
             imgr.subtract(y,imgr.makeNumber(3)),imgr.makeNumber(7));
 
-    DomainOptimizer optimizer = new BasicDomainOptimizer(context, wrapped, query);
+    DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
+        wrapped, query);
 
     optimizer.pushQuery(query);
     optimizer.visit(query);
@@ -91,8 +95,12 @@ public class DomainOptimizerTest {
       System.out.println(var.toString());
       SolutionSet domain = optimizer.getSolutionSet(var);
       domain.show();
+      Stack<IntegerFormula> declarations = domain.getDeclarations();
+      for (IntegerFormula declaration : declarations) {
+        System.out.println(declaration.toString());
+      }
     }
     Set<BooleanFormula> constraints = optimizer.getConstraints();
-    System.out.println(constraints.size());
   }
+
 }
