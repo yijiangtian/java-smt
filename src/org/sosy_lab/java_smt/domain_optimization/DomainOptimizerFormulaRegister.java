@@ -78,7 +78,7 @@ public class DomainOptimizerFormulaRegister {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             IntegerFormula var = imgr.makeVariable(name);
             opt.pushVariable(var);
-            SolutionSet domain = new SolutionSet(var, opt);
+            SolutionSet domain = new SolutionSet(opt);
             opt.pushDomain(var, domain);
             return TraversalProcess.CONTINUE;
           }
@@ -194,7 +194,7 @@ public class DomainOptimizerFormulaRegister {
                     Function func = readFromBuffer();
                     List<Formula> args = func.args;
                     IntegerFormula variable = digDeeper(args);
-                    SolutionSet domain = new SolutionSet(variable, opt);
+                    SolutionSet domain = new SolutionSet(opt);
                     opt.pushDomain(variable, domain);
 
                     if (getFormulaType(var_2) == argTypes.CONST) {
@@ -235,7 +235,7 @@ public class DomainOptimizerFormulaRegister {
                     Function func = readFromBuffer();
                     List<Formula> args = func.args;
                     IntegerFormula variable = digDeeper(args);
-                    SolutionSet domain = new SolutionSet(variable, opt);
+                    SolutionSet domain = new SolutionSet(opt);
                     opt.pushDomain(variable, domain);
 
                     if (getFormulaType(var_2) == argTypes.CONST) {
@@ -267,7 +267,7 @@ public class DomainOptimizerFormulaRegister {
             public TraversalProcess visitConstant(Formula f, Object value) {
               IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
               IntegerFormula constant = imgr.makeNumber(value.toString());
-              SolutionSet domain = new SolutionSet(constant, opt);
+              SolutionSet domain = new SolutionSet(opt);
               opt.pushDomain(constant, domain);
               return TraversalProcess.CONTINUE;
             }
@@ -282,7 +282,7 @@ public class DomainOptimizerFormulaRegister {
     for (Formula var : args) {
         if (getFormulaType(var) == argTypes.VAR) {
           opt.pushVariable(var);
-          SolutionSet domain = new SolutionSet(var, opt);
+          SolutionSet domain = new SolutionSet(opt);
           opt.pushDomain(var, domain);
           return (IntegerFormula) var;
       }
@@ -375,7 +375,7 @@ public class DomainOptimizerFormulaRegister {
         Function func = readFromBuffer();
         List<Formula> args = func.args;
         IntegerFormula variable = digDeeper(args);
-        SolutionSet domain = new SolutionSet(variable, opt);
+        SolutionSet domain = new SolutionSet(opt);
         opt.pushDomain(variable, domain);
 
         if (getFormulaType(var_2) == argTypes.CONST) {
@@ -416,7 +416,7 @@ public class DomainOptimizerFormulaRegister {
         Function func = readFromBuffer();
         List<Formula> args = func.args;
         IntegerFormula variable = digDeeper(args);
-        SolutionSet domain = new SolutionSet(variable, opt);
+        SolutionSet domain = new SolutionSet(opt);
         opt.pushDomain(variable, domain);
 
         if (getFormulaType(var_2) == argTypes.CONST) {
