@@ -60,7 +60,7 @@ public class DomainOptimizerTest {
     DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(delegate);
     
     FormulaManager fmgr = delegate.getFormulaManager();
-    BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    //BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
 
     IntegerFormula x = imgr.makeVariable("x"),
