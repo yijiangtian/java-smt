@@ -38,7 +38,8 @@ import org.sosy_lab.java_smt.api.SolverContext;
 public class StdInputTest {
 
 
-  public static void main(String[] args) throws InvalidConfigurationException {
+  public static void main(String[] args) throws InvalidConfigurationException,
+                                                InterruptedException {
     Configuration config = Configuration.fromCmdLineArguments(args);
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
@@ -53,6 +54,7 @@ public class StdInputTest {
     BooleanFormula constraint = fmgr.parse(toParse);
 
     try (ProverEnvironment pe = context.newProverEnvironment()) {
+      pe.push(constraint);
     }
   }
 }
