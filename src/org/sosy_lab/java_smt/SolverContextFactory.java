@@ -164,11 +164,6 @@ public class SolverContextFactory {
     return generateContext(solver);
   }
 
-  public DomainOptimizerSolverContext generateDomainOptimizerSolverContext()
-      throws InvalidConfigurationException {
-    SolverContext context = generateContext();
-    return new DomainOptimizerSolverContext(context);
-  }
 
   /** Create new context with solver name supplied. */
   @SuppressWarnings("resource") // returns unclosed context object
@@ -189,6 +184,9 @@ public class SolverContextFactory {
 
     if (useLogger) {
       context = new LoggingSolverContext(logger, context);
+    }
+    if (useDomainOptimizer) {
+      context = new DomainOptimizerSolverContext(context);
     }
     return context;
   }
