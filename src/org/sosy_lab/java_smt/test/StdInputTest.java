@@ -49,7 +49,7 @@ public class StdInputTest {
     String toParse = "(declare-fun v_~A2_5_const_-684433859 () (Array (_ BitVec 32) (_ "
         + "FloatingPoint 11 53)))";
     FormulaManager fmgr = context.getFormulaManager();
-    BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    //BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     BooleanFormula constraint = fmgr.parse(toParse);
 
