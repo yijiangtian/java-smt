@@ -50,7 +50,7 @@ public class StdInputTest {
         + "FloatingPoint 11 53)))";
     FormulaManager fmgr = context.getFormulaManager();
     //BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     BooleanFormula constraint = fmgr.parse(toParse);
 
     try (ProverEnvironment pe = context.newProverEnvironment()) {
