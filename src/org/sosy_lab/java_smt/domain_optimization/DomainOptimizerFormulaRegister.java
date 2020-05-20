@@ -44,7 +44,6 @@ class Function {
 
 public class DomainOptimizerFormulaRegister {
 
-  private final DomainOptimizerProverEnvironment env;
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private Function functionBuffer;
@@ -55,9 +54,7 @@ public class DomainOptimizerFormulaRegister {
     FUNC
   }
 
-  public DomainOptimizerFormulaRegister(DomainOptimizerProverEnvironment env,
-                                       DomainOptimizer opt) {
-    this.env = env;
+  public DomainOptimizerFormulaRegister(DomainOptimizer opt) {
     this.opt = opt;
     this.delegate = opt.getDelegate();
   }
@@ -183,7 +180,7 @@ public class DomainOptimizerFormulaRegister {
                       Function func = readFromBuffer();
                       Integer val_2 = Integer.parseInt(var_2.toString());
                       domain_1 = opt.getSolutionSet(var_1);
-                      FunctionDeclarationKind dec = functionBuffer.declaration;
+                      FunctionDeclarationKind dec = func.declaration;
                       if (dec== FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain_1.getUpperBound();
                         domain_1.setUpperBound(upperBound + val_2);
@@ -199,7 +196,6 @@ public class DomainOptimizerFormulaRegister {
 
                     if (getFormulaType(var_2) == argTypes.CONST) {
                       Integer val_2 = Integer.parseInt(var_2.toString());
-                      SolutionSet domain1 = opt.getSolutionSet(variable);
                       FunctionDeclarationKind dec = func.declaration;
                       if (dec == FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain.getUpperBound();
@@ -216,7 +212,6 @@ public class DomainOptimizerFormulaRegister {
                     opt.pushDomain(variable, domain);
                     if (getFormulaType(var_1) == argTypes.CONST) {
                       Integer val_1 = Integer.parseInt(var_1.toString());
-                      SolutionSet domain1 = opt.getSolutionSet(variable);
                       FunctionDeclarationKind dec = func.declaration;
                       List<Formula> extArgs = func.args;
                       Integer val_2 = Integer.parseInt(extArgs.get(1).toString());
@@ -267,13 +262,12 @@ public class DomainOptimizerFormulaRegister {
                     FunctionDeclarationKind dec = func.declaration;
                     List<Formula> extArgs = func.args;
                     Integer val_2 = Integer.parseInt(extArgs.get(1).toString());
-                    SolutionSet domain1 = opt.getSolutionSet(variable);
                     if (getFormulaType(var_1) == argTypes.CONST) {
                       Integer val_1 = Integer.parseInt(var_1.toString());
                       SolutionSet domain2 = opt.getSolutionSet(variable);
                       if (dec == FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain2.getUpperBound();
-                        domain2.setUpperBound(upperBound - val_1);
+                        domain2.setUpperBound(val_2 - val_1);
                       }
                     }
                   }
