@@ -160,9 +160,7 @@ public class DomainOptimizerFormulaRegister {
                 }
               }
               IntegerFormula var_1 = (IntegerFormula) pArgs.get(0);
-              SolutionSet domain_1 = opt.getSolutionSet(var_1);
               IntegerFormula var_2 = (IntegerFormula) pArgs.get(1);
-              SolutionSet domain_2 = opt.getSolutionSet(var_2);
               //SolutionSets of the variables are adjusted according to the function-declaration
               switch (declaration.toString()) {
 
@@ -179,7 +177,7 @@ public class DomainOptimizerFormulaRegister {
                     if (getFormulaType(var_2) == argTypes.CONST) {
                       Function func = readFromBuffer();
                       Integer val_2 = Integer.parseInt(var_2.toString());
-                      domain_1 = opt.getSolutionSet(var_1);
+                      SolutionSet domain_1 = opt.getSolutionSet(var_1);
                       FunctionDeclarationKind dec = func.declaration;
                       if (dec== FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain_1.getUpperBound();
@@ -229,8 +227,8 @@ public class DomainOptimizerFormulaRegister {
                     if (getFormulaType(var_2) == argTypes.CONST) {
                       Function func = readFromBuffer();
                       Integer val_2 = Integer.parseInt(var_2.toString());
-                      domain_1 = opt.getSolutionSet(var_1);
-                      FunctionDeclarationKind dec = functionBuffer.declaration;
+                      SolutionSet domain_1 = opt.getSolutionSet(var_1);
+                      FunctionDeclarationKind dec = func.declaration;
                       if (dec == FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain_1.getUpperBound();
                         domain_1.setUpperBound(upperBound - val_2);
@@ -246,7 +244,6 @@ public class DomainOptimizerFormulaRegister {
 
                     if (getFormulaType(var_2) == argTypes.CONST) {
                       Integer val_2 = Integer.parseInt(var_2.toString());
-                      SolutionSet domain1 = opt.getSolutionSet(variable);
                       FunctionDeclarationKind dec = func.declaration;
                       if (dec == FunctionDeclarationKind.LTE) {
                         Integer upperBound = domain.getUpperBound();
@@ -266,7 +263,6 @@ public class DomainOptimizerFormulaRegister {
                       Integer val_1 = Integer.parseInt(var_1.toString());
                       SolutionSet domain2 = opt.getSolutionSet(variable);
                       if (dec == FunctionDeclarationKind.LTE) {
-                        Integer upperBound = domain2.getUpperBound();
                         domain2.setUpperBound(val_2 - val_1);
                       }
                     }
