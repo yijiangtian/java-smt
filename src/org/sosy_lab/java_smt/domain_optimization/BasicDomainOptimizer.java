@@ -47,7 +47,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     this.delegate = delegate;
     this.wrapped = wrapped;
     this.query = query;
-    this.register = new DomainOptimizerFormulaRegister(wrapped, this);
+    this.register = new DomainOptimizerFormulaRegister(this);
   }
 
   @Override
