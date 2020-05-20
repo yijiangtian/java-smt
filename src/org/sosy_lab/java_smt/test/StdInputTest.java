@@ -27,6 +27,7 @@ import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
+import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
@@ -36,6 +37,7 @@ import org.sosy_lab.java_smt.api.SolverContext;
 
 public class StdInputTest {
 
+
   public static void main(String[] args) throws InvalidConfigurationException {
     Configuration config = Configuration.fromCmdLineArguments(args);
     LogManager logger = BasicLogManager.create(config);
@@ -43,11 +45,12 @@ public class StdInputTest {
 
     SolverContext context = SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-
+    String toParse = "(declare-fun v_~A2_5_const_-684433859 () (Array (_ BitVec 32) (_ "
+        + "FloatingPoint 11 53)))";
     FormulaManager fmgr = context.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-
+    BooleanFormula constraint = fmgr.parse(toParse);
 
     try (ProverEnvironment pe = context.newProverEnvironment()) {
     }

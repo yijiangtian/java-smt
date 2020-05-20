@@ -95,12 +95,7 @@ public class DomainOptimizerTest {
       System.out.println(var.toString());
       SolutionSet domain = optimizer.getSolutionSet(var);
       domain.show();
-      Stack<IntegerFormula> declarations = domain.getDeclarations();
-      for (IntegerFormula declaration : declarations) {
-        System.out.println(declaration.toString());
-      }
     }
-    Set<BooleanFormula> constraints = optimizer.getConstraints();
   }
 
 }
