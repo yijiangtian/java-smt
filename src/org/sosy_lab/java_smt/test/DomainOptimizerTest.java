@@ -21,7 +21,6 @@
 package org.sosy_lab.java_smt.test;
 
 import java.util.Set;
-import java.util.Stack;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -31,7 +30,6 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
-import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
@@ -49,7 +47,7 @@ public class DomainOptimizerTest {
   public static void main(String[] args) throws InvalidConfigurationException,
                                                 InterruptedException, SolverException {
     ConfigurationBuilder builder = Configuration.builder();
-    //builder.setOption("useDomainOptimizer", "true");
+    builder.setOption("useDomainOptimizer", "true");
     Configuration config = builder.build();
 
     LogManager logger = BasicLogManager.create(config);
@@ -60,7 +58,6 @@ public class DomainOptimizerTest {
     DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(delegate);
     
     FormulaManager fmgr = delegate.getFormulaManager();
-    //BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
 
     IntegerFormula x = imgr.makeVariable("x"),
@@ -79,6 +76,10 @@ public class DomainOptimizerTest {
         imgr.lessOrEquals(
             imgr.subtract(y,imgr.makeNumber(3)),imgr.makeNumber(7));
 
+    BooleanFormula constraint_4 =
+        imgr.greaterOrEquals(
+            imgr.multiply(y,imgr.makeNumber(3)), imgr.makeNumber(3));
+
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped, query);
 
@@ -87,6 +88,7 @@ public class DomainOptimizerTest {
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);
+    optimizer.pushConstraint(constraint_4);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
@@ -97,5 +99,4 @@ public class DomainOptimizerTest {
       domain.show();
     }
   }
-
 }
