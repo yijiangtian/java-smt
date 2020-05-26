@@ -55,6 +55,10 @@ public class DomainOptimizerFormulaRegister {
   }
 
   enum operators {
+    LT,
+    GT,
+    LTE,
+    GTE,
     ADD,
     SUB,
     MULT,
@@ -139,7 +143,7 @@ public class DomainOptimizerFormulaRegister {
     return this.functionBuffer;
   }
 
-    public void processConstraint (Formula f){
+    public void processConstraint (Formula f)  {
       FormulaManager fmgr = delegate.getFormulaManager();
       FormulaVisitor<TraversalProcess> constraintExtractor =
           new DefaultFormulaVisitor<>() {
@@ -165,32 +169,39 @@ public class DomainOptimizerFormulaRegister {
               }
               IntegerFormula var_1 = (IntegerFormula) pArgs.get(0);
               IntegerFormula var_2 = (IntegerFormula) pArgs.get(1);
+              if ((getFormulaType(var_1) == argTypes.VAR) && (getFormulaType(var_2) == argTypes.VAR)) {
+                return TraversalProcess.CONTINUE;
+              }
               //SolutionSets of the variables are adjusted according to the function-declaration
               switch (declaration.toString()) {
 
+                case "LT":
+                  return adjustBounds(var_1, var_2, operators.LT, pArgs, pFunctionDeclaration);
+
+                case "GT":
+                  return adjustBounds(var_1, var_2, operators.GT, pArgs, pFunctionDeclaration);
+
                 case "LTE":
-                  adjustBounds(var_1, var_2, true, pArgs, pFunctionDeclaration);
-                  break;
+                  return adjustBounds(var_1, var_2, operators.LTE, pArgs, pFunctionDeclaration);
 
                 case "GTE":
-                  adjustBounds(var_1, var_2, false, pArgs, pFunctionDeclaration);
-                  break;
+                  return adjustBounds(var_1, var_2, operators.GTE, pArgs, pFunctionDeclaration);
 
                 case "ADD":
-                  processDeclaration(var_1, var_2, operators.ADD, pArgs, pFunctionDeclaration);
-                  break;
+                  return processDeclaration(var_1, var_2, operators.ADD, pArgs,
+                      pFunctionDeclaration);
 
                 case "SUB":
-                  processDeclaration(var_1, var_2, operators.SUB, pArgs, pFunctionDeclaration);
-                  break;
+                  return processDeclaration(var_1, var_2, operators.SUB, pArgs,
+                      pFunctionDeclaration);
 
-                case "MULT":
-                  processDeclaration(var_1, var_2, operators.MULT, pArgs, pFunctionDeclaration);
-                  break;
+                case "MUL":
+                  return processDeclaration(var_1, var_2, operators.MULT, pArgs,
+                      pFunctionDeclaration);
 
                 case "DIV":
-                  processDeclaration(var_1, var_2, operators.DIV, pArgs, pFunctionDeclaration);
-                  break;
+                  return processDeclaration(var_1, var_2, operators.DIV, pArgs,
+                      pFunctionDeclaration);
 
               }
               return TraversalProcess.CONTINUE;
@@ -212,6 +223,10 @@ public class DomainOptimizerFormulaRegister {
   performs depth-search on a function in order to retrieve variable { f(x) -> x }
    */
   public IntegerFormula digDeeper(List<Formula> args) {
+    //if both arguments are variables, the visitor skips the functions
+    if ((getFormulaType(args.get(0)) == argTypes.VAR) && (getFormulaType(args.get(1)) == argTypes.VAR)) {
+      return null;
+    }
     for (Formula var : args) {
         if (getFormulaType(var) == argTypes.VAR) {
           opt.pushVariable(var);
@@ -224,65 +239,91 @@ public class DomainOptimizerFormulaRegister {
   /*
   parses a formula containing a numeral relation as an operator
    */
-  public void adjustBounds(IntegerFormula var_1, IntegerFormula var_2, boolean operator,
+  public TraversalProcess adjustBounds(IntegerFormula var_1, IntegerFormula var_2, operators operator,
                            List<Formula> pArgs, FunctionDeclaration<?> pFunctionDeclaration) {
-      if (getFormulaType(var_2) == argTypes.CONST) {
-        Integer val_2 = Integer.parseInt(var_2.toString());
-        if (getFormulaType(var_1) == argTypes.FUNC) {
-          List<Formula> args = functionBuffer.args;
-          Function func = new Function(pArgs, pFunctionDeclaration.getKind());
-          putToBuffer(func);
-          IntegerFormula variable = digDeeper(args);
-          SolutionSet domain_1 = opt.getSolutionSet(variable);
-          if (operator) {
-            domain_1.setUpperBound(val_2);
-          }
-          else {
-            domain_1.setLowerBound(val_2);
-          }
+    if (getFormulaType(var_2) == argTypes.CONST) {
+      Integer val_2 = Integer.parseInt(var_2.toString());
+      if (getFormulaType(var_1) == argTypes.FUNC) {
+        List<Formula> args = functionBuffer.args;
+        Function func = new Function(pArgs, pFunctionDeclaration.getKind());
+        putToBuffer(func);
+        IntegerFormula variable = digDeeper(args);
+        if (!check(variable)) {
+          return TraversalProcess.CONTINUE;
         }
-        else if (getFormulaType(var_1) == argTypes.VAR) {
-          SolutionSet domain_1 = opt.getSolutionSet(var_1);
-          if (operator) {
+        SolutionSet domain_1 = opt.getSolutionSet(variable);
+        if (val_2 > domain_1.getUpperBound() || val_2 < domain_1.getLowerBound()) {
+          return TraversalProcess.CONTINUE;
+        }
+          if (operator == operators.LTE) {
             domain_1.setUpperBound(val_2);
+          } else if (operator == operators.LT) {
+            domain_1.setUpperBound(val_2 - 1);
           }
-          else {
+        else if (operator == operators.GTE) {
             domain_1.setLowerBound(val_2);
-          }
+        } else if (operator == operators.GT) {
+            domain_1.setLowerBound(val_2 + 1);
+        }
+      } else if (getFormulaType(var_1) == argTypes.VAR) {
+        SolutionSet domain_1 = opt.getSolutionSet(var_1);
+        if (val_2 > domain_1.getUpperBound() || val_2 < domain_1.getLowerBound()) {
+          return TraversalProcess.CONTINUE;
+        }
+        if (operator == operators.LTE) {
+          domain_1.setUpperBound(val_2);
+        } else {
+          domain_1.setLowerBound(val_2);
         }
       }
-      else if (getFormulaType(var_1) == argTypes.CONST) {
-        Integer val_1 = Integer.parseInt(var_1.toString());
-        if (getFormulaType(var_2) == argTypes.FUNC) {
-          List<Formula> args = functionBuffer.args;
-          Function func = new Function(pArgs, pFunctionDeclaration.getKind());
-          putToBuffer(func);
-          IntegerFormula variable = digDeeper(args);
-          SolutionSet domain_2 = opt.getSolutionSet(variable);
+    } else if (getFormulaType(var_1) == argTypes.CONST) {
+      Integer val_1 = Integer.parseInt(var_1.toString());
+
+      if (getFormulaType(var_2) == argTypes.FUNC) {
+        List<Formula> args = functionBuffer.args;
+        Function func = new Function(pArgs, pFunctionDeclaration.getKind());
+        putToBuffer(func);
+        IntegerFormula variable = digDeeper(args);
+        if (!check(variable)) {
+          return TraversalProcess.CONTINUE;
+        }
+        SolutionSet domain_2 = opt.getSolutionSet(variable);
+        if (val_1 > domain_2.getUpperBound() || val_1 < domain_2.getLowerBound()) {
+          return TraversalProcess.CONTINUE;
+        }
+        domain_2.setLowerBound(val_1);
+      } else if (getFormulaType(var_2) == argTypes.VAR) {
+        SolutionSet domain_2 = opt.getSolutionSet(var_2);
+        if (val_1 > domain_2.getUpperBound() || val_1 < domain_2.getLowerBound()) {
+          return TraversalProcess.CONTINUE;
+        }
+        if (operator == operators.LTE) {
           domain_2.setLowerBound(val_1);
-        } else if (getFormulaType(var_2) == argTypes.VAR) {
-          SolutionSet domain_2 = opt.getSolutionSet(var_2);
-          if (operator) {
-            domain_2.setLowerBound(val_1);
-          }
-          else {
-            domain_2.setUpperBound(val_1);
-          }
+        } else if (operator == operators.LT) {
+          domain_2.setLowerBound(val_1 + 1);
+        } else if (operator == operators.GTE) {
+          domain_2.setUpperBound(val_1);
+        } else if (operator == operators.GT) {
+          domain_2.setUpperBound(val_1 - 1);
         }
       }
+    }
+    return TraversalProcess.CONTINUE;
   }
 
   /*
   parses a formula containing an arithmetic relation as an operator
   */
-  public void processDeclaration(IntegerFormula var_1, IntegerFormula var_2, operators op,
+  public TraversalProcess processDeclaration(IntegerFormula var_1, IntegerFormula var_2,
+                                            operators op,
                                  List<Formula> pArgs, FunctionDeclaration<?> pFunctionDeclaration) {
+    Function func = readFromBuffer();
+    FunctionDeclarationKind dec = func.declaration;
+    System.out.println(dec.toString());
     if (getFormulaType(var_1) == argTypes.VAR) {
       if (getFormulaType(var_2) == argTypes.CONST) {
-        Function func = readFromBuffer();
         Integer val_2 = Integer.parseInt(var_2.toString());
         SolutionSet domain_1 = opt.getSolutionSet(var_1);
-        FunctionDeclarationKind dec = func.declaration;
         if (dec == FunctionDeclarationKind.LTE) {
           Integer upperBound = domain_1.getUpperBound();
           if (op == operators.ADD) {
@@ -316,15 +357,15 @@ public class DomainOptimizerFormulaRegister {
       }
     }
     if (getFormulaType(var_1) == argTypes.FUNC) {
-      Function func = readFromBuffer();
       List<Formula> args = func.args;
       IntegerFormula variable = digDeeper(args);
-      SolutionSet domain = new SolutionSet();
-      opt.pushDomain(variable, domain);
+      if (!check(variable)) {
+        return TraversalProcess.CONTINUE;
+      }
+      SolutionSet domain = opt.getSolutionSet(variable);
 
       if (getFormulaType(var_2) == argTypes.CONST) {
         Integer val_2 = Integer.parseInt(var_2.toString());
-        FunctionDeclarationKind dec = func.declaration;
         if (dec == FunctionDeclarationKind.LTE) {
           Integer upperBound = domain.getUpperBound();
           if (op == operators.ADD) {
@@ -357,14 +398,13 @@ public class DomainOptimizerFormulaRegister {
         }
       }
     }
-
     if (getFormulaType(var_2) == argTypes.FUNC) {
-      Function func = readFromBuffer();
       List<Formula> args = func.args;
       IntegerFormula variable = digDeeper(args);
-      SolutionSet domain = new SolutionSet();
-      opt.pushDomain(variable, domain);
-      FunctionDeclarationKind dec = func.declaration;
+      if (!check(variable)) {
+        return TraversalProcess.CONTINUE;
+      }
+      SolutionSet domain = opt.getSolutionSet(variable);
       List<Formula> extArgs = func.args;
       Integer val_2 = Integer.parseInt(extArgs.get(1).toString());
       if (getFormulaType(var_1) == argTypes.CONST) {
@@ -400,6 +440,13 @@ public class DomainOptimizerFormulaRegister {
         }
       }
     }
+    return TraversalProcess.CONTINUE;
   }
+
+
+  public boolean check(IntegerFormula variable) {
+    return variable != null;
+  }
+
 
 }

@@ -61,7 +61,8 @@ public class DomainOptimizerTest {
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
 
     IntegerFormula x = imgr.makeVariable("x"),
-        y = imgr.makeVariable("y");
+        y = imgr.makeVariable("y"),
+        z = imgr.makeVariable("z");
     BooleanFormula query =
         imgr.equal(
             imgr.add(x, imgr.makeNumber(2)), y);
@@ -80,6 +81,10 @@ public class DomainOptimizerTest {
         imgr.greaterOrEquals(
             imgr.multiply(y,imgr.makeNumber(3)), imgr.makeNumber(3));
 
+    BooleanFormula constraint_5 =
+        imgr.greaterOrEquals(
+            imgr.add(y, z), imgr.makeNumber(5));
+
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped, query);
 
@@ -89,6 +94,7 @@ public class DomainOptimizerTest {
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);
     optimizer.pushConstraint(constraint_4);
+    optimizer.pushConstraint(constraint_5);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
