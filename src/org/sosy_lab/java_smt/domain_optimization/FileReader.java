@@ -18,50 +18,45 @@
  *  limitations under the License.
  */
 
-package org.sosy_lab.java_smt.test;
+package org.sosy_lab.java_smt.domain_optimization;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
+import org.sosy_lab.common.configuration.ConfigurationBuilder;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
-import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 
+public class FileReader {
+  String header;
 
-public class StdInputTest {
-
-
-  public static void main(String[] args) throws InvalidConfigurationException,
-                                                InterruptedException {
-    Configuration config = Configuration.fromCmdLineArguments(args);
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
-
-    SolverContext context = SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    String header = "(declare-fun x4_plus () Int)\n"
-        + "(declare-fun x4_minus () Int)\n"
-        + "(declare-fun x2_plus () Int)\n"
-        + "(declare-fun x2_minus () Int)\n"
-        + "(declare-fun x1_plus () Int)\n"
-        + "(declare-fun x1_minus () Int)\n"
-        + "(declare-fun x0_plus () Int)\n"
-        + "(declare-fun x0_minus () Int)\n"
-        + "(declare-fun x3_plus () Int)\n"
-        + "(declare-fun x3_minus () Int)";
-    String firstAssert = "(assert (>= x4_plus 0))";
-    FormulaManager fmgr = context.getFormulaManager();
-    //BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
-    //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    BooleanFormula constraint = fmgr.parse(header + firstAssert);
-    System.out.println(constraint.toString());
-    try (ProverEnvironment pe = context.newProverEnvironment()) {
-      pe.push(constraint);
+  public void parse(String path) throws FileNotFoundException {
+    Scanner scanner = new Scanner(new File(path));
+    while (scanner.hasNextLine()) {
+      String s = scanner.nextLine();
+      if (s.contains("(declare-fun")) {
+        header = header.concat(s);
+      }
     }
   }
+
+  public FormulaManager initialize() throws InvalidConfigurationException {
+    ConfigurationBuilder builder = Configuration.builder();
+    builder.setOption("useDomainOptimizer", "true");
+    Configuration config = builder.build();
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+    SolverContext context = SolverContextFactory.createSolverContext(
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+    FormulaManager fmgr = context.getFormulaManager();
+    return fmgr;
+  }
+
 }
