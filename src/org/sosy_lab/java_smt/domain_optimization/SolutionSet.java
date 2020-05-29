@@ -20,9 +20,6 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import java.util.Stack;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-
 public class SolutionSet {
 
   private Integer[] bounds = new Integer[2];

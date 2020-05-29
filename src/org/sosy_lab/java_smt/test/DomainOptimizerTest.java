@@ -86,7 +86,7 @@ public class DomainOptimizerTest {
             imgr.add(y, z), imgr.makeNumber(5));
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
-        wrapped, query);
+        wrapped);
 
     optimizer.pushQuery(query);
     optimizer.visit(query);
