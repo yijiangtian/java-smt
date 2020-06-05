@@ -82,14 +82,15 @@ public class DomainOptimizerTest {
             imgr.multiply(y,imgr.makeNumber(3)), imgr.makeNumber(3));
 
     BooleanFormula constraint_5 =
-        imgr.greaterOrEquals(
-            imgr.add(y, z), imgr.makeNumber(5));
+        imgr.lessOrEquals(
+            imgr.add(z,y), imgr.makeNumber(5));
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
 
     optimizer.pushQuery(query);
     optimizer.visit(query);
+    optimizer.visit(constraint_5);
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);

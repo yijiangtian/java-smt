@@ -23,6 +23,7 @@ package org.sosy_lab.java_smt.domain_optimization;
 public class SolutionSet {
 
   private Integer[] bounds = new Integer[2];
+  public boolean isSet = false;
 
   public SolutionSet() {
     this.setLowerBound(Integer.MIN_VALUE);
@@ -30,10 +31,16 @@ public class SolutionSet {
   }
 
   public void setLowerBound(Integer lBound) {
+    if (!this.isSet) {
+      this.isSet = true;
+    }
     this.bounds[0] = lBound;
   }
 
   public void setUpperBound(Integer uBound) {
+    if (!this.isSet) {
+      this.isSet = true;
+    }
     this.bounds[1] = uBound;
   }
 
@@ -53,5 +60,6 @@ public class SolutionSet {
     System.out.println("lBound: " + bounds[0]);
     System.out.println("uBound: " + bounds[1]);
   }
+
 
 }

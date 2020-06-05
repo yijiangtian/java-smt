@@ -26,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverException;
 
 
@@ -34,19 +33,16 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   private final DomainOptimizerSolverContext delegate;
   private final DomainOptimizerProverEnvironment wrapped;
   final Set<Formula> usedVariables = new LinkedHashSet<>();
-  final BooleanFormula query;
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
   private LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaRegister register;
 
   public BasicDomainOptimizer(DomainOptimizerSolverContext delegate,
-                              DomainOptimizerProverEnvironment wrapped,
-                              BooleanFormula query) {
+                              DomainOptimizerProverEnvironment wrapped) {
 
     this.delegate = delegate;
     this.wrapped = wrapped;
-    this.query = query;
     this.register = new DomainOptimizerFormulaRegister(this);
   }
 
@@ -85,6 +81,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.wrapped.addConstraint(constraint);
     this.register.processConstraint(constraint);
+    this.register.replaceVariablesWithSolutionSets(constraint);
     this.constraints.add(constraint);
   }
 

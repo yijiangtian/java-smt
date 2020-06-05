@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -33,6 +34,7 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
 
@@ -102,6 +104,14 @@ public class FileReader {
     ArrayList<String> asserts = reader.parseAsserts(filePath);
     for (String toAssert : asserts) {
       BooleanFormula example = reader.fmgr.parse(header + toAssert);
+      reader.optimizer.visit(example);
+      reader.optimizer.pushConstraint(example);
+      Set<Formula> usedVariables = reader.optimizer.getVariables();
+      for (Formula var : usedVariables) {
+        System.out.println(var.toString());
+        SolutionSet domain = reader.optimizer.getSolutionSet(var);
+        domain.show();
+      }
       }
     }
 }
