@@ -43,5 +43,4 @@ public interface DomainOptimizer {
 
     SolutionSet getSolutionSet(Formula var);
 
-    void replace(Formula constraint);
 }

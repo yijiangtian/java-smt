@@ -86,7 +86,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.register.visit(constraint);
-    this.register.replaceVariablesWithSolutionSets(constraint);
     this.wrapped.addConstraint(constraint);
     this.register.processConstraint(constraint);
     this.constraints.add(constraint);
@@ -113,9 +112,5 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return domain;
   }
 
-  @Override
-  public void replace(Formula constraint) {
-    this.register.replaceVariablesWithSolutionSets(constraint);
-  }
 
 }
