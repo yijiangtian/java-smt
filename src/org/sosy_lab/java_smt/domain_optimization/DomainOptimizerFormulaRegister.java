@@ -500,7 +500,7 @@ public class DomainOptimizerFormulaRegister {
           return TraversalProcess.CONTINUE;
         }
         //Integer lowerBound = domain_2.getLowerBound();
-        Integer upperBound = domain_2.getUpperBound();
+        //Integer upperBound = domain_2.getUpperBound();
         if (operator == operators.LTE) {
           domain_1.setUpperBound(val_1);
           processDeclaration(variable_1, variable_2, operators.LTE, vars);
