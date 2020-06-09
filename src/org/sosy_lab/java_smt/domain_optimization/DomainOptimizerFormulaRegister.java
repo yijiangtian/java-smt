@@ -169,7 +169,7 @@ public class DomainOptimizerFormulaRegister {
             }
             else if (dec == FunctionDeclarationKind.LT) {
               IntegerFormula upperBound = imgr.makeNumber(domain.getUpperBound() + 1);
-              Map<Formula, IntegerFormula> substitution = new HashMap<>();
+              //Map<Formula, IntegerFormula> substitution = new HashMap<>();
               f = upperBound;
             }
             else if (dec == FunctionDeclarationKind.GTE) {
@@ -229,9 +229,9 @@ public class DomainOptimizerFormulaRegister {
             public TraversalProcess visitFunction(
                 Formula f, List<Formula> pArgs,
                 FunctionDeclaration<?> pFunctionDeclaration) {
-              IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+              //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
               FunctionDeclarationKind declaration = pFunctionDeclaration.getKind();
-              List<Formula> variables = opt.getVariables();
+              //List<Formula> variables = opt.getVariables();
               //iterate through the function arguments and retrieve the corresponding variables in the
               //domain-dictionary
             //  for (Formula argument : pArgs) {
@@ -406,8 +406,8 @@ public class DomainOptimizerFormulaRegister {
         if (!domain_2.isSet) {
           return TraversalProcess.CONTINUE;
         }
-        Integer lowerBound = domain_2.getLowerBound();
-        Integer upperBound = domain_2.getUpperBound();
+        //Integer lowerBound = domain_2.getLowerBound();
+        //Integer upperBound = domain_2.getUpperBound();
         if (operator == operators.LTE) {
           domain_1.setUpperBound(val_2);
           processDeclaration(variable_1, variable_2, operators.LTE, vars);
@@ -488,7 +488,7 @@ public class DomainOptimizerFormulaRegister {
       String name = format(var_1.toString());
       Integer val_1 = Integer.parseInt(name);
       List<Formula> args = functionBuffer.args;
-      Function func = new Function(pArgs, pFunctionDeclaration.getKind());
+      //Function func = new Function(pArgs, pFunctionDeclaration.getKind());
       List<Formula> vars = digDeeper(args);
       Formula variable_1 = vars.get(0);
       System.out.println(variable_1.toString());
@@ -499,7 +499,7 @@ public class DomainOptimizerFormulaRegister {
         if (!domain_2.isSet) {
           return TraversalProcess.CONTINUE;
         }
-        Integer lowerBound = domain_2.getLowerBound();
+        //Integer lowerBound = domain_2.getLowerBound();
         Integer upperBound = domain_2.getUpperBound();
         if (operator == operators.LTE) {
           domain_1.setUpperBound(val_1);
