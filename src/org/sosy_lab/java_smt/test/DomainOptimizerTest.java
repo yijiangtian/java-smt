@@ -20,6 +20,7 @@
 
 package org.sosy_lab.java_smt.test;
 
+import java.util.List;
 import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
@@ -85,21 +86,27 @@ public class DomainOptimizerTest {
         imgr.lessOrEquals(
             imgr.add(z,y), imgr.makeNumber(5));
 
+    BooleanFormula constraint_6 =
+        imgr.lessOrEquals(
+            imgr.add(y,imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
+
+
+
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
 
     optimizer.pushQuery(query);
-    optimizer.visit(query);
-    optimizer.visit(constraint_5);
+
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);
     optimizer.pushConstraint(constraint_4);
     optimizer.pushConstraint(constraint_5);
+    optimizer.pushConstraint(constraint_6);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 
-    Set<Formula> usedVariables = optimizer.getVariables();
+    List<Formula> usedVariables = optimizer.getVariables();
     for (Formula var : usedVariables) {
       System.out.println(var.toString());
       SolutionSet domain = optimizer.getSolutionSet(var);

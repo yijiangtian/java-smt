@@ -21,8 +21,10 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
@@ -32,7 +34,7 @@ import org.sosy_lab.java_smt.api.SolverException;
 public class BasicDomainOptimizer implements DomainOptimizer{
   private final DomainOptimizerSolverContext delegate;
   private final DomainOptimizerProverEnvironment wrapped;
-  final Set<Formula> usedVariables = new LinkedHashSet<>();
+  final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
   private LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
@@ -63,7 +65,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public Set<Formula> getVariables() {
+  public List<Formula> getVariables() {
     return this.usedVariables;
   }
 
@@ -74,14 +76,19 @@ public class BasicDomainOptimizer implements DomainOptimizer{
 
   @Override
   public void pushVariable(Formula var) {
-    this.usedVariables.add(var);
+    if (!this.usedVariables.contains(var)) {
+      SolutionSet domain = new SolutionSet();
+      this.pushDomain(var, domain);
+      this.usedVariables.add(var);
+    }
   }
 
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
+    this.register.visit(constraint);
+    this.register.replaceVariablesWithSolutionSets(constraint);
     this.wrapped.addConstraint(constraint);
     this.register.processConstraint(constraint);
-    this.register.replaceVariablesWithSolutionSets(constraint);
     this.constraints.add(constraint);
   }
 
@@ -104,6 +111,11 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   public SolutionSet getSolutionSet(Formula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
+  }
+
+  @Override
+  public void replace(Formula constraint) {
+    this.register.replaceVariablesWithSolutionSets(constraint);
   }
 
 }

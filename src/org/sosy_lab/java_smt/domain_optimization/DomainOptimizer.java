@@ -20,10 +20,10 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import java.util.List;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverException;
 
 public interface DomainOptimizer {
@@ -31,7 +31,7 @@ public interface DomainOptimizer {
     DomainOptimizerSolverContext getDelegate();
     DomainOptimizerProverEnvironment getWrapped();
     void visit(Formula f);
-    Set<Formula> getVariables();
+    List<Formula> getVariables();
     Set<BooleanFormula> getConstraints();
 
     void pushVariable(Formula pVar);
@@ -42,4 +42,6 @@ public interface DomainOptimizer {
     boolean isUnsat() throws SolverException, InterruptedException;
 
     SolutionSet getSolutionSet(Formula var);
+
+    void replace(Formula constraint);
 }
