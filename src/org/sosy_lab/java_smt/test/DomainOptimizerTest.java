@@ -21,7 +21,6 @@
 package org.sosy_lab.java_smt.test;
 
 import java.util.List;
-import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;

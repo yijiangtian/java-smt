@@ -23,8 +23,8 @@ package org.sosy_lab.java_smt.domain_optimization;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -106,7 +106,7 @@ public class FileReader {
       BooleanFormula example = reader.fmgr.parse(header + toAssert);
       reader.optimizer.visit(example);
       reader.optimizer.pushConstraint(example);
-      Set<Formula> usedVariables = reader.optimizer.getVariables();
+      List<Formula> usedVariables = reader.optimizer.getVariables();
       for (Formula var : usedVariables) {
         System.out.println(var.toString());
         SolutionSet domain = reader.optimizer.getSolutionSet(var);
