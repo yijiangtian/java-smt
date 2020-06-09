@@ -22,6 +22,7 @@ package org.sosy_lab.java_smt.domain_optimization;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -50,7 +51,7 @@ public class FileReader {
 
   public String parseHeader(String path) throws FileNotFoundException {
     String header = "";
-    Scanner scanner = new Scanner(new File(path));
+    Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
     while (scanner.hasNextLine()) {
       String s = scanner.nextLine();
       if (s.contains("(declare-fun")) {
@@ -63,7 +64,7 @@ public class FileReader {
   public ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
     ArrayList<String> asserts = new ArrayList<>();
     String toAppend = "( assert";
-    Scanner scanner = new Scanner(new File(path));
+    Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
     scanner.useDelimiter("assert");
     while (scanner.hasNext()) {
       String toAssert = scanner.next();
