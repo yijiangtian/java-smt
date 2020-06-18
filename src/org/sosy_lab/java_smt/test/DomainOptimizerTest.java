@@ -89,7 +89,10 @@ public class DomainOptimizerTest {
         imgr.lessOrEquals(
             imgr.add(y,imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
 
-
+    BooleanFormula constraint_7 =
+        imgr.lessOrEquals(
+            imgr.add(imgr.multiply(z, imgr.makeNumber(3)),imgr.add(z,x)), imgr.makeNumber(5)
+        );
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
@@ -102,6 +105,7 @@ public class DomainOptimizerTest {
     optimizer.pushConstraint(constraint_4);
     optimizer.pushConstraint(constraint_5);
     optimizer.pushConstraint(constraint_6);
+    optimizer.pushConstraint(constraint_7);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
 

@@ -225,18 +225,7 @@ public class DomainOptimizerFormulaRegister {
             public TraversalProcess visitFunction(
                 Formula f, List<Formula> pArgs,
                 FunctionDeclaration<?> pFunctionDeclaration) {
-              //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
               FunctionDeclarationKind declaration = pFunctionDeclaration.getKind();
-              //List<Formula> variables = opt.getVariables();
-              //iterate through the function arguments and retrieve the corresponding variables in the
-              //domain-dictionary
-            //  for (Formula argument : pArgs) {
-                //IntegerFormula var = variables.
-                //if a number is encountered, the visitConstant-method is called
-                //if (getFormulaType(argument) == argTypes.CONST) {
-              //    visitConstant(var, argument);
-              //  }
-            //  }
               Formula var_1 = pArgs.get(0);
               Formula var_2 = pArgs.get(1);
               //SolutionSets of the variables are adjusted according to the function-declaration
@@ -294,6 +283,10 @@ public class DomainOptimizerFormulaRegister {
           opt.pushVariable(var);
           vars.add(var);
       }
+        else if (getFormulaType(var) == argTypes.FUNC) {
+          Function func = readFromBuffer();
+          vars = digDeeper(func.args);
+        }
     }
     return vars;
   }
@@ -534,6 +527,8 @@ public class DomainOptimizerFormulaRegister {
                                  List<Formula> pArgs) {
     Function func = readFromBuffer();
     FunctionDeclarationKind dec = func.declaration;
+
+
     if (getFormulaType(var_1) == argTypes.VAR) {
       if (getFormulaType(var_2) == argTypes.CONST) {
         Integer val_2 = Integer.parseInt(var_2.toString());
@@ -744,6 +739,8 @@ public class DomainOptimizerFormulaRegister {
         }
       }
     }
+
+
     return TraversalProcess.CONTINUE;
   }
 
