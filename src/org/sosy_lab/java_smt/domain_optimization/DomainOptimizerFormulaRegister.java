@@ -753,7 +753,7 @@ public class DomainOptimizerFormulaRegister {
     Integer val_1 = Integer.parseInt(name_1);
     String name_2 = format(var_2.toString());
     Integer val_2 = Integer.parseInt(name_2);
-    Integer result;
+    int result;
     switch (declaration.toString()) {
       case "ADD":
         result = val_1 + val_2;
