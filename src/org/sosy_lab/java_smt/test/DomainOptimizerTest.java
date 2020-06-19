@@ -90,7 +90,7 @@ public class DomainOptimizerTest {
             imgr.add(y,imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
 
     BooleanFormula constraint_7 =
-        imgr.lessOrEquals(
+        imgr.greaterThan(
             imgr.add(imgr.multiply(z, imgr.makeNumber(3)),imgr.add(z,x)), imgr.makeNumber(5)
         );
 

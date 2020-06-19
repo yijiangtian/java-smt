@@ -689,7 +689,7 @@ public class DomainOptimizerFormulaRegister {
           }
           else if (dec == FunctionDeclarationKind.MUL) {
 
-            domain_1.setUpperBound(domain_1.getUpperBound() / domain_2.getUpperBound() + 1);
+            domain_1.setUpperBound(domain_1.getUpperBound() / domain_2.getUpperBound());
           }
           else if (dec == FunctionDeclarationKind.DIV) {
             domain_1.setUpperBound(domain_1.getUpperBound() * domain_2.getUpperBound());
