@@ -156,7 +156,6 @@ public class DomainOptimizerFormulaRegister {
           @Override
           public Formula visitFreeVariable(Formula f, String name) {
             SolutionSet domain = opt.getSolutionSet(f);
-            Formula replacedVars = null;
             if (operator == operators.LTE) {
               IntegerFormula upperBound = imgr.makeNumber(domain.getUpperBound());
               return upperBound;
@@ -173,7 +172,7 @@ public class DomainOptimizerFormulaRegister {
               IntegerFormula lowerBound = imgr.makeNumber(domain.getLowerBound() - 1);
               return lowerBound;
             }
-            return replacedVars;
+            return null;
           }
 
           @Override
@@ -243,6 +242,7 @@ public class DomainOptimizerFormulaRegister {
                 case "GTE":
                   return adjustBounds(var_1, var_2, operators.GTE, pArgs, pFunctionDeclaration);
 
+
                 case "ADD":
                   return processDeclaration(var_1, var_2, operators.ADD, pArgs);
 
@@ -299,9 +299,13 @@ public class DomainOptimizerFormulaRegister {
     for (Formula var : args) {
       if (getFormulaType(var) == argTypes.CONST) {
         constants.add(var);
-        if (constants.size() == 2) {
-          return constants;
-        }
+      }
+      else if (getFormulaType(var) == argTypes.CONST) {
+        Function func = readFromBuffer();
+        constants = digDeeperForConstants(func.args);
+      }
+      if (constants.size() == 2) {
+        return constants;
       }
     }
     return null;
@@ -341,7 +345,7 @@ public class DomainOptimizerFormulaRegister {
       Formula var_1_replaced = replaceVariablesWithSolutionSets(var_1, operator);
       getFormulaType(var_1_replaced);
       left_branch = digDeeperForConstants(functionBuffer.args);
-      limit = processOperation(left_branch.get(0), right_branch.get(1), functionBuffer.declaration);
+      limit = processOperation(left_branch.get(0), left_branch.get(1), functionBuffer.declaration);
       getFormulaType(var_2);
       right_branch = digDeeper(functionBuffer.args);
       variable = right_branch.get(0);
@@ -360,7 +364,6 @@ public class DomainOptimizerFormulaRegister {
     if (arg_1 == argTypes.FUNC && arg_2 == argTypes.VAR){
       SolutionSet domain_2 = opt.getSolutionSet(var_2);
       SolutionSet domain_1;
-      if (getFormulaType(var_1) == argTypes.FUNC) {
         List<Formula> args = functionBuffer.args;
         Function func = new Function(pArgs, pFunctionDeclaration.getKind());
         putToBuffer(func);
@@ -376,7 +379,6 @@ public class DomainOptimizerFormulaRegister {
         } else if (operator == operators.GT) {
           domain_1.setLowerBound(domain_2.getUpperBound() + 1);
         }
-      }
     }
 
 
@@ -688,7 +690,6 @@ public class DomainOptimizerFormulaRegister {
             domain_1.setUpperBound(domain_1.getUpperBound() + domain_2.getUpperBound());
           }
           else if (dec == FunctionDeclarationKind.MUL) {
-
             domain_1.setUpperBound(domain_1.getUpperBound() / domain_2.getUpperBound());
           }
           else if (dec == FunctionDeclarationKind.DIV) {
@@ -739,8 +740,6 @@ public class DomainOptimizerFormulaRegister {
         }
       }
     }
-
-
     return TraversalProcess.CONTINUE;
   }
 

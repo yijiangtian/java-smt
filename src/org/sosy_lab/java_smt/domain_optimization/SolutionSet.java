@@ -20,28 +20,35 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+
 public class SolutionSet {
 
   private Integer[] bounds = new Integer[2];
   public boolean isSet = false;
 
   public SolutionSet() {
-    this.setLowerBound(Integer.MIN_VALUE);
-    this.setUpperBound(Integer.MAX_VALUE);
+    this.bounds[0] = Integer.MIN_VALUE;
+    this.bounds[1] = Integer.MAX_VALUE;
   }
 
   public void setLowerBound(Integer lBound) {
+    if (lBound == 0) {
+      lBound += 1;
+    }
+    if (lBound > this.getLowerBound() && lBound <= this.getUpperBound()) this.bounds[0] = lBound;
     if (!this.isSet) {
       this.isSet = true;
     }
-    this.bounds[0] = lBound;
   }
 
   public void setUpperBound(Integer uBound) {
+    if (uBound == 0) {
+      uBound += 1;
+    }
+    if (uBound < this.getUpperBound() && uBound >= this.getLowerBound()) this.bounds[1] = uBound;
     if (!this.isSet) {
       this.isSet = true;
     }
-    this.bounds[1] = uBound;
   }
 
   public Integer[] getBounds() {
@@ -60,6 +67,8 @@ public class SolutionSet {
     System.out.println("lBound: " + bounds[0]);
     System.out.println("uBound: " + bounds[1]);
   }
+
+
 
 
 }

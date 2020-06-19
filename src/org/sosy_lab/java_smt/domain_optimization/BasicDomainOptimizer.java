@@ -97,11 +97,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void pushQuery(BooleanFormula newQuery) throws InterruptedException {
-    this.wrapped.push(newQuery);
-  }
-
-  @Override
   public boolean isUnsat() throws SolverException, InterruptedException {
     return this.wrapped.isUnsat();
   }

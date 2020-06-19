@@ -63,9 +63,6 @@ public class DomainOptimizerTest {
     IntegerFormula x = imgr.makeVariable("x"),
         y = imgr.makeVariable("y"),
         z = imgr.makeVariable("z");
-    BooleanFormula query =
-        imgr.equal(
-            imgr.add(x, imgr.makeNumber(2)), y);
 
     BooleanFormula constraint_1 =
         imgr.lessOrEquals(x, imgr.makeNumber(7));
@@ -96,8 +93,6 @@ public class DomainOptimizerTest {
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
-
-    optimizer.pushQuery(query);
 
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
