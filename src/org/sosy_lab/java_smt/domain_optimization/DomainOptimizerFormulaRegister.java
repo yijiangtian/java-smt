@@ -96,6 +96,46 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(f, nameExtractor);
   }
 
+
+  public boolean isCaterpillar(Formula f) {
+    FormulaManager fmgr = delegate.getFormulaManager();
+    FormulaVisitor<Boolean> isCaterpillar =
+        new FormulaVisitor<>() {
+          @Override
+          public Boolean visitFreeVariable(Formula f, String name) {
+            return null;
+          }
+
+          @Override
+          public Boolean visitBoundVariable(Formula f, int deBruijnIdx) {
+            return null;
+          }
+
+          @Override
+          public Boolean visitConstant(Formula f, Object value) {
+            return null;
+          }
+
+          @Override
+          public Boolean visitFunction(
+              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
+            return getFormulaType(args.get(0)) != argTypes.FUNC
+                || getFormulaType(args.get(1)) != argTypes.FUNC;
+          }
+
+          @Override
+          public Boolean visitQuantifier(
+              BooleanFormula f,
+              Quantifier quantifier,
+              List<Formula> boundVariables,
+              BooleanFormula body) {
+            return null;
+          }
+        };
+    return fmgr.visit(f, isCaterpillar);
+  }
+
+
   public argTypes getFormulaType(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<argTypes> getFormulaType =
@@ -189,7 +229,6 @@ public class DomainOptimizerFormulaRegister {
           public Formula visitFunction(
               Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
             for (Formula arg : args) {
-              System.out.println(arg.toString());
               Formula substitute = visitFreeVariable(arg, arg.toString());
               Map<Formula, Formula> substitution = new HashMap<>();
               substitution.put(arg, substitute);
@@ -478,7 +517,6 @@ public class DomainOptimizerFormulaRegister {
       List<Formula> args = functionBuffer.args;
       List<Formula> vars = digDeeper(args);
       Formula variable_1 = vars.get(0);
-      System.out.println(variable_1.toString());
       SolutionSet domain_1 = opt.getSolutionSet(variable_1);
       if (vars.size() > 1) {
         Formula variable_2 = vars.get(1);
@@ -775,6 +813,7 @@ public class DomainOptimizerFormulaRegister {
     }
     return result;
   }
+
 
 
 /*

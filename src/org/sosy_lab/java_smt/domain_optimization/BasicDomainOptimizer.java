@@ -86,6 +86,8 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.register.visit(constraint);
+    Boolean isCat = this.register.isCaterpillar(constraint);
+    System.out.println(isCat);
     this.wrapped.addConstraint(constraint);
     this.register.processConstraint(constraint);
     this.constraints.add(constraint);
@@ -100,6 +102,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   public boolean isUnsat() throws SolverException, InterruptedException {
     return this.wrapped.isUnsat();
   }
+
 
   @Override
   public SolutionSet getSolutionSet(Formula var) {

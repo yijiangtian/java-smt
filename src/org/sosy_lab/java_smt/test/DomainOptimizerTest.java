@@ -88,8 +88,8 @@ public class DomainOptimizerTest {
 
     BooleanFormula constraint_7 =
         imgr.greaterThan(
-            imgr.add(imgr.multiply(z, imgr.makeNumber(3)),imgr.add(z,x)), imgr.makeNumber(5)
-        );
+            imgr.add(imgr.multiply(z, imgr.makeNumber(3)),imgr.makeNumber(2)),
+            imgr.makeNumber(-100));
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
