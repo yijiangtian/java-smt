@@ -114,5 +114,6 @@ public class FileReader {
         domain.show();
       }
       }
+    reader.optimizer.replace();
     }
 }

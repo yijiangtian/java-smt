@@ -74,6 +74,10 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return this.constraints;
   }
 
+  public void removeConstraint(BooleanFormula constraint) {
+    this.constraints.remove(constraint);
+  }
+
   @Override
   public void pushVariable(Formula var) {
     if (!this.usedVariables.contains(var)) {
@@ -86,11 +90,11 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.register.visit(constraint);
-    Boolean isCat = this.register.isCaterpillar(constraint);
-    System.out.println(isCat);
-    this.wrapped.addConstraint(constraint);
-    this.register.processConstraint(constraint);
-    this.constraints.add(constraint);
+    if (this.register.isCaterpillar(constraint)) {
+      this.wrapped.addConstraint(constraint);
+      this.register.processConstraint(constraint);
+      this.constraints.add(constraint);
+    }
   }
 
   @Override
@@ -103,12 +107,20 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return this.wrapped.isUnsat();
   }
 
-
   @Override
   public SolutionSet getSolutionSet(Formula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
   }
 
+  @Override
+  public void replace() throws InterruptedException {
+    Set<BooleanFormula> constraints = this.getConstraints();
+    Set<BooleanFormula> newConstraints = new LinkedHashSet<>();
+    for (BooleanFormula constraint : constraints) {
+      constraint = (BooleanFormula) this.register.replaceVariablesWithSolutionSets(constraint);
+      this.register.processConstraint(constraint);
+    }
+  }
 
 }

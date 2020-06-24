@@ -37,6 +37,8 @@ public interface DomainOptimizer {
     void pushVariable(Formula pVar);
     void pushDomain(Formula var, SolutionSet domain);
     void pushConstraint(BooleanFormula constraint) throws InterruptedException;
+    void removeConstraint(BooleanFormula constraint);
+    void replace() throws InterruptedException;
 
     boolean isUnsat() throws SolverException, InterruptedException;
 
