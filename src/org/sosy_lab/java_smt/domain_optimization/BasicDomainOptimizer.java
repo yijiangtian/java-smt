@@ -22,12 +22,16 @@ package org.sosy_lab.java_smt.domain_optimization;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
+import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.SolverException;
 
 
@@ -114,11 +118,20 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void replace() throws InterruptedException {
+  public void replace() {
+    FormulaManager fmgr = delegate.getFormulaManager();
     Set<BooleanFormula> constraints = this.getConstraints();
     Set<BooleanFormula> newConstraints = new LinkedHashSet<>();
     for (BooleanFormula constraint : constraints) {
       constraint = (BooleanFormula) this.register.replaceVariablesWithSolutionSets(constraint);
+      System.out.println(constraint.toString());
+      this.register.solveOperations(constraint);
+      Map<Formula, Formula> substitution = this.register.getSubstitution();
+      boolean isSubstituted = this.register.getSubstitutionFlag();
+      if (isSubstituted) {
+        constraint = fmgr.substitute(constraint, substitution);
+        System.out.println(constraint.toString());
+      }
       this.register.processConstraint(constraint);
     }
   }
