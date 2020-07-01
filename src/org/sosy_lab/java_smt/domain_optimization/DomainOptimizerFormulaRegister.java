@@ -210,6 +210,91 @@ public class DomainOptimizerFormulaRegister {
     return this.substitution;
   }
 
+  public void foldFunction(Formula f) {
+    final int[] i = {0};
+    FormulaManager fmgr = delegate.getFormulaManager();
+    FormulaVisitor<TraversalProcess> folder =
+        new FormulaVisitor<>() {
+          @Override
+          public TraversalProcess visitFreeVariable(Formula f, String name) {
+            SolutionSet domain = opt.getSolutionSet(f);
+            Function func = readFromBuffer();
+            FunctionDeclarationKind dec = func.declaration;
+            System.out.println(f.toString());
+            switch (dec) {
+              case LTE:
+                domain.setUpperBound(i[0]);
+                break;
+              case LT:
+                domain.setUpperBound(i[0] - 1);
+                break;
+              case GTE:
+                domain.setLowerBound(i[0]);
+                break;
+              case GT:
+                domain.setLowerBound(i[0] + 1);
+              break;
+            }
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
+            return null;
+          }
+
+          @Override
+          public TraversalProcess visitConstant(Formula f, Object value) {
+            return null;
+          }
+
+          @Override
+          public TraversalProcess visitFunction(
+              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
+            FunctionDeclarationKind dec = functionDeclaration.getKind();
+            if (dec == FunctionDeclarationKind.LTE || dec == FunctionDeclarationKind.LT ||
+                dec == FunctionDeclarationKind.GTE || dec == FunctionDeclarationKind.GT) {
+              Function func = new Function(args, dec);
+              putToBuffer(func);
+            }
+            IntegerFormula constant = null;
+            for (Formula arg : args) {
+              if (getFormulaType(arg) == argTypes.CONST) {
+                constant = (IntegerFormula) arg;
+              }
+              String name = format(constant.toString());
+              int value = Integer.parseInt(name);
+              switch (dec) {
+                case ADD:
+                  i[0] += value;
+                  break;
+                case SUB:
+                  i[0] -= value;
+                  break;
+                case MUL:
+                  i[0] *= value;
+                  break;
+                case DIV:
+                  i[0] = i[0] / value;
+                  break;
+              }
+            }
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitQuantifier(
+              BooleanFormula f,
+              Quantifier quantifier,
+              List<Formula> boundVariables,
+              BooleanFormula body) {
+            return null;
+          }
+        };
+
+  }
+
+
   public int countVariables(Formula f) {
     final int[] i = {0};
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -253,6 +338,7 @@ public class DomainOptimizerFormulaRegister {
 
   public void solveOperations(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     FormulaVisitor<TraversalProcess> solver =
         new FormulaVisitor<>() {
 
@@ -278,18 +364,19 @@ public class DomainOptimizerFormulaRegister {
             FunctionDeclarationKind dec = functionDeclaration.getKind();
             if (dec == FunctionDeclarationKind.ADD || dec == FunctionDeclarationKind.MUL ||
                 dec == FunctionDeclarationKind.DIV || dec == FunctionDeclarationKind.SUB) {
-            if (vars.size() == 0) {
-              List<Formula> constants = digDeeperForConstants(args);
-              Formula substitute = processOperation(constants.get(0), constants.get(1),
-                  functionDeclaration.getKind());
-              Map<Formula, Formula> substitution = new HashMap<>();
-              substitution.put(f, substitute);
-              System.out.println(substitution.toString());
-              setSubstitution(substitution);
-              setSubstitutionFlag(true);
+              if (vars.size() == 0) {
+                List<Formula> constants = digDeeperForConstants(args);
+                Formula substitute = processOperation(constants.get(0), constants.get(1),
+                    functionDeclaration.getKind());
+                Map<Formula, Formula> substitution = new HashMap<>();
+                substitution.put(f, substitute);
+                System.out.println(substitution.toString());
+                setSubstitution(substitution);
+                setSubstitutionFlag(true);
+              }
             }
-          }
             return TraversalProcess.CONTINUE;
+
           }
 
           @Override
@@ -665,7 +752,8 @@ public class DomainOptimizerFormulaRegister {
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(0);
       SolutionSet domain = opt.getSolutionSet(variable);
-      Integer val_2 = Integer.parseInt(var_2.toString());
+      String name = format(var_2.toString());
+      Integer val_2 = Integer.parseInt(name);
       if (dec == FunctionDeclarationKind.LTE) {
         Integer upperBound = domain.getUpperBound();
         if (op == operators.ADD) {
@@ -729,7 +817,8 @@ public class DomainOptimizerFormulaRegister {
     }
 
     if (getFormulaType(var_1) == argTypes.VAR && getFormulaType(var_2) == argTypes.CONST) {
-        Integer val_2 = Integer.parseInt(var_2.toString());
+      String name = format(var_2.toString());
+        Integer val_2 = Integer.parseInt(name);
         SolutionSet domain_1 = opt.getSolutionSet(var_1);
         if (dec == FunctionDeclarationKind.LTE) {
           Integer upperBound = domain_1.getUpperBound();

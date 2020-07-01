@@ -22,8 +22,6 @@ package org.sosy_lab.java_smt.domain_optimization;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -100,7 +98,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
       this.constraints.add(constraint);
       this.register.processConstraint(constraint);
       constraint = replace(constraint);
-
+      this.register.processConstraint(constraint);
     }
   }
 
@@ -132,22 +130,14 @@ public class BasicDomainOptimizer implements DomainOptimizer{
       if (isSubstituted) {
         constraint = fmgr.substitute(constraint, substitution);
       }
-      System.out.println(constraint.toString());
+      //System.out.println(constraint.toString());
+      this.register.processConstraint(constraint);
       variables = this.register.countVariables(constraint);
     }
+    this.register.foldFunction(constraint);
+    System.out.println(constraint.toString());
     return constraint;
   }
 
-  @Override
-  public void reduceFunctions() throws InterruptedException {
-    int i = 0;
-    while (i < 100) {
-      for (BooleanFormula constraint : this.constraints) {
-        pushConstraint(constraint);
-      }
-      i++;
-      this.constraints.clear();
-    }
-  }
 
 }
