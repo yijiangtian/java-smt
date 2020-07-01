@@ -94,10 +94,13 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.register.visit(constraint);
+
     if (this.register.isCaterpillar(constraint)) {
       this.wrapped.addConstraint(constraint);
-      this.register.processConstraint(constraint);
       this.constraints.add(constraint);
+      this.register.processConstraint(constraint);
+      constraint = replace(constraint);
+
     }
   }
 
@@ -118,21 +121,32 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void replace() {
+  public BooleanFormula replace(BooleanFormula constraint) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    Set<BooleanFormula> constraints = this.getConstraints();
-    Set<BooleanFormula> newConstraints = new LinkedHashSet<>();
-    for (BooleanFormula constraint : constraints) {
+    int variables = this.register.countVariables(constraint);
+    while (variables > 1) {
       constraint = (BooleanFormula) this.register.replaceVariablesWithSolutionSets(constraint);
-      System.out.println(constraint.toString());
       this.register.solveOperations(constraint);
       Map<Formula, Formula> substitution = this.register.getSubstitution();
       boolean isSubstituted = this.register.getSubstitutionFlag();
       if (isSubstituted) {
         constraint = fmgr.substitute(constraint, substitution);
-        System.out.println(constraint.toString());
       }
-      this.register.processConstraint(constraint);
+      System.out.println(constraint.toString());
+      variables = this.register.countVariables(constraint);
+    }
+    return constraint;
+  }
+
+  @Override
+  public void reduceFunctions() throws InterruptedException {
+    int i = 0;
+    while (i < 100) {
+      for (BooleanFormula constraint : this.constraints) {
+        pushConstraint(constraint);
+      }
+      i++;
+      this.constraints.clear();
     }
   }
 

@@ -210,6 +210,46 @@ public class DomainOptimizerFormulaRegister {
     return this.substitution;
   }
 
+  public int countVariables(Formula f) {
+    final int[] i = {0};
+    FormulaManager fmgr = delegate.getFormulaManager();
+    FormulaVisitor<TraversalProcess> variableCounter =
+        new FormulaVisitor<>() {
+          @Override
+          public TraversalProcess visitFreeVariable(Formula f, String name) {
+            i[0] += 1;
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitConstant(Formula f, Object value) {
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitFunction(
+              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
+            return TraversalProcess.CONTINUE;
+          }
+
+          @Override
+          public TraversalProcess visitQuantifier(
+              BooleanFormula f,
+              Quantifier quantifier,
+              List<Formula> boundVariables,
+              BooleanFormula body) {
+            return TraversalProcess.CONTINUE;
+          }
+        };
+    fmgr.visitRecursively(f, variableCounter);
+    return i[0];
+  }
+
 
   public void solveOperations(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -244,6 +284,7 @@ public class DomainOptimizerFormulaRegister {
                   functionDeclaration.getKind());
               Map<Formula, Formula> substitution = new HashMap<>();
               substitution.put(f, substitute);
+              System.out.println(substitution.toString());
               setSubstitution(substitution);
               setSubstitutionFlag(true);
             }
@@ -310,7 +351,7 @@ public class DomainOptimizerFormulaRegister {
             if (dec == FunctionDeclarationKind.LTE || dec == FunctionDeclarationKind.LT
                 || dec == FunctionDeclarationKind.GTE || dec == FunctionDeclarationKind.GT) {
               for (Formula arg : args) {
-                if (getFormulaType(arg) != argTypes.VAR) {
+                if (getFormulaType(arg) == argTypes.FUNC) {
                   arg = digDeeper(args).get(0);
                 }
                 Function func = new Function(args, dec);
