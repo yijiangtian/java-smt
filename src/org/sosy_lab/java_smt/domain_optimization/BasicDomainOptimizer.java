@@ -132,10 +132,11 @@ public class BasicDomainOptimizer implements DomainOptimizer{
       }
       //System.out.println(constraint.toString());
       this.register.processConstraint(constraint);
+      this.register.foldFunction(constraint);
       variables = this.register.countVariables(constraint);
     }
-    this.register.foldFunction(constraint);
-    System.out.println(constraint.toString());
+
+    //System.out.println(constraint.toString());
     return constraint;
   }
 

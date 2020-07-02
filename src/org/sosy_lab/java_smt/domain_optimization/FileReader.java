@@ -103,17 +103,17 @@ public class FileReader {
     FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
-    for (String toAssert : asserts) {
-      BooleanFormula example = reader.fmgr.parse(header + toAssert);
-      reader.optimizer.visit(example);
-      reader.optimizer.pushConstraint(example);
-      List<Formula> usedVariables = reader.optimizer.getVariables();
-      for (Formula var : usedVariables) {
-        System.out.println(var.toString());
-        SolutionSet domain = reader.optimizer.getSolutionSet(var);
-        domain.show();
+      for (String toAssert : asserts) {
+        BooleanFormula constraint = reader.fmgr.parse(header + toAssert);
+        reader.optimizer.visit(constraint);
+        reader.optimizer.pushConstraint(constraint);
       }
-      }
-    reader.optimizer.replace();
+        List<Formula> usedVariables = reader.optimizer.getVariables();
+        for (Formula var : usedVariables) {
+          System.out.println(var.toString());
+          SolutionSet domain = reader.optimizer.getSolutionSet(var);
+          domain.show();
+        }
+
     }
 }
