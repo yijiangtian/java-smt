@@ -212,6 +212,7 @@ public class DomainOptimizerFormulaRegister {
 
   public void foldFunction(Formula f) {
     final int[] i = {0};
+    final FunctionDeclarationKind[] declaration = new FunctionDeclarationKind[1];
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> folder =
         new FormulaVisitor<>() {
@@ -232,7 +233,7 @@ public class DomainOptimizerFormulaRegister {
                 break;
               case GT:
                 domain.setLowerBound(i[0] + 1);
-              break;
+                break;
             }
             return TraversalProcess.CONTINUE;
           }
@@ -246,7 +247,7 @@ public class DomainOptimizerFormulaRegister {
           public TraversalProcess visitConstant(Formula f, Object value) {
             int val = Integer.parseInt(value.toString());
             i[0] += val;
-            return null;
+            return TraversalProcess.CONTINUE;
           }
 
           @Override
@@ -254,9 +255,14 @@ public class DomainOptimizerFormulaRegister {
               Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
             FunctionDeclarationKind dec = functionDeclaration.getKind();
             if (dec == FunctionDeclarationKind.LTE || dec == FunctionDeclarationKind.LT ||
-            dec == FunctionDeclarationKind.GTE || dec == FunctionDeclarationKind.GT) {
+                dec == FunctionDeclarationKind.GTE || dec == FunctionDeclarationKind.GT) {
               Function func = new Function(args, dec);
               putToBuffer(func);
+            }
+            if (dec == FunctionDeclarationKind.ADD || dec == FunctionDeclarationKind.SUB ||
+                dec == FunctionDeclarationKind.MUL || dec == FunctionDeclarationKind.DIV) {
+              i[0] = 0;
+              declaration[0] = dec;
             }
             return TraversalProcess.CONTINUE;
           }
@@ -270,7 +276,7 @@ public class DomainOptimizerFormulaRegister {
             return null;
           }
         };
-      fmgr.visitRecursively(f, folder);
+    fmgr.visitRecursively(f, folder);
   }
 
 
@@ -349,7 +355,6 @@ public class DomainOptimizerFormulaRegister {
                     functionDeclaration.getKind());
                 Map<Formula, Formula> substitution = new HashMap<>();
                 substitution.put(f, substitute);
-                //System.out.println(substitution.toString());
                 setSubstitution(substitution);
                 setSubstitutionFlag(true);
               }

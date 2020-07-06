@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -38,11 +39,13 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
+import org.sosy_lab.java_smt.api.SolverException;
 
 
 public class FileReader {
   FormulaManager fmgr;
   SolverContext context;
+  DomainOptimizerBasicProverEnvironment wrapped;
   DomainOptimizer optimizer;
 
   public FileReader() throws InvalidConfigurationException {
@@ -94,11 +97,13 @@ public class FileReader {
         wrapped);
     this.fmgr = fmgr;
     this.context = context;
+    this.wrapped = wrapped;
     this.optimizer = optimizer;
   }
 
   public static void main(String[] args)
-      throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
+      throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
+             SolverException {
       String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
@@ -114,6 +119,10 @@ public class FileReader {
           SolutionSet domain = reader.optimizer.getSolutionSet(var);
           domain.show();
         }
-
+        Set<Formula> newConstraints = reader.optimizer.getNewConstraints();
+        for (Formula constraint : newConstraints) {
+          reader.wrapped.addConstraint((BooleanFormula) constraint);
+        }
+        System.out.println(reader.wrapped.isUnsat());
     }
 }

@@ -41,6 +41,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   private LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaRegister register;
+  DomainOptimizerDecider decider;
 
   public BasicDomainOptimizer(DomainOptimizerSolverContext delegate,
                               DomainOptimizerProverEnvironment wrapped) {
@@ -48,6 +49,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     this.delegate = delegate;
     this.wrapped = wrapped;
     this.register = new DomainOptimizerFormulaRegister(this);
+    this.decider = new DomainOptimizerDecider(this,delegate);
   }
 
   @Override
@@ -92,7 +94,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   @Override
   public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
     this.register.visit(constraint);
-
     if (this.register.isCaterpillar(constraint)) {
       this.wrapped.addConstraint(constraint);
       this.constraints.add(constraint);
@@ -130,14 +131,17 @@ public class BasicDomainOptimizer implements DomainOptimizer{
       if (isSubstituted) {
         constraint = fmgr.substitute(constraint, substitution);
       }
-      //System.out.println(constraint.toString());
-      this.register.processConstraint(constraint);
       this.register.foldFunction(constraint);
+      this.register.processConstraint(constraint);
+      System.out.println(constraint.toString());
       variables = this.register.countVariables(constraint);
     }
-
-    //System.out.println(constraint.toString());
     return constraint;
+  }
+
+  @Override
+  public Set<Formula> getNewConstraints() {
+    return this.decider.replaceAll();
   }
 
 
