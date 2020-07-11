@@ -92,10 +92,9 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public void pushConstraint(BooleanFormula constraint) throws InterruptedException {
+  public void pushConstraint(BooleanFormula constraint) {
     this.register.visit(constraint);
     if (this.register.isCaterpillar(constraint)) {
-      this.wrapped.addConstraint(constraint);
       this.constraints.add(constraint);
       this.register.processConstraint(constraint);
       constraint = replace(constraint);
@@ -140,9 +139,13 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public Set<Formula> getNewConstraints() {
-    return this.decider.replaceAll();
+  public DomainOptimizerFormulaRegister getRegister() {
+    return this.register;
   }
 
+  @Override
+  public DomainOptimizerDecider getDecider() {
+    return this.decider;
+  }
 
 }
