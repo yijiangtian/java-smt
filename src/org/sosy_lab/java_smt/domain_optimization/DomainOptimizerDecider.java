@@ -38,6 +38,7 @@ import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
 public class DomainOptimizerDecider {
+
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final List<Formula> satisfiableQueries = new ArrayList<>();
