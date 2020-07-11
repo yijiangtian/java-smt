@@ -23,6 +23,7 @@ package org.sosy_lab.java_smt.test;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import junit.framework.Assert;
 import org.junit.runners.Parameterized;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
@@ -123,10 +124,10 @@ public class DomainOptimizerTest {
   public void test_Solutions()
       throws InterruptedException, SolverException, InvalidConfigurationException {
    SolutionSet[] solutionSets = initializeTest();
-    assertThat(solutionSets[0].getLowerBound() == 4);
-    assertThat(solutionSets[0].getUpperBound() == 7);
-    assertThat(solutionSets[1].getLowerBound() == 3);
-    assertThat(solutionSets[1].getUpperBound() == 5);
+    Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[0].getLowerBound()),4);
+    Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[0].getUpperBound()),7);
+    Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[1].getLowerBound()),3);
+    Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[1].getUpperBound()),5);
   }
 
 }
