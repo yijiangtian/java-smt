@@ -78,6 +78,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return this.constraints;
   }
 
+  @Override
   public void removeConstraint(BooleanFormula constraint) {
     this.constraints.remove(constraint);
   }
