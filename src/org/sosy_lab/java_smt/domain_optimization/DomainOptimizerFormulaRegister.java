@@ -234,6 +234,8 @@ public class DomainOptimizerFormulaRegister {
               case GT:
                 domain.setLowerBound(i[0] + 1);
                 break;
+              default:
+                break;
             }
             return TraversalProcess.CONTINUE;
           }
@@ -323,7 +325,6 @@ public class DomainOptimizerFormulaRegister {
 
   public void solveOperations(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     FormulaVisitor<TraversalProcess> solver =
         new FormulaVisitor<>() {
 
