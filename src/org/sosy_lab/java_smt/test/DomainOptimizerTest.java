@@ -21,7 +21,7 @@
 package org.sosy_lab.java_smt.test;
 
 import java.util.List;
-import org.junit.Assert;
+import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -122,14 +122,7 @@ public class DomainOptimizerTest {
   public void test_Solutions()
       throws InterruptedException, SolverException, InvalidConfigurationException {
    SolutionSet[] solutionSets = initializeTest();
-    //Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[0].getLowerBound()),
-    //    java.util.Optional.of(4));
-    //Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[0].getUpperBound()),
-    //    java.util.Optional.of(7));
-   // Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[1].getLowerBound()),
-   //     java.util.Optional.of(3));
-    Assert.assertEquals(java.util.Optional.ofNullable(solutionSets[1].getUpperBound()),
-        java.util.Optional.of(5));
+    assertThat(solutionSets[0].getLowerBound()).isEqualTo(4);
   }
 
 }
