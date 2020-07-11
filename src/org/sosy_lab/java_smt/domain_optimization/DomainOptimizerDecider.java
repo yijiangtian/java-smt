@@ -40,7 +40,6 @@ import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 public class DomainOptimizerDecider {
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
-  private final DomainOptimizerFormulaRegister register;
   private final List<Formula> satisfiableQueries = new ArrayList<>();
 
   public DomainOptimizerDecider(
@@ -48,7 +47,6 @@ public class DomainOptimizerDecider {
       DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
-    register = opt.getRegister();
   }
 
 
