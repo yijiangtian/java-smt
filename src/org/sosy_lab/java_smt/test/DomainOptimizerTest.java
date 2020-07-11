@@ -20,7 +20,12 @@
 
 package org.sosy_lab.java_smt.test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -42,10 +47,13 @@ import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironmen
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 
+import static com.google.common.truth.Truth.assertThat;
+
+@RunWith(Parameterized.class)
 public class DomainOptimizerTest {
 
-  public static void main(String[] args) throws InvalidConfigurationException,
-                                                InterruptedException, SolverException {
+  public Map<Formula,SolutionSet> initializeTest()
+      throws InterruptedException, SolverException, InvalidConfigurationException {
     ConfigurationBuilder builder = Configuration.builder();
     builder.setOption("useDomainOptimizer", "true");
     Configuration config = builder.build();
@@ -56,7 +64,7 @@ public class DomainOptimizerTest {
     SolverContext delegate = SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
     DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(delegate);
-    
+
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
 
@@ -72,24 +80,24 @@ public class DomainOptimizerTest {
 
     BooleanFormula constraint_3 =
         imgr.lessOrEquals(
-            imgr.subtract(y,imgr.makeNumber(3)),imgr.makeNumber(7));
+            imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
 
     BooleanFormula constraint_4 =
         imgr.greaterOrEquals(
-            imgr.multiply(y,imgr.makeNumber(3)), imgr.makeNumber(3));
+            imgr.multiply(y, imgr.makeNumber(3)), imgr.makeNumber(3));
 
     BooleanFormula constraint_5 =
         imgr.lessOrEquals(
-            imgr.add(z,y), imgr.makeNumber(5));
+            imgr.add(z, y), imgr.makeNumber(5));
 
     BooleanFormula constraint_6 =
         imgr.lessOrEquals(
-            imgr.add(y,imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
+            imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
 
     BooleanFormula constraint_7 =
-        imgr.greaterThan(
-            imgr.add(imgr.multiply(z, imgr.makeNumber(3)),imgr.makeNumber(2)),
-            imgr.makeNumber(-100));
+        imgr.greaterOrEquals(
+            imgr.add(imgr.multiply(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
+            imgr.makeNumber(-50));
 
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
@@ -105,10 +113,24 @@ public class DomainOptimizerTest {
     System.out.println(isUnsat);
 
     List<Formula> usedVariables = optimizer.getVariables();
+    Map<Formula, SolutionSet> varsWithSolutionSets = new HashMap<>();
     for (Formula var : usedVariables) {
       System.out.println(var.toString());
       SolutionSet domain = optimizer.getSolutionSet(var);
+      varsWithSolutionSets.put(var,domain);
       domain.show();
     }
+    return varsWithSolutionSets;
   }
+
+  @Test
+  public void test_Solutions()
+      throws InterruptedException, SolverException, InvalidConfigurationException {
+   Map<Formula,SolutionSet> solutionSets = initializeTest();
+    assertThat(solutionSets.get(0).getUpperBound() == 4);
+    assertThat(solutionSets.get(0).getUpperBound() == 7);
+    assertThat(solutionSets.get(1).getUpperBound() == 3);
+    assertThat(solutionSets.get(1).getUpperBound() == 5);
+  }
+
 }

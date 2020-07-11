@@ -26,7 +26,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.ConfigurationBuilder;
@@ -38,6 +37,8 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
@@ -45,8 +46,9 @@ import org.sosy_lab.java_smt.api.SolverException;
 public class FileReader {
   FormulaManager fmgr;
   SolverContext context;
-  DomainOptimizerBasicProverEnvironment wrapped;
+  DomainOptimizerProverEnvironment wrapped;
   DomainOptimizer optimizer;
+  DomainOptimizerDecider decider;
 
   public FileReader() throws InvalidConfigurationException {
     initialize();
@@ -99,6 +101,7 @@ public class FileReader {
     this.context = context;
     this.wrapped = wrapped;
     this.optimizer = optimizer;
+    this.decider = optimizer.getDecider();
   }
 
   public static void main(String[] args)
@@ -108,6 +111,8 @@ public class FileReader {
     FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
+    FormulaManager fmgr = reader.context.getFormulaManager();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
       for (String toAssert : asserts) {
         BooleanFormula constraint = reader.fmgr.parse(header + toAssert);
         reader.optimizer.visit(constraint);
@@ -119,10 +124,9 @@ public class FileReader {
           SolutionSet domain = reader.optimizer.getSolutionSet(var);
           domain.show();
         }
-        Set<Formula> newConstraints = reader.optimizer.getNewConstraints();
-        for (Formula constraint : newConstraints) {
-          reader.wrapped.addConstraint((BooleanFormula) constraint);
-        }
-        System.out.println(reader.wrapped.isUnsat());
+        IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
+        IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
+        BooleanFormula query = imgr.greaterThan(imgr.add(var_1, var_2), imgr.makeNumber(0));
+        reader.decider.decide(query);
     }
 }
