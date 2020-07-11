@@ -52,7 +52,7 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(Parameterized.class)
 public class DomainOptimizerTest {
 
-  public Map<Formula,SolutionSet> initializeTest()
+  public SolutionSet[] initializeTest()
       throws InterruptedException, SolverException, InvalidConfigurationException {
     ConfigurationBuilder builder = Configuration.builder();
     builder.setOption("useDomainOptimizer", "true");
@@ -111,26 +111,24 @@ public class DomainOptimizerTest {
     optimizer.pushConstraint(constraint_7);
     boolean isUnsat = optimizer.isUnsat();
     System.out.println(isUnsat);
-
+    SolutionSet[] domains = new SolutionSet[3];
     List<Formula> usedVariables = optimizer.getVariables();
-    Map<Formula, SolutionSet> varsWithSolutionSets = new HashMap<>();
-    for (Formula var : usedVariables) {
-      System.out.println(var.toString());
+    for (int i = 0; i <= usedVariables.size(); i++) {
+      Formula var = usedVariables.get(i);
       SolutionSet domain = optimizer.getSolutionSet(var);
-      varsWithSolutionSets.put(var,domain);
-      domain.show();
+      domains[i] = domain;
     }
-    return varsWithSolutionSets;
+    return domains;
   }
 
   @Test
   public void test_Solutions()
       throws InterruptedException, SolverException, InvalidConfigurationException {
-   Map<Formula,SolutionSet> solutionSets = initializeTest();
-    assertThat(solutionSets.get(0).getUpperBound() == 4);
-    assertThat(solutionSets.get(0).getUpperBound() == 7);
-    assertThat(solutionSets.get(1).getUpperBound() == 3);
-    assertThat(solutionSets.get(1).getUpperBound() == 5);
+   SolutionSet[] solutionSets = initializeTest();
+    assertThat(solutionSets[0].getLowerBound() == 4);
+    assertThat(solutionSets[0].getUpperBound() == 7);
+    assertThat(solutionSets[1].getLowerBound() == 3);
+    assertThat(solutionSets[1].getUpperBound() == 5);
   }
 
 }
