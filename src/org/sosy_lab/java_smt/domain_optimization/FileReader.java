@@ -50,9 +50,29 @@ public class FileReader {
   DomainOptimizer optimizer;
   DomainOptimizerDecider decider;
 
-  public FileReader() throws InvalidConfigurationException {
-    initialize();
+
+  public FileReader(boolean fallBack) throws InvalidConfigurationException {
+    ConfigurationBuilder builder = Configuration.builder();
+    if (!fallBack) builder.setOption("useDomainOptimizer", "true");
+    else {
+      builder.setOption("useDomainOptimizer","false");
+    }
+    Configuration config = builder.build();
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+    SolverContext context = SolverContextFactory.createSolverContext(
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+    FormulaManager fmgr = context.getFormulaManager();
+    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(context);
+    DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) context,
+        wrapped);
+    this.fmgr = fmgr;
+    this.context = context;
+    this.wrapped = wrapped;
+    this.optimizer = optimizer;
+    this.decider = optimizer.getDecider();
   }
+
 
   public String parseHeader(String path) throws FileNotFoundException {
     String header = "";
@@ -65,6 +85,7 @@ public class FileReader {
     }
     return header;
   }
+
 
   public ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
     ArrayList<String> asserts = new ArrayList<>();
@@ -85,30 +106,12 @@ public class FileReader {
     return processedAsserts;
   }
 
-  public void initialize() throws InvalidConfigurationException {
-    ConfigurationBuilder builder = Configuration.builder();
-    builder.setOption("useDomainOptimizer", "true");
-    Configuration config = builder.build();
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
-    SolverContext context = SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    FormulaManager fmgr = context.getFormulaManager();
-    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(context);
-    DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) context,
-        wrapped);
-    this.fmgr = fmgr;
-    this.context = context;
-    this.wrapped = wrapped;
-    this.optimizer = optimizer;
-    this.decider = optimizer.getDecider();
-  }
 
   public static void main(String[] args)
       throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
              SolverException {
       String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
-    FileReader reader = new FileReader();
+    FileReader reader = new FileReader(false);
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
     FormulaManager fmgr = reader.context.getFormulaManager();
@@ -129,4 +132,5 @@ public class FileReader {
         BooleanFormula query = imgr.greaterThan(imgr.add(var_1, var_2), imgr.makeNumber(0));
         reader.decider.decide(query);
     }
+
 }
