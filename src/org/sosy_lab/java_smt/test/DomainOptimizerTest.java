@@ -99,6 +99,7 @@ public class DomainOptimizerTest {
     DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
         wrapped);
 
+
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);
