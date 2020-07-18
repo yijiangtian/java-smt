@@ -35,7 +35,7 @@ public class SolutionSet {
     if (lBound == 0) {
       lBound += 1;
     }
-    if (lBound > this.getLowerBound() && lBound <= this.getUpperBound()) this.bounds[0] = lBound;
+    if (lBound > this.getLowerBound() && lBound < this.getUpperBound()) this.bounds[0] = lBound;
     if (!this.isSet) {
       this.isSet = true;
     }
@@ -45,14 +45,10 @@ public class SolutionSet {
     if (uBound == 0) {
       uBound += 1;
     }
-    if (uBound < this.getUpperBound() && uBound >= this.getLowerBound()) this.bounds[1] = uBound;
+    if (uBound < this.getUpperBound() && uBound > this.getLowerBound()) this.bounds[1] = uBound;
     if (!this.isSet) {
       this.isSet = true;
     }
-  }
-
-  public Integer[] getBounds() {
-    return this.bounds;
   }
 
   public Integer getLowerBound() {

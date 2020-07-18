@@ -28,8 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverException;
 
 
@@ -45,7 +48,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
 
   public BasicDomainOptimizer(DomainOptimizerSolverContext delegate,
                               DomainOptimizerProverEnvironment wrapped) {
-
     this.delegate = delegate;
     this.wrapped = wrapped;
     this.register = new DomainOptimizerFormulaRegister(this);
@@ -61,6 +63,18 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   public DomainOptimizerProverEnvironment getWrapped() {
     return this.wrapped;
   }
+
+
+  @Override
+  public DomainOptimizerFormulaRegister getRegister() {
+    return this.register;
+  }
+
+  @Override
+  public DomainOptimizerDecider getDecider() {
+    return this.decider;
+  }
+
 
 
   @Override
@@ -98,8 +112,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     if (this.register.isCaterpillar(constraint)) {
       this.constraints.add(constraint);
       this.register.processConstraint(constraint);
-      constraint = replace(constraint);
-      this.register.processConstraint(constraint);
+      replace(constraint);
     }
   }
 
@@ -123,7 +136,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   public BooleanFormula replace(BooleanFormula constraint) {
     FormulaManager fmgr = delegate.getFormulaManager();
     int variables = this.register.countVariables(constraint);
-    while (variables > 1) {
+    while (variables > 0) {
       constraint = (BooleanFormula) this.register.replaceVariablesWithSolutionSets(constraint);
       this.register.solveOperations(constraint);
       Map<Formula, Formula> substitution = this.register.getSubstitution();
@@ -132,7 +145,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
         constraint = fmgr.substitute(constraint, substitution);
       }
       this.register.foldFunction(constraint);
-      this.register.processConstraint(constraint);
       System.out.println(constraint.toString());
       variables = this.register.countVariables(constraint);
     }
@@ -140,13 +152,17 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
   @Override
-  public DomainOptimizerFormulaRegister getRegister() {
-    return this.register;
-  }
-
-  @Override
-  public DomainOptimizerDecider getDecider() {
-    return this.decider;
+  public void convertIntervalsToConstraints() {
+    IntegerFormulaManager imgr = delegate.getFormulaManager().getIntegerFormulaManager();
+    BooleanFormulaManager bmgr = delegate.getFormulaManager().getBooleanFormulaManager();
+    constraints.clear();
+    for (Formula var : usedVariables) {
+      SolutionSet domain = this.getSolutionSet(var);
+      BooleanFormula interval = bmgr.and(imgr.lessOrEquals((IntegerFormula) var,
+          imgr.makeNumber(domain.getUpperBound())), imgr.greaterOrEquals((IntegerFormula) var,
+          imgr.makeNumber(domain.getLowerBound())));
+      constraints.add(interval);
+    }
   }
 
 }

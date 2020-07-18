@@ -33,7 +33,6 @@ public interface DomainOptimizer {
     void visit(Formula f);
     List<Formula> getVariables();
     Set<BooleanFormula> getConstraints();
-
     void pushVariable(Formula pVar);
     void pushDomain(Formula var, SolutionSet domain);
     void pushConstraint(BooleanFormula constraint) throws InterruptedException;
@@ -41,9 +40,8 @@ public interface DomainOptimizer {
     BooleanFormula replace(BooleanFormula constraint);
     DomainOptimizerFormulaRegister getRegister();
     DomainOptimizerDecider getDecider();
-
     boolean isUnsat() throws SolverException, InterruptedException;
-
     SolutionSet getSolutionSet(Formula var);
+    void convertIntervalsToConstraints();
 
 }
