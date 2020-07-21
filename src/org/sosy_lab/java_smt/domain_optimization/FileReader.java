@@ -118,7 +118,6 @@ public class FileReader {
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
       for (String toAssert : asserts) {
         BooleanFormula constraint = reader.fmgr.parse(header + toAssert);
-        reader.optimizer.visit(constraint);
         reader.optimizer.pushConstraint(constraint);
       }
         List<Formula> usedVariables = reader.optimizer.getVariables();

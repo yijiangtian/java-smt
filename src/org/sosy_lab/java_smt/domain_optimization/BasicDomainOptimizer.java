@@ -28,11 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
-import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.IntegerFormulaManager;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverException;
 
 
@@ -41,7 +38,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   private final DomainOptimizerProverEnvironment wrapped;
   final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
-  private LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
+  private final LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
@@ -53,6 +50,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     this.register = new DomainOptimizerFormulaRegister(this);
     this.decider = new DomainOptimizerDecider(this,delegate);
   }
+
 
   @Override
   public DomainOptimizerSolverContext getDelegate() {
@@ -76,26 +74,29 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   }
 
 
-
   @Override
   public void visit(Formula f) {
     this.register.visit(f);
   }
+
 
   @Override
   public List<Formula> getVariables() {
     return this.usedVariables;
   }
 
+
   @Override
   public Set<BooleanFormula> getConstraints() {
     return this.constraints;
   }
 
+
   @Override
   public void removeConstraint(BooleanFormula constraint) {
     this.constraints.remove(constraint);
   }
+
 
   @Override
   public void pushVariable(Formula var) {
@@ -105,6 +106,7 @@ public class BasicDomainOptimizer implements DomainOptimizer{
       this.usedVariables.add(var);
     }
   }
+
 
   @Override
   public void pushConstraint(BooleanFormula constraint) {
@@ -116,21 +118,25 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     }
   }
 
+
   @Override
   public void pushDomain(Formula var, SolutionSet domain) {
     this.domainDictionary.put(var, domain);
   }
+
 
   @Override
   public boolean isUnsat() throws SolverException, InterruptedException {
     return this.wrapped.isUnsat();
   }
 
+
   @Override
   public SolutionSet getSolutionSet(Formula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
   }
+
 
   @Override
   public BooleanFormula replace(BooleanFormula constraint) {
@@ -145,24 +151,10 @@ public class BasicDomainOptimizer implements DomainOptimizer{
         constraint = fmgr.substitute(constraint, substitution);
       }
       this.register.foldFunction(constraint);
-      System.out.println(constraint.toString());
       variables = this.register.countVariables(constraint);
     }
     return constraint;
   }
 
-  @Override
-  public void convertIntervalsToConstraints() {
-    IntegerFormulaManager imgr = delegate.getFormulaManager().getIntegerFormulaManager();
-    BooleanFormulaManager bmgr = delegate.getFormulaManager().getBooleanFormulaManager();
-    constraints.clear();
-    for (Formula var : usedVariables) {
-      SolutionSet domain = this.getSolutionSet(var);
-      BooleanFormula interval = bmgr.and(imgr.lessOrEquals((IntegerFormula) var,
-          imgr.makeNumber(domain.getUpperBound())), imgr.greaterOrEquals((IntegerFormula) var,
-          imgr.makeNumber(domain.getLowerBound())));
-      constraints.add(interval);
-    }
-  }
 
 }

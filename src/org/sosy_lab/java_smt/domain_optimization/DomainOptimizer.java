@@ -42,6 +42,5 @@ public interface DomainOptimizer {
     DomainOptimizerDecider getDecider();
     boolean isUnsat() throws SolverException, InterruptedException;
     SolutionSet getSolutionSet(Formula var);
-    void convertIntervalsToConstraints();
 
 }
