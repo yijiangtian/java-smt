@@ -128,8 +128,9 @@ public class FileReader {
         }
         IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
         IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
-        BooleanFormula query = imgr.greaterThan(imgr.add(var_1, var_2), imgr.makeNumber(0));
-        reader.decider.decide(query);
+        BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2),
+            imgr.makeNumber(10000));
+        System.out.println(reader.decider.decide(query));
     }
 
 }

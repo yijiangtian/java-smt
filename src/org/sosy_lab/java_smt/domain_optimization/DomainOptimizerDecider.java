@@ -38,7 +38,7 @@ public class DomainOptimizerDecider {
 
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
-  private final List<Formula> satisfiableQueries = new ArrayList<>();
+
   private List<Formula> variables = new ArrayList<>();
 
   public DomainOptimizerDecider(
@@ -46,6 +46,12 @@ public class DomainOptimizerDecider {
       DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
+  }
+
+  enum degreesOfSatisfiability {
+    unsat,
+    sat,
+    tautology
   }
 
 
@@ -78,7 +84,7 @@ public class DomainOptimizerDecider {
       for (int i = 0; i < Math.pow(2,variables.size()); i++) {
         List<Map<Formula,Formula>> substitutions = new ArrayList<>();
         for (int j = 0; j < variables.size(); j++) {
-          Formula var = variables.get(0);
+          Formula var = variables.get(j);
           SolutionSet domain = opt.getSolutionSet(var);
           Map<Formula,Formula> substitution = new HashMap<>();
           if (decisionMatrix[j][i] == 1) {
@@ -89,24 +95,37 @@ public class DomainOptimizerDecider {
           }
           substitutions.add(substitution);
         }
+        Formula buffer = f;
         for (Map<Formula,Formula> substitution : substitutions) {
           f = fmgr.substitute(f,substitution);
-          substitutedFormulas.add(f);
         }
+        substitutedFormulas.add(f);
+        f = buffer;
       }
       return substitutedFormulas;
     }
 
 
-    public void decide(BooleanFormula query) throws InterruptedException, SolverException {
+    public degreesOfSatisfiability decide(BooleanFormula query) throws InterruptedException, SolverException {
+      List<Formula> satisfiableQueries = new ArrayList<>();
       DomainOptimizerProverEnvironment wrapped = opt.getWrapped();
       List<Formula> readyForDecisisionPhase = performSubstitutions(query);
       for (Formula f : readyForDecisisionPhase) {
-        wrapped.addConstraint(query);
+        wrapped.addConstraint((BooleanFormula) f);
+        System.out.println(f.toString());
+        if (!wrapped.isUnsat()) {
+          System.out.println(f.toString());
+          satisfiableQueries.add(f);
+        }
+        wrapped.close();
       }
-      if (!wrapped.isUnsat()) {
-        satisfiableQueries.add(query);
+      if (satisfiableQueries.size() == readyForDecisisionPhase.size()) {
+        return degreesOfSatisfiability.tautology;
       }
+      if (satisfiableQueries.size() > 0) {
+        return degreesOfSatisfiability.sat;
+      }
+      return degreesOfSatisfiability.unsat;
     }
 
 
@@ -121,10 +140,6 @@ public class DomainOptimizerDecider {
       return decisionMatrix;
     }
 
-
-    public List<Formula> getSatisfiableQueries() {
-    return satisfiableQueries;
-    }
 
 
 }
