@@ -48,48 +48,52 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
     @Override
     public T addConstraint(BooleanFormula constraint) throws InterruptedException {
-        this.wrapped.addConstraint(constraint);
+    // TODO add constraint into Optimizer
+    this.wrapped.addConstraint(constraint);
         return null;
     }
 
     @Override
     public void push() {
-        this.wrapped.push();
+    // TODO push Optimizer
+    this.wrapped.push();
     }
 
     @Override
     public boolean isUnsat() throws SolverException, InterruptedException {
-        return this.wrapped.isUnsat();
+    // TODO check status of Optimizer
+    return this.wrapped.isUnsat();
     }
 
     @Override
     public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-        return this.wrapped.isUnsatWithAssumptions(assumptions);
+    throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
     public Model getModel() throws SolverException {
-        return this.wrapped.getModel();
+    // TODO check model of Optimizer
+    return this.wrapped.getModel();
     }
 
     @Override
     public List<BooleanFormula> getUnsatCore() {
-        return this.wrapped.getUnsatCore();
+    throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
     public Optional<List<BooleanFormula>> unsatCoreOverAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-        return Optional.empty();
+    throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
     public void close() {
-
+    wrapped.close();
     }
 
     @Override
     public <R> R allSat(AllSatCallback<R> callback, List<BooleanFormula> important) throws InterruptedException, SolverException {
-        return null;
+    // TODO we could implement this via extension of AbstractProverWithAllSat
+    throw new UnsupportedOperationException("not yet implemented");
     }
-
 }
