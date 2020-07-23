@@ -281,47 +281,9 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(f, folder);
   }
 
-
   public int countVariables(Formula f) {
-    final int[] i = {0};
-    FormulaManager fmgr = delegate.getFormulaManager();
-    FormulaVisitor<TraversalProcess> variableCounter =
-        new FormulaVisitor<>() {
-          @Override
-          public TraversalProcess visitFreeVariable(Formula f, String name) {
-            i[0] += 1;
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitConstant(Formula f, Object value) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitFunction(
-              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitQuantifier(
-              BooleanFormula f,
-              Quantifier quantifier,
-              List<Formula> boundVariables,
-              BooleanFormula body) {
-            return TraversalProcess.CONTINUE;
-          }
-        };
-    fmgr.visitRecursively(f, variableCounter);
-    return i[0];
+    return delegate.getFormulaManager().extractVariables(f).size();
   }
-
 
   public void solveOperations(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
