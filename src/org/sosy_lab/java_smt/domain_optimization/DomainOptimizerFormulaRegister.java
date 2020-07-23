@@ -36,18 +36,19 @@ import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
-class Function {
-  List<Formula> args;
-  FunctionDeclarationKind declaration;
-
-  public Function(List<Formula> args, FunctionDeclarationKind declaration) {
-    this.args = args;
-    this.declaration = declaration;
-  }
-
-}
-
 public class DomainOptimizerFormulaRegister {
+
+  private static class Function {
+
+    private final List<Formula> args;
+    private final FunctionDeclarationKind declaration;
+
+    Function(List<Formula> args, FunctionDeclarationKind declaration) {
+      this.args = args;
+      this.declaration = declaration;
+    }
+
+  }
 
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
