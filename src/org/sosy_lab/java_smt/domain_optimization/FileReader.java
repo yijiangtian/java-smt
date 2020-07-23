@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Scanner;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
-import org.sosy_lab.common.configuration.ConfigurationBuilder;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
@@ -42,7 +41,6 @@ import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
-
 public class FileReader {
   FormulaManager fmgr;
   SolverContext context;
@@ -50,26 +48,17 @@ public class FileReader {
   DomainOptimizer optimizer;
   DomainOptimizerDecider decider;
 
-
-  public FileReader(boolean fallBack) throws InvalidConfigurationException {
-    ConfigurationBuilder builder = Configuration.builder();
-    if (!fallBack) builder.setOption("useDomainOptimizer", "true");
-    else {
-      builder.setOption("useDomainOptimizer","false");
-    }
-    Configuration config = builder.build();
+  public FileReader() throws InvalidConfigurationException {
+    // the following code only work with an optimizer
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-    SolverContext context = SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    FormulaManager fmgr = context.getFormulaManager();
-    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(context);
-    DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) context,
-        wrapped);
-    this.fmgr = fmgr;
-    this.context = context;
-    this.wrapped = wrapped;
-    this.optimizer = optimizer;
+    context =
+        SolverContextFactory.createSolverContext(
+            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+    fmgr = context.getFormulaManager();
+    wrapped = (DomainOptimizerProverEnvironment) context.newProverEnvironment();
+    optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) context, wrapped);
     this.decider = optimizer.getDecider();
   }
 
@@ -111,7 +100,7 @@ public class FileReader {
       throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
              SolverException {
       String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
-    FileReader reader = new FileReader(false);
+    FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
     FormulaManager fmgr = reader.context.getFormulaManager();

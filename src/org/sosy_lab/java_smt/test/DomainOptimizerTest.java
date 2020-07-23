@@ -20,8 +20,9 @@
 
 package org.sosy_lab.java_smt.test;
 
-import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
+
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -60,7 +61,8 @@ public class DomainOptimizerTest {
 
     SolverContext delegate = SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    DomainOptimizerProverEnvironment wrapped = new DomainOptimizerProverEnvironment(delegate);
+    DomainOptimizerProverEnvironment wrapped =
+        (DomainOptimizerProverEnvironment) delegate.newProverEnvironment();
 
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();

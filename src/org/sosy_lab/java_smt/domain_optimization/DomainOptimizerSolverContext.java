@@ -42,18 +42,18 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public ProverEnvironment newProverEnvironment(ProverOptions... options) {
-    return delegate.newProverEnvironment(options);
+    return new DomainOptimizerProverEnvironment(delegate, delegate.newProverEnvironment(options));
   }
 
   @Override
   public InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation(
       ProverOptions... options) {
-    return delegate.newProverEnvironmentWithInterpolation(options);
+    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override
   public OptimizationProverEnvironment newOptimizationProverEnvironment(ProverOptions... options) {
-    return delegate.newOptimizationProverEnvironment(options);
+    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override
@@ -68,7 +68,6 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public void close() {
-
+    delegate.close();
   }
-
 }

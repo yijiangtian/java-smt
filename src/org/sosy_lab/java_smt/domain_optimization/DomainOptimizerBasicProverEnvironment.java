@@ -20,6 +20,9 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Model;
@@ -27,19 +30,15 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
     final SolverContext delegate;
     private final ProverEnvironment wrapped;
 
-
-    DomainOptimizerBasicProverEnvironment(SolverContext delegate) {
+  DomainOptimizerBasicProverEnvironment(
+      SolverContext delegate, ProverEnvironment pProverEnvironment) {
         this.delegate = delegate;
-        this.wrapped = delegate.newProverEnvironment();
+    this.wrapped = pProverEnvironment;
     }
 
     @Override
