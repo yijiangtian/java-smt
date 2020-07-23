@@ -553,7 +553,7 @@ public class DomainOptimizerFormulaRegister {
       if (vars.size() > 1) {
         Formula variable_2 = vars.get(1);
         SolutionSet domain_2 = opt.getSolutionSet(variable_2);
-        if (!domain_2.isSet) {
+        if (!domain_2.isSet()) {
           return TraversalProcess.CONTINUE;
         }
         if (operator == operators.LTE) {
@@ -642,7 +642,7 @@ public class DomainOptimizerFormulaRegister {
       if (vars.size() > 1) {
         Formula variable_2 = vars.get(1);
         SolutionSet domain_2 = opt.getSolutionSet(variable_2);
-        if (!domain_2.isSet) {
+        if (!domain_2.isSet()) {
           return TraversalProcess.CONTINUE;
         }
         if (operator == operators.LTE) {

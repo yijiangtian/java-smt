@@ -113,7 +113,7 @@ public class FileReader {
         for (Formula var : usedVariables) {
           System.out.println(var.toString());
           SolutionSet domain = reader.optimizer.getSolutionSet(var);
-          domain.show();
+      System.out.println(domain);
         }
         IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
         IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);

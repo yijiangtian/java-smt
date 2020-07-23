@@ -21,50 +21,61 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 
+// TODO rename to Interval
 public class SolutionSet {
 
-  private Integer[] bounds = new Integer[2];
-  public boolean isSet = false;
+  private Integer lower;
+  private Integer upper;
+  private boolean isSet = false;
 
   public SolutionSet() {
-    this.bounds[0] = Integer.MIN_VALUE;
-    this.bounds[1] = Integer.MAX_VALUE;
+    lower = Integer.MIN_VALUE;
+    upper = Integer.MAX_VALUE;
   }
 
+  // TODO void modifying methods and return a new immutable object?
   public void setLowerBound(Integer lBound) {
     if (lBound == 0) {
-      lBound += 1;
+      lBound += 1; // TODO why???
     }
-    if (lBound > this.getLowerBound() && lBound < this.getUpperBound()) this.bounds[0] = lBound;
+    if (lBound > getLowerBound() && lBound < getUpperBound()) {
+      lower = lBound;
+    }
     if (!this.isSet) {
       this.isSet = true;
     }
   }
 
+  // TODO void modifying methods and return a new immutable object?
   public void setUpperBound(Integer uBound) {
     if (uBound == 0) {
-      uBound += 1;
+      uBound += 1; // TODO why???
     }
-    if (uBound < this.getUpperBound() && uBound > this.getLowerBound()) this.bounds[1] = uBound;
+    if (uBound < getUpperBound() && uBound > getLowerBound()) {
+      upper = uBound;
+    }
     if (!this.isSet) {
       this.isSet = true;
     }
   }
 
+  // TODO add methods for operators, like PLUS, MINUS, TIMES, DIV
+  // to avoid those operations all over the Optimizer code
+
   public Integer getLowerBound() {
-    return this.bounds[0];
+    return lower;
   }
 
   public Integer getUpperBound() {
-    return this.bounds[1];
+    return upper;
   }
 
-  public void show() {
-    System.out.println("lBound: " + bounds[0]);
-    System.out.println("uBound: " + bounds[1]);
+  public boolean isSet() {
+    return isSet;
   }
 
-
-
-
+  @Override
+  public String toString() {
+    return String.format("lBound: %s ; uBound: %s", lower, upper);
+  }
 }
