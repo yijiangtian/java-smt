@@ -42,6 +42,7 @@ import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /** Testing formula serialization. */
 @RunWith(Parameterized.class)
@@ -75,14 +76,14 @@ public class TranslateFormulaTest {
   }
 
   @Before
-  public void initSolvers() throws InvalidConfigurationException {
+  public void initSolvers(DomainOptimizer pOpt) throws InvalidConfigurationException {
     Configuration empty = Configuration.builder().build();
     SolverContextFactory factory =
         new SolverContextFactory(empty, logger, ShutdownManager.create().getNotifier());
 
     try {
-      from = factory.generateContext(translateFrom);
-      to = factory.generateContext(translateTo);
+      from = factory.generateContext(translateFrom, pOpt);
+      to = factory.generateContext(translateTo, pOpt);
     } catch (InvalidConfigurationException e) {
       assume()
           .withMessage(e.getMessage())

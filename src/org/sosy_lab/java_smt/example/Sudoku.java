@@ -42,6 +42,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This program parses user-given Sudoku and solves it with an SMT solver.
@@ -91,7 +92,9 @@ public class Sudoku {
   private final BooleanFormulaManager bmgr;
   private final IntegerFormulaManager imgr;
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -101,7 +104,7 @@ public class Sudoku {
     {
       Solvers solver = Solvers.MATHSAT5;
       try (SolverContext context =
-          SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
+          SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
         Integer[][] grid = readGridFromStdin();
 
         Sudoku sudoku = new Sudoku(context);

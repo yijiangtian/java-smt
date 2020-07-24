@@ -20,6 +20,7 @@ import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /** Examples for Craig/sequential/tree interpolation. */
 public class Interpolation {
@@ -28,7 +29,9 @@ public class Interpolation {
     // never called
   }
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
 
     // set up a basic environment
@@ -41,8 +44,8 @@ public class Interpolation {
 
     // setup context
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-        InterpolatingProverEnvironment<?> prover =
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+         InterpolatingProverEnvironment<?> prover =
             context.newProverEnvironmentWithInterpolation()) {
 
       IntegerFormulaManager imgr = context.getFormulaManager().getIntegerFormulaManager();

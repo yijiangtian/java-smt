@@ -19,6 +19,7 @@ import org.sosy_lab.java_smt.api.OptimizationProverEnvironment.OptStatus;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Example for optimizing the weight of some constraints. For a given set of formulas, the weight of
@@ -31,7 +32,9 @@ public class OptimizationFormulaWeights {
     // never called
   }
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -39,8 +42,8 @@ public class OptimizationFormulaWeights {
     Solvers solver = Solvers.Z3; // Z3 works for optimization
 
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-        OptimizationProverEnvironment prover =
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+         OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();

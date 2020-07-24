@@ -48,6 +48,7 @@ import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultBooleanFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This program parses user-given formulas and prints out the (minimal) matching theory for them.
@@ -62,7 +63,9 @@ public class FormulaClassifier {
   private final Classifier v = new Classifier();
   private int levelLinearArithmetic = 0;
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
 
     if (args.length == 0) {
@@ -86,7 +89,7 @@ public class FormulaClassifier {
     ShutdownNotifier notifier = ShutdownNotifier.createDummy();
     // we need a solver that supports all theories, at least for parsing.
     try (SolverContext context =
-        SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
+        SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
       FormulaClassifier fc = new FormulaClassifier(context);
       List<BooleanFormula> formulas = new ArrayList<>();
       List<String> definitions = new ArrayList<>();

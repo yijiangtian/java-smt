@@ -21,6 +21,7 @@ import org.sosy_lab.java_smt.api.RationalFormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Example for optimizing 'x' with the constraint '0 &lt;= x &lt; 10'. We show the difference
@@ -35,7 +36,9 @@ public class OptimizationIntReal {
     // never called
   }
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -43,19 +46,23 @@ public class OptimizationIntReal {
 
     Solvers solver = Solvers.Z3; // Z3 works for optimization
 
-    optimizeWithIntegers(config, logger, notifier, solver);
+    optimizeWithIntegers(config, logger, notifier, solver, pOpt);
 
-    optimizeWithRationals(config, logger, notifier, solver);
+    optimizeWithRationals(config, logger, notifier, solver, pOpt);
   }
 
   /** Solve the problem with integer logic. */
   private static void optimizeWithIntegers(
-      Configuration config, LogManager logger, ShutdownNotifier notifier, Solvers solver)
+      Configuration config,
+      LogManager logger,
+      ShutdownNotifier notifier,
+      Solvers solver,
+      DomainOptimizer pOpt)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-        OptimizationProverEnvironment prover =
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+         OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();
@@ -74,12 +81,16 @@ public class OptimizationIntReal {
 
   /** Solve the problem with rational logic. */
   private static void optimizeWithRationals(
-      Configuration config, LogManager logger, ShutdownNotifier notifier, Solvers solver)
+      Configuration config,
+      LogManager logger,
+      ShutdownNotifier notifier,
+      Solvers solver,
+      DomainOptimizer pOpt)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-        OptimizationProverEnvironment prover =
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+         OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();

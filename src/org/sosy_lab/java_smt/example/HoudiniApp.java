@@ -25,6 +25,7 @@ import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.FormulaTransformationVisitor;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This application executes the inductive-invariant synthesis algorithm called "Houdini" taken from
@@ -48,7 +49,9 @@ public class HoudiniApp {
   private final BooleanFormulaManager bfmgr;
   private final SolverContext context;
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -61,7 +64,7 @@ public class HoudiniApp {
       // create the solver context, which includes all necessary parts for building, manipulating,
       // and solving formulas.
       try (SolverContext solverContext =
-          SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
+          SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
 
         // initialize Houdini
         HoudiniApp houdini = new HoudiniApp(solverContext);

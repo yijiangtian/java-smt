@@ -20,20 +20,25 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.sosy_lab.common.ShutdownManager;
+import org.sosy_lab.common.configuration.Configuration;
+import org.sosy_lab.common.configuration.InvalidConfigurationException;
+import org.sosy_lab.common.log.BasicLogManager;
+import org.sosy_lab.common.log.LogManager;
+import org.sosy_lab.java_smt.SolverContextFactory;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.SolverException;
 
-
-public class BasicDomainOptimizer implements DomainOptimizer{
+public class BasicDomainOptimizer implements DomainOptimizer {
   private final DomainOptimizerSolverContext delegate;
   private final DomainOptimizerProverEnvironment wrapped;
   final List<Formula> usedVariables = new ArrayList<>();
@@ -43,12 +48,15 @@ public class BasicDomainOptimizer implements DomainOptimizer{
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
-  public BasicDomainOptimizer(DomainOptimizerSolverContext delegate,
-                              DomainOptimizerProverEnvironment wrapped) {
-    this.delegate = delegate;
-    this.wrapped = wrapped;
+  public BasicDomainOptimizer() throws InvalidConfigurationException {
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+    this.delegate = (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL, this);
+    this.wrapped = (DomainOptimizerProverEnvironment) delegate.newProverEnvironment();
     this.register = new DomainOptimizerFormulaRegister(this);
-    this.decider = new DomainOptimizerDecider(this,delegate);
+    this.decider = new DomainOptimizerDecider(this, delegate);
   }
 
 
@@ -62,7 +70,6 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return this.wrapped;
   }
 
-
   @Override
   public DomainOptimizerFormulaRegister getRegister() {
     return this.register;
@@ -73,40 +80,34 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     return this.decider;
   }
 
-
   @Override
   public void visit(Formula f) {
     this.register.visit(f);
   }
-
 
   @Override
   public List<Formula> getVariables() {
     return this.usedVariables;
   }
 
-
   @Override
   public Set<BooleanFormula> getConstraints() {
     return this.constraints;
   }
-
 
   @Override
   public void removeConstraint(BooleanFormula constraint) {
     this.constraints.remove(constraint);
   }
 
-
   @Override
-  public void pushVariable(Formula var) {
+  public void addVariable(Formula var) {
     if (!this.usedVariables.contains(var)) {
       SolutionSet domain = new SolutionSet();
-      this.pushDomain(var, domain);
+      this.addDomain(var, domain);
       this.usedVariables.add(var);
     }
   }
-
 
   @Override
   public void pushConstraint(BooleanFormula constraint) {
@@ -118,25 +119,21 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     }
   }
 
-
   @Override
-  public void pushDomain(Formula var, SolutionSet domain) {
+  public void addDomain(Formula var, SolutionSet domain) {
     this.domainDictionary.put(var, domain);
   }
-
 
   @Override
   public boolean isUnsat() throws SolverException, InterruptedException {
     return this.wrapped.isUnsat();
   }
 
-
   @Override
   public SolutionSet getSolutionSet(Formula var) {
     SolutionSet domain = this.domainDictionary.get(var);
     return domain;
   }
-
 
   @Override
   public BooleanFormula replace(BooleanFormula constraint) {
@@ -155,6 +152,4 @@ public class BasicDomainOptimizer implements DomainOptimizer{
     }
     return constraint;
   }
-
-
 }

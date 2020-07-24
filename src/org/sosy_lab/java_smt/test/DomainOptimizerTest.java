@@ -26,14 +26,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.sosy_lab.common.ShutdownManager;
-import org.sosy_lab.common.configuration.Configuration;
-import org.sosy_lab.common.configuration.ConfigurationBuilder;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
-import org.sosy_lab.common.log.BasicLogManager;
-import org.sosy_lab.common.log.LogManager;
-import org.sosy_lab.java_smt.SolverContextFactory;
-import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
@@ -43,8 +36,6 @@ import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 
 @RunWith(Parameterized.class)
@@ -52,17 +43,9 @@ public class DomainOptimizerTest {
 
   public SolutionSet[] initializeTest()
       throws InterruptedException, SolverException, InvalidConfigurationException {
-    ConfigurationBuilder builder = Configuration.builder();
-    builder.setOption("useDomainOptimizer", "true");
-    Configuration config = builder.build();
-
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
-
-    SolverContext delegate = SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    DomainOptimizerProverEnvironment wrapped =
-        (DomainOptimizerProverEnvironment) delegate.newProverEnvironment();
+    DomainOptimizer optimizer =
+        new BasicDomainOptimizer();
+    SolverContext delegate = optimizer.getDelegate();
 
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
@@ -71,35 +54,26 @@ public class DomainOptimizerTest {
         y = imgr.makeVariable("y"),
         z = imgr.makeVariable("z");
 
-    BooleanFormula constraint_1 =
-        imgr.lessOrEquals(x, imgr.makeNumber(7));
+    BooleanFormula constraint_1 = imgr.lessOrEquals(x, imgr.makeNumber(7));
 
-    BooleanFormula constraint_2 =
-        imgr.lessOrEquals(imgr.makeNumber(4), x);
+    BooleanFormula constraint_2 = imgr.lessOrEquals(imgr.makeNumber(4), x);
 
     BooleanFormula constraint_3 =
-        imgr.lessOrEquals(
-            imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
+        imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
 
     BooleanFormula constraint_4 =
-        imgr.greaterOrEquals(
-            imgr.multiply(y, imgr.makeNumber(3)), imgr.makeNumber(3));
+        imgr.greaterOrEquals(imgr.multiply(y, imgr.makeNumber(3)), imgr.makeNumber(3));
 
-    BooleanFormula constraint_5 =
-        imgr.lessOrEquals(
-            imgr.add(z, y), imgr.makeNumber(5));
+    BooleanFormula constraint_5 = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
 
     BooleanFormula constraint_6 =
-        imgr.lessOrEquals(
-            imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
+        imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
 
     BooleanFormula constraint_7 =
         imgr.greaterOrEquals(
             imgr.add(imgr.multiply(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
             imgr.makeNumber(-50));
 
-    DomainOptimizer optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) delegate,
-        wrapped);
 
 
     optimizer.pushConstraint(constraint_1);
@@ -124,8 +98,7 @@ public class DomainOptimizerTest {
   @Test
   public void test_Solutions()
       throws InterruptedException, SolverException, InvalidConfigurationException {
-   SolutionSet[] solutionSets = initializeTest();
+    SolutionSet[] solutionSets = initializeTest();
     assertThat(solutionSets[0].getLowerBound()).isEqualTo(4);
   }
-
 }

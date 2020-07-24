@@ -32,68 +32,76 @@ import org.sosy_lab.java_smt.api.SolverException;
 
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
-    final SolverContext delegate;
-    private final ProverEnvironment wrapped;
+  private final SolverContext delegate;
+  private final ProverEnvironment wrapped;
+  private final DomainOptimizer opt;
 
   DomainOptimizerBasicProverEnvironment(
-      SolverContext delegate, ProverEnvironment pProverEnvironment) {
-        this.delegate = delegate;
+      SolverContext delegate,
+      ProverEnvironment pProverEnvironment,
+      DomainOptimizer pOpt) {
+    this.delegate = delegate;
     this.wrapped = pProverEnvironment;
-    }
+    opt = pOpt;
+  }
 
-    @Override
-    public void pop() {
-        this.wrapped.pop();
-    }
+  @Override
+  public void pop() {
+    this.wrapped.pop();
+  }
 
-    @Override
-    public T addConstraint(BooleanFormula constraint) throws InterruptedException {
+  @Override
+  public T addConstraint(BooleanFormula constraint) throws InterruptedException {
     // TODO add constraint into Optimizer
+    this.opt.pushConstraint(constraint);
     this.wrapped.addConstraint(constraint);
-        return null;
-    }
+    return null;
+  }
 
-    @Override
-    public void push() {
+  @Override
+  public void push() {
     // TODO push Optimizer
     this.wrapped.push();
-    }
+  }
 
-    @Override
-    public boolean isUnsat() throws SolverException, InterruptedException {
+  @Override
+  public boolean isUnsat() throws SolverException, InterruptedException {
     // TODO check status of Optimizer
     return this.wrapped.isUnsat();
-    }
+  }
 
-    @Override
-    public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
+  @Override
+  public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions)
+      throws SolverException, InterruptedException {
     throw new UnsupportedOperationException("not yet implemented");
-    }
+  }
 
-    @Override
-    public Model getModel() throws SolverException {
+  @Override
+  public Model getModel() throws SolverException {
     // TODO check model of Optimizer
     return this.wrapped.getModel();
-    }
+  }
 
-    @Override
-    public List<BooleanFormula> getUnsatCore() {
+  @Override
+  public List<BooleanFormula> getUnsatCore() {
     throw new UnsupportedOperationException("not yet implemented");
-    }
+  }
 
-    @Override
-    public Optional<List<BooleanFormula>> unsatCoreOverAssumptions(Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
+  @Override
+  public Optional<List<BooleanFormula>> unsatCoreOverAssumptions(
+      Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
     throw new UnsupportedOperationException("not yet implemented");
-    }
+  }
 
-    @Override
-    public void close() {
+  @Override
+  public void close() {
     wrapped.close();
-    }
+  }
 
-    @Override
-    public <R> R allSat(AllSatCallback<R> callback, List<BooleanFormula> important) throws InterruptedException, SolverException {
+  @Override
+  public <R> R allSat(AllSatCallback<R> callback, List<BooleanFormula> important)
+      throws InterruptedException, SolverException {
     // TODO we could implement this via extension of AbstractProverWithAllSat
     throw new UnsupportedOperationException("not yet implemented");
-    }
+  }
 }

@@ -204,6 +204,11 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="princess_2.12" level="project" />
+    <orderEntry type="library" name="CVC4" level="project" />
+    <orderEntry type="library" name="checker-qual" level="project" />
+    <orderEntry type="library" name="spotbugs" level="project" />
+    <orderEntry type="library" name="spotbugs-annotations" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">

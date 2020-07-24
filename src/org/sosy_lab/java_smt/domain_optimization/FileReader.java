@@ -31,8 +31,6 @@ import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
-import org.sosy_lab.java_smt.SolverContextFactory;
-import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
@@ -50,18 +48,9 @@ public class FileReader {
 
   public FileReader() throws InvalidConfigurationException {
     // the following code only work with an optimizer
-    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
-    context =
-        SolverContextFactory.createSolverContext(
-            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    fmgr = context.getFormulaManager();
-    wrapped = (DomainOptimizerProverEnvironment) context.newProverEnvironment();
-    optimizer = new BasicDomainOptimizer((DomainOptimizerSolverContext) context, wrapped);
+    optimizer = new BasicDomainOptimizer();
     this.decider = optimizer.getDecider();
   }
-
 
   public String parseHeader(String path) throws FileNotFoundException {
     String header = "";
@@ -74,7 +63,6 @@ public class FileReader {
     }
     return header;
   }
-
 
   public ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
     ArrayList<String> asserts = new ArrayList<>();
@@ -95,31 +83,29 @@ public class FileReader {
     return processedAsserts;
   }
 
-
   public static void main(String[] args)
       throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
-             SolverException {
-      String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
+          SolverException {
+    String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
-    FormulaManager fmgr = reader.context.getFormulaManager();
+    SolverContext context = reader.optimizer.getDelegate();
+    FormulaManager fmgr = context.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-      for (String toAssert : asserts) {
-        BooleanFormula constraint = reader.fmgr.parse(header + toAssert);
-        reader.optimizer.pushConstraint(constraint);
-      }
-        List<Formula> usedVariables = reader.optimizer.getVariables();
-        for (Formula var : usedVariables) {
-          System.out.println(var.toString());
-          SolutionSet domain = reader.optimizer.getSolutionSet(var);
-      System.out.println(domain);
-        }
-        IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
-        IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
-        BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2),
-            imgr.makeNumber(10000));
-        System.out.println(reader.decider.decide(query));
+    for (String toAssert : asserts) {
+      BooleanFormula constraint = fmgr.parse(header + toAssert);
+      reader.optimizer.pushConstraint(constraint);
     }
-
+    List<Formula> usedVariables = reader.optimizer.getVariables();
+    for (Formula var : usedVariables) {
+      System.out.println(var.toString());
+      SolutionSet domain = reader.optimizer.getSolutionSet(var);
+      System.out.println(domain);
+    }
+    IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
+    IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
+    BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2), imgr.makeNumber(10000));
+    System.out.println(reader.decider.decide(query));
+  }
 }

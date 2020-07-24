@@ -30,9 +30,13 @@ import org.sosy_lab.java_smt.api.SolverContext;
 public class DomainOptimizerSolverContext implements SolverContext {
 
   private final SolverContext delegate;
+  private final DomainOptimizer opt;
 
-  public DomainOptimizerSolverContext(SolverContext delegate) {
+  public DomainOptimizerSolverContext(
+      SolverContext delegate,
+      DomainOptimizer pOpt) {
     this.delegate = delegate;
+    opt = pOpt;
   }
 
   @Override
@@ -42,7 +46,8 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public ProverEnvironment newProverEnvironment(ProverOptions... options) {
-    return new DomainOptimizerProverEnvironment(delegate, delegate.newProverEnvironment(options));
+    return new DomainOptimizerProverEnvironment(delegate, delegate.newProverEnvironment(options),
+        opt);
   }
 
   @Override

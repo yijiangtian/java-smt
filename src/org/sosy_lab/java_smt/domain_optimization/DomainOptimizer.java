@@ -28,19 +28,31 @@ import org.sosy_lab.java_smt.api.SolverException;
 
 public interface DomainOptimizer {
 
-    DomainOptimizerSolverContext getDelegate();
-    DomainOptimizerProverEnvironment getWrapped();
-    void visit(Formula f);
-    List<Formula> getVariables();
-    Set<BooleanFormula> getConstraints();
-    void pushVariable(Formula pVar);
-    void pushDomain(Formula var, SolutionSet domain);
-    void pushConstraint(BooleanFormula constraint) throws InterruptedException;
-    void removeConstraint(BooleanFormula constraint);
-    BooleanFormula replace(BooleanFormula constraint);
-    DomainOptimizerFormulaRegister getRegister();
-    DomainOptimizerDecider getDecider();
-    boolean isUnsat() throws SolverException, InterruptedException;
-    SolutionSet getSolutionSet(Formula var);
+  DomainOptimizerSolverContext getDelegate();
 
+  DomainOptimizerProverEnvironment getWrapped();
+
+  void visit(Formula f);
+
+  List<Formula> getVariables();
+
+  Set<BooleanFormula> getConstraints();
+
+  void addVariable(Formula pVar);
+
+  void addDomain(Formula var, SolutionSet domain);
+
+  void pushConstraint(BooleanFormula constraint) throws InterruptedException;
+
+  void removeConstraint(BooleanFormula constraint);
+
+  BooleanFormula replace(BooleanFormula constraint);
+
+  DomainOptimizerFormulaRegister getRegister();
+
+  DomainOptimizerDecider getDecider();
+
+  boolean isUnsat() throws SolverException, InterruptedException;
+
+  SolutionSet getSolutionSet(Formula var);
 }

@@ -48,6 +48,7 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.FloatingPointRoundingMode;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.basicimpl.AbstractNumeralFormulaManager.NonLinearArithmetic;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 import org.sosy_lab.java_smt.logging.LoggingSolverContext;
 import org.sosy_lab.java_smt.solvers.boolector.BoolectorSolverContext;
@@ -158,15 +159,17 @@ public class SolverContextFactory {
     return (lastIndexOf == -1) ? "" : path.substring(lastIndexOf);
   }
 
-  /** Create new context with solver chosen according to the supplied configuration. */
-  public SolverContext generateContext() throws InvalidConfigurationException {
-    return generateContext(solver);
+  /** Create new context with solver chosen according to the supplied configuration.
+   * @param pOpt*/
+  public SolverContext generateContext(DomainOptimizer pOpt) throws InvalidConfigurationException {
+    return generateContext(solver, pOpt);
   }
-
 
   /** Create new context with solver name supplied. */
   @SuppressWarnings("resource") // returns unclosed context object
-  public SolverContext generateContext(Solvers solverToCreate)
+  public SolverContext generateContext(
+      Solvers solverToCreate,
+      DomainOptimizer pOpt)
       throws InvalidConfigurationException {
     SolverContext context;
     try {
@@ -182,7 +185,7 @@ public class SolverContextFactory {
     }
 
     if (useDomainOptimizer) {
-      context = new DomainOptimizerSolverContext(context);
+      context = new DomainOptimizerSolverContext(context, pOpt);
     }
     if (useLogger) {
       context = new LoggingSolverContext(logger, context);
@@ -249,9 +252,12 @@ public class SolverContextFactory {
    * documentation of accepted parameters.
    */
   public static SolverContext createSolverContext(
-      Configuration config, LogManager logger, ShutdownNotifier shutdownNotifier)
+      Configuration config,
+      LogManager logger,
+      ShutdownNotifier shutdownNotifier,
+      DomainOptimizer pOpt)
       throws InvalidConfigurationException {
-    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext();
+    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(pOpt);
   }
 
   /**
@@ -261,9 +267,13 @@ public class SolverContextFactory {
    * documentation of accepted parameters.
    */
   public static SolverContext createSolverContext(
-      Configuration config, LogManager logger, ShutdownNotifier shutdownNotifier, Solvers solver)
+      Configuration config,
+      LogManager logger,
+      ShutdownNotifier shutdownNotifier,
+      Solvers solver,
+      DomainOptimizer pOpt)
       throws InvalidConfigurationException {
-    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(solver);
+    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(solver, pOpt);
   }
 
   /**
@@ -271,14 +281,17 @@ public class SolverContextFactory {
    * and no shutdown notifier.
    *
    * @param solver Solver to initialize
+   * @param pOpt
    */
-  public static SolverContext createSolverContext(Solvers solver)
+  public static SolverContext createSolverContext(
+      Solvers solver,
+      DomainOptimizer pOpt)
       throws InvalidConfigurationException {
     return new SolverContextFactory(
             Configuration.defaultConfiguration(),
             LogManager.createNullLogManager(),
             ShutdownNotifier.createDummy())
-        .generateContext(solver);
+        .generateContext(solver, pOpt);
   }
 
   /**

@@ -22,6 +22,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This example shows different ways to get all satisfiable models for a given set of constraints.
@@ -34,15 +35,17 @@ public class AllSatExample {
   private final ProverEnvironment prover;
   private final SolverContext context;
 
-  public static void main(String... args)
+  public static void main(
+      DomainOptimizer pOpt,
+      String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
     ShutdownNotifier notifier = ShutdownNotifier.createDummy();
     for (Solvers solver : Solvers.values()) {
       try (SolverContext context =
-              SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-          ProverEnvironment prover =
+              SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+           ProverEnvironment prover =
               context.newProverEnvironment(
                   ProverOptions.GENERATE_MODELS, ProverOptions.GENERATE_ALL_SAT)) {
         System.out.println("\nUsing solver " + solver + " in version " + context.getVersion());
