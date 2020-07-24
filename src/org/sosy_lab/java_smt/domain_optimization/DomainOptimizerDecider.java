@@ -31,6 +31,7 @@ import org.sosy_lab.java_smt.api.FunctionDeclaration;
 import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
@@ -120,7 +121,7 @@ public class DomainOptimizerDecider {
   public boolean decide(BooleanFormula query)
       throws InterruptedException, SolverException {
     query = (BooleanFormula) performSubstitutions(query);
-    DomainOptimizerProverEnvironment wrapped = opt.getWrapped();
+    ProverEnvironment wrapped = opt.getWrapped();
     wrapped.push(query);
     boolean isUnsat = wrapped.isUnsat();
     wrapped.pop();

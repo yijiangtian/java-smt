@@ -54,5 +54,7 @@ public interface DomainOptimizer {
 
   boolean isUnsat() throws SolverException, InterruptedException;
 
+  boolean fallBack(BooleanFormula constraint);
+
   SolutionSet getSolutionSet(Formula var);
 }

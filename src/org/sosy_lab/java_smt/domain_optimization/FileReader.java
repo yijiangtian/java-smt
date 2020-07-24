@@ -73,6 +73,7 @@ public class FileReader {
       String toAssert = scanner.next();
       asserts.add(toAssert);
     }
+    scanner.close();
     asserts.remove(0);
     ArrayList<String> processedAsserts = new ArrayList<>();
     for (String s : asserts) {
@@ -90,22 +91,24 @@ public class FileReader {
     FileReader reader = new FileReader();
     String header = reader.parseHeader(filePath);
     ArrayList<String> asserts = reader.parseAsserts(filePath);
-    SolverContext context = reader.optimizer.getDelegate();
+    DomainOptimizer opt = new BasicDomainOptimizer();
+    SolverContext context = opt.getDelegate();
     FormulaManager fmgr = context.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    DomainOptimizerProverEnvironment env = opt.getWrapped();
     for (String toAssert : asserts) {
       BooleanFormula constraint = fmgr.parse(header + toAssert);
-      reader.optimizer.pushConstraint(constraint);
+      env.addConstraint(constraint);
     }
-    List<Formula> usedVariables = reader.optimizer.getVariables();
+    List<Formula> usedVariables = opt.getVariables();
     for (Formula var : usedVariables) {
       System.out.println(var.toString());
-      SolutionSet domain = reader.optimizer.getSolutionSet(var);
+      SolutionSet domain = opt.getSolutionSet(var);
       System.out.println(domain);
     }
     IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
     IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
     BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2), imgr.makeNumber(10000));
-    System.out.println(reader.decider.decide(query));
+    System.out.println(opt.getDecider().decide(query));
   }
 }

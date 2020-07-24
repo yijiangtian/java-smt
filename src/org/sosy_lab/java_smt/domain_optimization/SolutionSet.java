@@ -20,7 +20,6 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-
 // TODO rename to Interval
 public class SolutionSet {
 
@@ -37,6 +36,7 @@ public class SolutionSet {
   public void setLowerBound(Integer lBound) {
     if (lBound == 0) {
       lBound += 1; // TODO why???
+      //in order to prevent division by zero
     }
     if (lBound > getLowerBound() && lBound < getUpperBound()) {
       lower = lBound;
@@ -72,6 +72,14 @@ public class SolutionSet {
 
   public boolean isSet() {
     return isSet;
+  }
+
+  public boolean isUpperBoundSet() {
+    return upper != Integer.MAX_VALUE;
+  }
+
+  public boolean isLowerBoundSet() {
+    return lower != Integer.MIN_VALUE;
   }
 
   @Override

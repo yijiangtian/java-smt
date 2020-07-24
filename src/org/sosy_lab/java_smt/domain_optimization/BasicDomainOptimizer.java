@@ -36,7 +36,12 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.FunctionDeclaration;
+import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
 import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
+import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
+import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
 public class BasicDomainOptimizer implements DomainOptimizer {
   private final DomainOptimizerSolverContext delegate;
@@ -44,7 +49,6 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
   private final LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
-  DomainOptimizerProverEnvironment env;
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
@@ -57,6 +61,34 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     this.wrapped = (DomainOptimizerProverEnvironment) delegate.newProverEnvironment();
     this.register = new DomainOptimizerFormulaRegister(this);
     this.decider = new DomainOptimizerDecider(this, delegate);
+  }
+
+
+@Override
+  public boolean fallBack(BooleanFormula constraint) {
+    boolean[] fallBack = {false};
+    FormulaManager fmgr = delegate.getFormulaManager();
+    if (!register.isCaterpillar(constraint)) {
+      fallBack[0] = true;
+    }
+    FormulaVisitor<TraversalProcess> checkForUnsupportedOperands =
+        new DefaultFormulaVisitor<>() {
+          @Override
+          protected TraversalProcess visitDefault(Formula f) {
+            return null;
+          }
+          @Override
+          public TraversalProcess visitFunction(Formula f, List<Formula> args,
+                                                   FunctionDeclaration<?> functionDeclaration) {
+            FunctionDeclarationKind dec = functionDeclaration.getKind();
+            if (dec == FunctionDeclarationKind.MODULO) {
+              fallBack[0] = true;
+            }
+            return TraversalProcess.CONTINUE;
+          }
+        };
+    fmgr.visitRecursively(constraint,checkForUnsupportedOperands);
+    return fallBack[0];
   }
 
 
@@ -112,11 +144,9 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   @Override
   public void pushConstraint(BooleanFormula constraint) {
     this.register.visit(constraint);
-    if (this.register.isCaterpillar(constraint)) {
-      this.constraints.add(constraint);
-      this.register.processConstraint(constraint);
-      replace(constraint);
-    }
+    this.constraints.add(constraint);
+    this.register.processConstraint(constraint);
+    replace(constraint);
   }
 
   @Override

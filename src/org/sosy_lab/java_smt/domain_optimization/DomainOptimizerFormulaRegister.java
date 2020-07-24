@@ -100,6 +100,7 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(f, nameExtractor);
   }
 
+
   public boolean isCaterpillar(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<Boolean> isCaterpillar =
