@@ -32,15 +32,12 @@ import org.sosy_lab.java_smt.api.SolverException;
 
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
-  private final SolverContext delegate;
   private final ProverEnvironment wrapped;
   private final DomainOptimizer opt;
 
   DomainOptimizerBasicProverEnvironment(
-      SolverContext delegate,
       ProverEnvironment pProverEnvironment,
       DomainOptimizer pOpt) {
-    this.delegate = delegate;
     this.wrapped = pProverEnvironment;
     opt = pOpt;
   }
