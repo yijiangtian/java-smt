@@ -46,7 +46,7 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   @Override
   public ProverEnvironment newProverEnvironment(ProverOptions... options) {
-    return new DomainOptimizerProverEnvironment(delegate, delegate.newProverEnvironment(options),
+    return new DomainOptimizerProverEnvironment(delegate.newProverEnvironment(options),
         opt);
   }
 
