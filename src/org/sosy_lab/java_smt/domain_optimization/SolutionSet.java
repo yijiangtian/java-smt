@@ -59,6 +59,7 @@ public class SolutionSet {
     }
   }
 
+
   // TODO add methods for operators, like PLUS, MINUS, TIMES, DIV
   // to avoid those operations all over the Optimizer code
 
