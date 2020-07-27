@@ -91,6 +91,7 @@ public class DomainOptimizerDecider {
             return TraversalProcess.CONTINUE;
           }
 
+          @Override
           public TraversalProcess visitFunction(
               Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
             FunctionDeclarationKind declaration = functionDeclaration.getKind();
@@ -103,6 +104,7 @@ public class DomainOptimizerDecider {
             return TraversalProcess.CONTINUE;
           }
 
+            @Override
             public TraversalProcess visitQuantifier(
                 BooleanFormula f,
                 Quantifier quantifier,
