@@ -46,9 +46,9 @@ public class OptimizationIntReal {
 
     Solvers solver = Solvers.Z3; // Z3 works for optimization
 
-    optimizeWithIntegers(config, logger, notifier, solver, pOpt);
+    optimizeWithIntegers(config, logger, notifier, solver);
 
-    optimizeWithRationals(config, logger, notifier, solver, pOpt);
+    optimizeWithRationals(config, logger, notifier, solver);
   }
 
   /** Solve the problem with integer logic. */
@@ -56,8 +56,7 @@ public class OptimizationIntReal {
       Configuration config,
       LogManager logger,
       ShutdownNotifier notifier,
-      Solvers solver,
-      DomainOptimizer pOpt)
+      Solvers solver)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
@@ -84,8 +83,7 @@ public class OptimizationIntReal {
       Configuration config,
       LogManager logger,
       ShutdownNotifier notifier,
-      Solvers solver,
-      DomainOptimizer pOpt)
+      Solvers solver)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
