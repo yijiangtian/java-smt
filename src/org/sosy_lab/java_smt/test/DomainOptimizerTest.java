@@ -23,33 +23,43 @@ package org.sosy_lab.java_smt.test;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
+import java.util.logging.LogManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.sosy_lab.common.ShutdownManager;
+import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
+import org.sosy_lab.common.log.BasicLogManager;
+import org.sosy_lab.java_smt.SolverContextFactory;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
+import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 
 @RunWith(Parameterized.class)
 public class DomainOptimizerTest {
 
   public SolutionSet[] initializeTest()
-      throws InterruptedException, SolverException, InvalidConfigurationException {
-    /*
-    DomainOptimizer optimizer =
-        new BasicDomainOptimizer(wrapped);
-    SolverContext delegate = optimizer.getDelegate();
+      throws InvalidConfigurationException, InterruptedException, SolverException {
+
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
+    LogManager logger = (LogManager) BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+
+    DomainOptimizerSolverContext delegate =
+        (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
+        config, (org.sosy_lab.common.log.LogManager) logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
 
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
     IntegerFormula x = imgr.makeVariable("x"),
         y = imgr.makeVariable("y"),
@@ -75,26 +85,24 @@ public class DomainOptimizerTest {
             imgr.add(imgr.multiply(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
             imgr.makeNumber(-50));
 
-    optimizer.pushConstraint(constraint_1);
-    optimizer.pushConstraint(constraint_2);
-    optimizer.pushConstraint(constraint_3);
-    optimizer.pushConstraint(constraint_4);
-    optimizer.pushConstraint(constraint_5);
-    optimizer.pushConstraint(constraint_6);
-    optimizer.pushConstraint(constraint_7);
-    boolean isUnsat = optimizer.isUnsat();
+    env.addConstraint(constraint_1);
+    env.addConstraint(constraint_2);
+    env.addConstraint(constraint_3);
+    env.addConstraint(constraint_4);
+    env.addConstraint(constraint_5);
+    env.addConstraint(constraint_6);
+    env.addConstraint(constraint_7);
+    boolean isUnsat = env.isUnsat();
     System.out.println(isUnsat);
     SolutionSet[] domains = new SolutionSet[3];
-    List<Formula> usedVariables = optimizer.getVariables();
+    List<Formula> usedVariables = env.getVariables();
     for (int i = 0; i <= usedVariables.size(); i++) {
       Formula var = usedVariables.get(i);
-      SolutionSet domain = optimizer.getSolutionSet(var);
+      SolutionSet domain = env.getSolutionSet(var);
       domains[i] = domain;
     }
     return domains;
 
-     */
-    return null;
   }
 
   @Test
