@@ -20,23 +20,33 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import static org.sosy_lab.java_smt.test.ProverEnvironmentSubject.assertThat;
+
+import com.google.common.truth.Truth;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.logging.LogManager;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
-import org.sosy_lab.common.log.LogManager;
+import org.sosy_lab.java_smt.SolverContextFactory;
+import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
+import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
+import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 
 public class FileReader {
@@ -46,13 +56,7 @@ public class FileReader {
   DomainOptimizer optimizer;
   DomainOptimizerDecider decider;
 
-  public FileReader() throws InvalidConfigurationException {
-    // the following code only work with an optimizer
-    optimizer = new BasicDomainOptimizer();
-    this.decider = optimizer.getDecider();
-  }
-
-  public String parseHeader(String path) throws FileNotFoundException {
+  public static String parseHeader(String path) throws FileNotFoundException {
     String header = "";
     Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
     while (scanner.hasNextLine()) {
@@ -64,7 +68,7 @@ public class FileReader {
     return header;
   }
 
-  public ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
+  public static ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
     ArrayList<String> asserts = new ArrayList<>();
     String toAppend = "( assert";
     Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
@@ -88,14 +92,16 @@ public class FileReader {
       throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
           SolverException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
-    FileReader reader = new FileReader();
-    String header = reader.parseHeader(filePath);
-    ArrayList<String> asserts = reader.parseAsserts(filePath);
+    String header = parseHeader(filePath);
+    ArrayList<String> asserts = parseAsserts(filePath);
+
     DomainOptimizer opt = new BasicDomainOptimizer();
     SolverContext context = opt.getDelegate();
     FormulaManager fmgr = context.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+
     DomainOptimizerProverEnvironment env = opt.getWrapped();
+
     for (String toAssert : asserts) {
       BooleanFormula constraint = fmgr.parse(header + toAssert);
       env.addConstraint(constraint);

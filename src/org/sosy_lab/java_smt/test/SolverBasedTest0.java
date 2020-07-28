@@ -47,6 +47,7 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 import org.sosy_lab.java_smt.api.RationalFormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.UFManager;
+import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
@@ -115,9 +116,9 @@ public abstract class SolverBasedTest0 {
   }
 
   @Before
-  public final void initSolver(DomainOptimizer pOpt) throws InvalidConfigurationException {
+  public final void initSolver() throws InvalidConfigurationException {
     config = createTestConfigBuilder().build();
-
+    DomainOptimizer pOpt = new BasicDomainOptimizer();
     factory = new SolverContextFactory(config, logger, shutdownNotifierToUse());
     try {
       context = factory.generateContext(pOpt);
