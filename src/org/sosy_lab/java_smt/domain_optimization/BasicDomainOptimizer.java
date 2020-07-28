@@ -26,11 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.sosy_lab.common.ShutdownManager;
-import org.sosy_lab.common.configuration.Configuration;
-import org.sosy_lab.common.configuration.InvalidConfigurationException;
-import org.sosy_lab.common.log.BasicLogManager;
-import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
@@ -52,10 +47,8 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
-  public BasicDomainOptimizer(ProverEnvironment pWrapped, DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
-    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
+
+  public BasicDomainOptimizer(ProverEnvironment pWrapped, DomainOptimizerSolverContext delegate) {
     this.wrapped = pWrapped;
     this.delegate = delegate;
     this.register = new DomainOptimizerFormulaRegister(this);

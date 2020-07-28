@@ -31,11 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
-import java.util.logging.LogManager;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
+import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
@@ -94,14 +94,13 @@ public class FileReader {
     String header = parseHeader(filePath);
     ArrayList<String> asserts = parseAsserts(filePath);
 
-    Configuration config = Configuration.fromCmdLineArguments(args);
-    org.sosy_lab.common.log.LogManager logger =
-        BasicLogManager.create(config);
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
+    LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
 
-    SolverContext context = SolverContextFactory.createSolverContext(
+    DomainOptimizerSolverContext delegate =
+        (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
 
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
