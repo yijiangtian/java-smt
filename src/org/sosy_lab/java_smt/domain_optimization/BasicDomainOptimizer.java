@@ -31,34 +31,33 @@ import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
 import org.sosy_lab.common.log.LogManager;
-import org.sosy_lab.java_smt.SolverContextFactory;
-import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
 import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
+
 public class BasicDomainOptimizer implements DomainOptimizer {
   private final DomainOptimizerSolverContext delegate;
-  private final DomainOptimizerProverEnvironment wrapped;
+  private final ProverEnvironment wrapped;
   final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
   private final LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
-  public BasicDomainOptimizer() throws InvalidConfigurationException {
+  public BasicDomainOptimizer(ProverEnvironment pWrapped, DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-    this.delegate = (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL, this);
-    this.wrapped = (DomainOptimizerProverEnvironment) delegate.newProverEnvironment();
+    this.wrapped = pWrapped;
+    this.delegate = delegate;
     this.register = new DomainOptimizerFormulaRegister(this);
     this.decider = new DomainOptimizerDecider(this, delegate);
   }
@@ -98,7 +97,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   }
 
   @Override
-  public DomainOptimizerProverEnvironment getWrapped() {
+  public ProverEnvironment getWrapped() {
     return this.wrapped;
   }
 

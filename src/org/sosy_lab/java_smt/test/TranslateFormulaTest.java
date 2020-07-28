@@ -76,14 +76,14 @@ public class TranslateFormulaTest {
   }
 
   @Before
-  public void initSolvers(DomainOptimizer pOpt) throws InvalidConfigurationException {
+  public void initSolvers() throws InvalidConfigurationException {
     Configuration empty = Configuration.builder().build();
     SolverContextFactory factory =
         new SolverContextFactory(empty, logger, ShutdownManager.create().getNotifier());
 
     try {
-      from = factory.generateContext(translateFrom, pOpt);
-      to = factory.generateContext(translateTo, pOpt);
+      from = factory.generateContext(translateFrom);
+      to = factory.generateContext(translateTo);
     } catch (InvalidConfigurationException e) {
       assume()
           .withMessage(e.getMessage())

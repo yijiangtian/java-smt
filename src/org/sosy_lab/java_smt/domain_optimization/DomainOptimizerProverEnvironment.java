@@ -20,13 +20,14 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 
 public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProverEnvironment<Void>
     implements ProverEnvironment {
 
   public DomainOptimizerProverEnvironment(
-      ProverEnvironment pProverEnvironment, DomainOptimizer pOpt) {
-    super(pProverEnvironment, pOpt);
+      DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
+    super(delegate);
   }
 }

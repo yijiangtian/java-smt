@@ -93,7 +93,6 @@ public class Sudoku {
   private final IntegerFormulaManager imgr;
 
   public static void main(
-      DomainOptimizer pOpt,
       String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
     Configuration config = Configuration.defaultConfiguration();
@@ -104,7 +103,7 @@ public class Sudoku {
     {
       Solvers solver = Solvers.MATHSAT5;
       try (SolverContext context =
-          SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
+          SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
         Integer[][] grid = readGridFromStdin();
 
         Sudoku sudoku = new Sudoku(context);

@@ -47,8 +47,6 @@ import org.sosy_lab.java_smt.api.QuantifiedFormulaManager;
 import org.sosy_lab.java_smt.api.RationalFormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.UFManager;
-import org.sosy_lab.java_smt.domain_optimization.BasicDomainOptimizer;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Abstract base class with helpful utilities for writing tests that use an SMT solver. It
@@ -118,10 +116,9 @@ public abstract class SolverBasedTest0 {
   @Before
   public final void initSolver() throws InvalidConfigurationException {
     config = createTestConfigBuilder().build();
-    DomainOptimizer pOpt = new BasicDomainOptimizer();
     factory = new SolverContextFactory(config, logger, shutdownNotifierToUse());
     try {
-      context = factory.generateContext(pOpt);
+      context = factory.generateContext();
     } catch (InvalidConfigurationException e) {
       assume()
           .withMessage(e.getMessage())

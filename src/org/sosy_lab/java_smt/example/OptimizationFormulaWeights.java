@@ -42,7 +42,7 @@ public class OptimizationFormulaWeights {
     Solvers solver = Solvers.Z3; // Z3 works for optimization
 
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
          OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 

@@ -43,8 +43,9 @@ public class DomainOptimizerTest {
 
   public SolutionSet[] initializeTest()
       throws InterruptedException, SolverException, InvalidConfigurationException {
+    /*
     DomainOptimizer optimizer =
-        new BasicDomainOptimizer();
+        new BasicDomainOptimizer(wrapped);
     SolverContext delegate = optimizer.getDelegate();
 
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -74,8 +75,6 @@ public class DomainOptimizerTest {
             imgr.add(imgr.multiply(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
             imgr.makeNumber(-50));
 
-
-
     optimizer.pushConstraint(constraint_1);
     optimizer.pushConstraint(constraint_2);
     optimizer.pushConstraint(constraint_3);
@@ -93,6 +92,9 @@ public class DomainOptimizerTest {
       domains[i] = domain;
     }
     return domains;
+
+     */
+    return null;
   }
 
   @Test

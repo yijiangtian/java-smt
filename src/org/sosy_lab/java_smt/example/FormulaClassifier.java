@@ -64,7 +64,6 @@ public class FormulaClassifier {
   private int levelLinearArithmetic = 0;
 
   public static void main(
-      DomainOptimizer pOpt,
       String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
 
@@ -89,7 +88,7 @@ public class FormulaClassifier {
     ShutdownNotifier notifier = ShutdownNotifier.createDummy();
     // we need a solver that supports all theories, at least for parsing.
     try (SolverContext context =
-        SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
+        SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
       FormulaClassifier fc = new FormulaClassifier(context);
       List<BooleanFormula> formulas = new ArrayList<>();
       List<String> definitions = new ArrayList<>();

@@ -44,7 +44,7 @@ public class AllSatExample {
     ShutdownNotifier notifier = ShutdownNotifier.createDummy();
     for (Solvers solver : Solvers.values()) {
       try (SolverContext context =
-              SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+              SolverContextFactory.createSolverContext(config, logger, notifier, solver);
            ProverEnvironment prover =
               context.newProverEnvironment(
                   ProverOptions.GENERATE_MODELS, ProverOptions.GENERATE_ALL_SAT)) {

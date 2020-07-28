@@ -160,16 +160,15 @@ public class SolverContextFactory {
   }
 
   /** Create new context with solver chosen according to the supplied configuration.
-   * @param pOpt*/
-  public SolverContext generateContext(DomainOptimizer pOpt) throws InvalidConfigurationException {
-    return generateContext(solver, pOpt);
+   **/
+  public SolverContext generateContext() throws InvalidConfigurationException {
+    return generateContext(solver);
   }
 
   /** Create new context with solver name supplied. */
   @SuppressWarnings("resource") // returns unclosed context object
   public SolverContext generateContext(
-      Solvers solverToCreate,
-      DomainOptimizer pOpt)
+      Solvers solverToCreate)
       throws InvalidConfigurationException {
     SolverContext context;
     try {
@@ -185,7 +184,7 @@ public class SolverContextFactory {
     }
 
     if (useDomainOptimizer) {
-      context = new DomainOptimizerSolverContext(context, pOpt);
+      context = new DomainOptimizerSolverContext(context);
     }
     if (useLogger) {
       context = new LoggingSolverContext(logger, context);
@@ -254,10 +253,9 @@ public class SolverContextFactory {
   public static SolverContext createSolverContext(
       Configuration config,
       LogManager logger,
-      ShutdownNotifier shutdownNotifier,
-      DomainOptimizer pOpt)
+      ShutdownNotifier shutdownNotifier)
       throws InvalidConfigurationException {
-    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(pOpt);
+    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext();
   }
 
   /**
@@ -270,10 +268,9 @@ public class SolverContextFactory {
       Configuration config,
       LogManager logger,
       ShutdownNotifier shutdownNotifier,
-      Solvers solver,
-      DomainOptimizer pOpt)
+      Solvers solver)
       throws InvalidConfigurationException {
-    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(solver, pOpt);
+    return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(solver);
   }
 
   /**
@@ -281,17 +278,15 @@ public class SolverContextFactory {
    * and no shutdown notifier.
    *
    * @param solver Solver to initialize
-   * @param pOpt
    */
   public static SolverContext createSolverContext(
-      Solvers solver,
-      DomainOptimizer pOpt)
+      Solvers solver)
       throws InvalidConfigurationException {
     return new SolverContextFactory(
             Configuration.defaultConfiguration(),
             LogManager.createNullLogManager(),
             ShutdownNotifier.createDummy())
-        .generateContext(solver, pOpt);
+        .generateContext(solver);
   }
 
   /**

@@ -23,8 +23,10 @@ package org.sosy_lab.java_smt.domain_optimization;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.Model;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
@@ -35,15 +37,22 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   private final DomainOptimizer opt;
 
   DomainOptimizerBasicProverEnvironment(
-      ProverEnvironment pProverEnvironment,
-      DomainOptimizer pOpt) {
-    this.wrapped = pProverEnvironment;
-    opt = pOpt;
+      DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
+    this.wrapped = delegate.newProverEnvironment();
+    opt = new BasicDomainOptimizer(wrapped, delegate);
   }
 
   @Override
   public void pop() {
     this.wrapped.pop();
+  }
+
+  public List<Formula> getVariables() {
+    return this.opt.getVariables();
+  }
+
+  public SolutionSet getSolutionSet(Formula var) {
+    return this.opt.getSolutionSet(var);
   }
 
   @Override

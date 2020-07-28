@@ -64,7 +64,7 @@ public class HoudiniApp {
       // create the solver context, which includes all necessary parts for building, manipulating,
       // and solving formulas.
       try (SolverContext solverContext =
-          SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt)) {
+          SolverContextFactory.createSolverContext(config, logger, notifier, solver)) {
 
         // initialize Houdini
         HoudiniApp houdini = new HoudiniApp(solverContext);

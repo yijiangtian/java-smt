@@ -44,7 +44,7 @@ public class Interpolation {
 
     // setup context
     try (SolverContext context =
-            SolverContextFactory.createSolverContext(config, logger, notifier, solver, pOpt);
+            SolverContextFactory.createSolverContext(config, logger, notifier, solver);
          InterpolatingProverEnvironment<?> prover =
             context.newProverEnvironmentWithInterpolation()) {
 

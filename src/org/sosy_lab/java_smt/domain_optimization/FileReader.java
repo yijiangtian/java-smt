@@ -89,32 +89,39 @@ public class FileReader {
   }
 
   public static void main(String[] args)
-      throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
-          SolverException {
+      throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     String header = parseHeader(filePath);
     ArrayList<String> asserts = parseAsserts(filePath);
 
-    DomainOptimizer opt = new BasicDomainOptimizer();
-    SolverContext context = opt.getDelegate();
-    FormulaManager fmgr = context.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    Configuration config = Configuration.fromCmdLineArguments(args);
+    org.sosy_lab.common.log.LogManager logger =
+        BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
 
-    DomainOptimizerProverEnvironment env = opt.getWrapped();
+    SolverContext context = SolverContextFactory.createSolverContext(
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+    DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
+
+    FormulaManager fmgr = delegate.getFormulaManager();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
     for (String toAssert : asserts) {
       BooleanFormula constraint = fmgr.parse(header + toAssert);
       env.addConstraint(constraint);
     }
-    List<Formula> usedVariables = opt.getVariables();
+
+    List<Formula> usedVariables = env.getVariables();
     for (Formula var : usedVariables) {
       System.out.println(var.toString());
-      SolutionSet domain = opt.getSolutionSet(var);
+      SolutionSet domain = env.getSolutionSet(var);
       System.out.println(domain);
     }
+
     IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
     IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
     BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2), imgr.makeNumber(10000));
-    System.out.println(opt.getDecider().decide(query));
+
   }
 }
