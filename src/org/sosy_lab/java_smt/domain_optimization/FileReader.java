@@ -103,7 +103,7 @@ public class FileReader {
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
 
     FormulaManager fmgr = delegate.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
     for (String toAssert : asserts) {
