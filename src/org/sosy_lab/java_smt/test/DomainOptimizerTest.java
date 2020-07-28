@@ -23,11 +23,13 @@ package org.sosy_lab.java_smt.test;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.LogManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
@@ -48,7 +50,8 @@ import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 public class DomainOptimizerTest {
   public static List<SolutionSet> solutionSets;
 
-  public void initializeTest()
+  @Parameters
+  public static Collection<SolutionSet> initializeTest()
       throws InvalidConfigurationException, InterruptedException, SolverException {
 
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
@@ -103,12 +106,13 @@ public class DomainOptimizerTest {
       SolutionSet domain = env.getSolutionSet(var);
       domains.add(domain);
     }
-    solutionSets = domains;
+    return domains;
   }
 
   @Test
-  public void test_Solutions() {
-    List<SolutionSet> solutionSets = DomainOptimizerTest.solutionSets;
-    assertThat(solutionSets.get(0).getLowerBound()).isEqualTo(4);
+  public void test_Solutions()
+      throws InvalidConfigurationException, InterruptedException, SolverException {
+    Collection<SolutionSet> solutionSets = initializeTest();
+    assertThat(solutionSets.iterator().next().getLowerBound()).isEqualTo(4);
   }
 }
