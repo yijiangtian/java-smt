@@ -49,12 +49,12 @@ public class DomainOptimizerSolverContext implements SolverContext {
   @Override
   public InterpolatingProverEnvironment<?> newProverEnvironmentWithInterpolation(
       ProverOptions... options) {
-    throw new UnsupportedOperationException("not yet implemented");
+    return delegate.newProverEnvironmentWithInterpolation(options);
   }
 
   @Override
   public OptimizationProverEnvironment newOptimizationProverEnvironment(ProverOptions... options) {
-    throw new UnsupportedOperationException("not yet implemented");
+    return delegate.newOptimizationProverEnvironment(options);
   }
 
   @Override

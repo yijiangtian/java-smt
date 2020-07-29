@@ -25,7 +25,6 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.LogManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,6 +33,7 @@ import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.common.log.BasicLogManager;
+import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
@@ -55,12 +55,12 @@ public class DomainOptimizerTest {
       throws InvalidConfigurationException, InterruptedException, SolverException {
 
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
-    LogManager logger = (LogManager) BasicLogManager.create(config);
+    LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
 
     DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-        config, (org.sosy_lab.common.log.LogManager) logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
 
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
