@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.sosy_lab.common.ShutdownManager;
@@ -52,6 +53,18 @@ import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 @RunWith(Parameterized.class)
 public class DomainOptimizerTest {
 
+  @Parameters(name="{0")
+  public static DomainOptimizerProverEnvironment getProver() throws InvalidConfigurationException {
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+    DomainOptimizerSolverContext delegate =
+        (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
+            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+    return new DomainOptimizerProverEnvironment(delegate);
+  }
+
+  @Parameter
   private Collection<SolutionSet> solutionSets;
 
   @Before
@@ -112,6 +125,7 @@ public class DomainOptimizerTest {
     }
     solutionSets = domains;
   }
+
 
   @Test
   public void test_Solutions() {
