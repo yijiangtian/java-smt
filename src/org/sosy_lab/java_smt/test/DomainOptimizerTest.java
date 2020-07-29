@@ -116,6 +116,6 @@ public class DomainOptimizerTest {
   @Test
   public void test_Solutions() {
     Collection<SolutionSet> sets = solutionSets;
-    assertThat(solutionSets.iterator().next().getLowerBound()).isEqualTo(4);
+    assertThat(sets.iterator().next().getLowerBound()).isEqualTo(4);
   }
 }
