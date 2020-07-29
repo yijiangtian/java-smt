@@ -54,14 +54,15 @@ import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 public class DomainOptimizerTest {
 
   @Parameters(name="{0")
-  public static DomainOptimizerProverEnvironment getProver() throws InvalidConfigurationException {
+  public static DomainOptimizerProverEnvironment[] getProver() throws InvalidConfigurationException {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
     DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    return new DomainOptimizerProverEnvironment(delegate);
+    DomainOptimizerProverEnvironment[] array = {new DomainOptimizerProverEnvironment(delegate)};
+    return array;
   }
 
   @Parameter
