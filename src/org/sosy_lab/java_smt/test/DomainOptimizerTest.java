@@ -25,10 +25,13 @@ import static com.google.common.truth.Truth.assertThat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
 import org.sosy_lab.common.configuration.InvalidConfigurationException;
@@ -48,10 +51,11 @@ import org.sosy_lab.java_smt.domain_optimization.SolutionSet;
 
 @RunWith(Parameterized.class)
 public class DomainOptimizerTest {
-  public static List<SolutionSet> solutionSets;
 
-  @Parameters
-  public static Collection<SolutionSet> initializeTest()
+  private Collection<SolutionSet> solutionSets;
+
+  @Before
+  public void initializeTest()
       throws InvalidConfigurationException, InterruptedException, SolverException {
 
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
@@ -62,9 +66,10 @@ public class DomainOptimizerTest {
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
 
+    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
+
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
     IntegerFormula x = imgr.makeVariable("x"),
         y = imgr.makeVariable("y"),
@@ -105,13 +110,12 @@ public class DomainOptimizerTest {
       SolutionSet domain = env.getSolutionSet(var);
       domains.add(domain);
     }
-    return domains;
+    solutionSets = domains;
   }
 
   @Test
-  public void test_Solutions()
-      throws InvalidConfigurationException, InterruptedException, SolverException {
-    Collection<SolutionSet> solutionSets = initializeTest();
+  public void test_Solutions() {
+    Collection<SolutionSet> sets = solutionSets;
     assertThat(solutionSets.iterator().next().getLowerBound()).isEqualTo(4);
   }
 }
