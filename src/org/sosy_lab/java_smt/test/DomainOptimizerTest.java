@@ -101,8 +101,7 @@ public class DomainOptimizerTest {
     System.out.println(isUnsat);
     List<SolutionSet> domains = new ArrayList<>();
     List<Formula> usedVariables = env.getVariables();
-    for (int i = 0; i <= usedVariables.size(); i++) {
-      Formula var = usedVariables.get(i);
+    for (Formula var : usedVariables) {
       SolutionSet domain = env.getSolutionSet(var);
       domains.add(domain);
     }
