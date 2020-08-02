@@ -43,7 +43,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   private final ProverEnvironment wrapped;
   final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
-  private final LinkedHashMap<Formula, SolutionSet> domainDictionary = new LinkedHashMap<>();
+  private final LinkedHashMap<Formula, Interval> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
@@ -127,7 +127,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   @Override
   public void addVariable(Formula var) {
     if (!this.usedVariables.contains(var)) {
-      SolutionSet domain = new SolutionSet();
+      Interval domain = new Interval();
       this.addDomain(var, domain);
       this.usedVariables.add(var);
     }
@@ -142,7 +142,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   }
 
   @Override
-  public void addDomain(Formula var, SolutionSet domain) {
+  public void addDomain(Formula var, Interval domain) {
     this.domainDictionary.put(var, domain);
   }
 
@@ -152,8 +152,8 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   }
 
   @Override
-  public SolutionSet getSolutionSet(Formula var) {
-    SolutionSet domain = this.domainDictionary.get(var);
+  public Interval getInterval(Formula var) {
+    Interval domain = this.domainDictionary.get(var);
     return domain;
   }
 
@@ -162,7 +162,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     FormulaManager fmgr = delegate.getFormulaManager();
     int variables = this.register.countVariables(constraint);
     while (variables > 0) {
-      constraint = (BooleanFormula) this.register.replaceVariablesWithSolutionSets(constraint);
+      constraint = (BooleanFormula) this.register.replaceVariablesWithIntervals(constraint);
       this.register.solveOperations(constraint);
       Map<Formula, Formula> substitution = this.register.getSubstitution();
       boolean isSubstituted = this.register.getSubstitutionFlag();
