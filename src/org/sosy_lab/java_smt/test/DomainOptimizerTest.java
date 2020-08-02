@@ -62,7 +62,7 @@ public class DomainOptimizerTest {
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
     this.fmgr = delegate.getFormulaManager();
     this.env = new DomainOptimizerProverEnvironment(delegate);
-    this.basicEnv = env.getWrapped();
+    this.basicEnv = delegate.newProverEnvironment();
   }
 
   @Before
