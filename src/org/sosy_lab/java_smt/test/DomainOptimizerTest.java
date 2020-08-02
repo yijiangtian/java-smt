@@ -113,7 +113,7 @@ public class DomainOptimizerTest {
         boolean isUnsat = env.isUnsat();
         isUnsatWithDomainOptimizer = isUnsat;
       }
-
+    delegate.close();
   }
 
   @Test

@@ -82,26 +82,26 @@ public class FileReader {
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
 
-    DomainOptimizerSolverContext delegate =
+    try (DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
+        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+      FormulaManager fmgr = delegate.getFormulaManager();
 
-    FormulaManager fmgr = delegate.getFormulaManager();
-    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
-    for (String toAssert : asserts) {
-      BooleanFormula constraint = fmgr.parse(header + toAssert);
-      env.addConstraint(constraint);
+      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
+
+        for (String toAssert : asserts) {
+          BooleanFormula constraint = fmgr.parse(header + toAssert);
+          env.addConstraint(constraint);
+        }
+
+        List<Formula> usedVariables = env.getVariables();
+        for (Formula var : usedVariables) {
+          System.out.println(var.toString());
+          Interval domain = env.getInterval(var);
+          System.out.println(domain);
+        }
+      }
     }
-
-    List<Formula> usedVariables = env.getVariables();
-    for (Formula var : usedVariables) {
-      System.out.println(var.toString());
-      Interval domain = env.getInterval(var);
-      System.out.println(domain);
-    }
-    delegate.close();
-    env.close();
-
   }
 }
