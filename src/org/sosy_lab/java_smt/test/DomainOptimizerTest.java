@@ -38,7 +38,6 @@ import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
@@ -46,7 +45,6 @@ import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 public class DomainOptimizerTest {
 
   private DomainOptimizerProverEnvironment env;
-  private ProverEnvironment basicEnv;
   private FormulaManager fmgr;
   private final List<Formula> constraints = new ArrayList<>();
   private final List<Formula> queries = new ArrayList<>();
@@ -62,7 +60,6 @@ public class DomainOptimizerTest {
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
     this.fmgr = delegate.getFormulaManager();
     this.env = new DomainOptimizerProverEnvironment(delegate);
-    this.basicEnv = delegate.newProverEnvironment();
   }
 
   @Before
@@ -103,15 +100,14 @@ public class DomainOptimizerTest {
   @Test
   public void isSatisfiabilityAffected() throws InterruptedException, SolverException {
     for (Formula constraint : constraints) {
-      basicEnv.addConstraint((BooleanFormula) constraint);
+      env.addConstraint((BooleanFormula) constraint);
     }
     for (Formula query : queries) {
-      basicEnv.addConstraint((BooleanFormula) query);
+      env.addConstraint((BooleanFormula) query);
     }
-    boolean isBasicEnvUnsat = basicEnv.isUnsat();
-    basicEnv.close();
-    for (Formula constraint : constraints) {
-      env.addConstraint((BooleanFormula) constraint);
+    boolean isBasicEnvUnsat = env.isUnsat();
+    for (int i = 0; i < queries.size(); i++) {
+      env.pop();
     }
     for (Formula query : queries) {
       env.pushQuery(query);
