@@ -38,34 +38,31 @@ import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.SolverContext;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
 
 public class DomainOptimizerTest {
 
-  private DomainOptimizerProverEnvironment env;
-  private FormulaManager fmgr;
-  private final List<Formula> constraints = new ArrayList<>();
-  private final List<Formula> queries = new ArrayList<>();
+  private boolean isUnsatWithoutDomainOptimizer;
+  private boolean isUnsatWithDomainOptimizer;
 
   @Before
-  public void setUpEnvironment() throws InvalidConfigurationException {
+  public void setupTest()
+      throws InvalidConfigurationException, InterruptedException, SolverException {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-
+    List<Formula> constraints = new ArrayList<>();
+    List<Formula> queries = new ArrayList<>();
     DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    this.fmgr = delegate.getFormulaManager();
-    this.env = new DomainOptimizerProverEnvironment(delegate);
-  }
+    ProverEnvironment basicEnv = delegate.newProverEnvironment();
+    FormulaManager fmgr = delegate.getFormulaManager();
 
-  @Before
-  public void setUpFormulas() {
-    IntegerFormulaManager imgr = this.fmgr.getIntegerFormulaManager();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     IntegerFormula x = imgr.makeVariable("x"),
         y = imgr.makeVariable("y"),
         z = imgr.makeVariable("z");
@@ -96,24 +93,30 @@ public class DomainOptimizerTest {
     queries.add(query_1);
     queries.add(query_2);
     queries.add(query_3);
-  }
-
-  @Test
-  public void isSatisfiabilityAffected() throws InterruptedException, SolverException {
     for (Formula constraint : constraints) {
-      env.addConstraint((BooleanFormula) constraint);
+      basicEnv.addConstraint((BooleanFormula) constraint);
     }
     for (Formula query : queries) {
-      env.addConstraint((BooleanFormula) query);
+      basicEnv.addConstraint((BooleanFormula) query);
     }
-    boolean isBasicEnvUnsat = env.isUnsat();
+    boolean isBasicEnvUnsat = basicEnv.isUnsat();
+    basicEnv.close();
+    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
+    for (Formula constraint : constraints) {
+      env.addConstraint((BooleanFormula)constraint);
+    }
     for (Formula query : queries) {
       env.pushQuery(query);
     }
-    env.close();
     boolean isUnsat = env.isUnsat();
+    env.close();
+    isUnsatWithoutDomainOptimizer = isBasicEnvUnsat;
+    isUnsatWithDomainOptimizer = isUnsat;
+  }
 
-  Assert.assertEquals(isBasicEnvUnsat, isUnsat);
+  @Test
+  public void isSatisfiabilityAffected() {
+    Assert.assertEquals(isUnsatWithDomainOptimizer,isUnsatWithoutDomainOptimizer);
   }
 
 }
