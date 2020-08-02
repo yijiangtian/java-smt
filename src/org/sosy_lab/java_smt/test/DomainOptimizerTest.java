@@ -69,7 +69,6 @@ public class DomainOptimizerTest {
   @Before
   public void setUpFormulas() {
     IntegerFormulaManager imgr = this.fmgr.getIntegerFormulaManager();
-    BooleanFormulaManager bmgr = this.fmgr.getBooleanFormulaManager();
     IntegerFormula x = imgr.makeVariable("x"),
         y = imgr.makeVariable("y"),
         z = imgr.makeVariable("z");
