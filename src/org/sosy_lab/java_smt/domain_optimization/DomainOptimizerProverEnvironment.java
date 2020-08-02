@@ -20,7 +20,6 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 
 public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProverEnvironment<Void>

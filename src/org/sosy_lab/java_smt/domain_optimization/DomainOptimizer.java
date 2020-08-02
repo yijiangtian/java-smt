@@ -41,7 +41,7 @@ public interface DomainOptimizer {
 
   void addVariable(Formula pVar);
 
-  void addDomain(Formula var, SolutionSet domain);
+  void addDomain(Formula var, Interval domain);
 
   void pushConstraint(BooleanFormula constraint) throws InterruptedException;
 
@@ -57,5 +57,5 @@ public interface DomainOptimizer {
 
   boolean fallBack(BooleanFormula constraint);
 
-  SolutionSet getSolutionSet(Formula var);
+  Interval getInterval(Formula var);
 }

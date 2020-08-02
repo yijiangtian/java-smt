@@ -20,22 +20,20 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-// TODO rename to Interval
-public class SolutionSet {
+public class Interval {
 
   private Integer lower;
   private Integer upper;
   private boolean isSet = false;
 
-  public SolutionSet() {
+  public Interval() {
     lower = Integer.MIN_VALUE;
     upper = Integer.MAX_VALUE;
   }
 
-  // TODO void modifying methods and return a new immutable object?
   public void setLowerBound(Integer lBound) {
     if (lBound == 0) {
-      lBound += 1; // TODO why???
+      lBound += 1;
       //in order to prevent division by zero
     }
     if (lBound > getLowerBound() && lBound < getUpperBound()) {
@@ -45,11 +43,9 @@ public class SolutionSet {
       this.isSet = true;
     }
   }
-
-  // TODO void modifying methods and return a new immutable object?
   public void setUpperBound(Integer uBound) {
     if (uBound == 0) {
-      uBound += 1; // TODO why???
+      uBound += 1;
     }
     if (uBound < getUpperBound() && uBound > getLowerBound()) {
       upper = uBound;
@@ -59,9 +55,6 @@ public class SolutionSet {
     }
   }
 
-
-  // TODO add methods for operators, like PLUS, MINUS, TIMES, DIV
-  // to avoid those operations all over the Optimizer code
 
   public Integer getLowerBound() {
     return lower;

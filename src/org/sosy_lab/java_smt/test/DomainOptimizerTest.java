@@ -110,8 +110,6 @@ public class DomainOptimizerTest {
           env.pushQuery(query);
         }
         boolean isUnsat = env.isUnsat();
-        delegate.close();
-        env.close();
         isUnsatWithoutDomainOptimizer = isBasicEnvUnsat;
         isUnsatWithDomainOptimizer = isUnsat;
       }

@@ -211,7 +211,7 @@ public class DomainOptimizerFormulaRegister {
         new FormulaVisitor<>() {
           @Override
           public TraversalProcess visitFreeVariable(Formula f, String name) {
-            SolutionSet domain = opt.getSolutionSet(f);
+            Interval domain = opt.getInterval(f);
             Function func = readFromBuffer();
             FunctionDeclarationKind dec = func.declaration;
             switch (dec) {
@@ -337,14 +337,14 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(pFormula, solver);
   }
 
-  public Formula replaceVariablesWithSolutionSets(Formula pFormula) {
+  public Formula replaceVariablesWithIntervals(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<Formula> replacer =
         new FormulaVisitor<>() {
           @Override
           public Formula visitFreeVariable(Formula f, String name) {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            SolutionSet domain = opt.getSolutionSet(f);
+            Interval domain = opt.getInterval(f);
             Function func = readFromBuffer();
             FunctionDeclarationKind dec = func.declaration;
             if (dec == FunctionDeclarationKind.LTE) {
@@ -424,7 +424,7 @@ public class DomainOptimizerFormulaRegister {
             FunctionDeclarationKind declaration = pFunctionDeclaration.getKind();
             Formula var_1 = pArgs.get(0);
             Formula var_2 = pArgs.get(1);
-            // SolutionSets of the variables are adjusted according to the function-declaration
+            // Intervals of the variables are adjusted according to the function-declaration
             switch (declaration.toString()) {
               case "LT":
                 return adjustBounds(var_1, var_2, operators.LT, pArgs, pFunctionDeclaration);
@@ -453,7 +453,7 @@ public class DomainOptimizerFormulaRegister {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             String name = format(value.toString());
             IntegerFormula constant = imgr.makeNumber(name);
-            SolutionSet domain = new SolutionSet();
+            Interval domain = new Interval();
             opt.addDomain(constant, domain);
             return TraversalProcess.CONTINUE;
           }
@@ -508,14 +508,14 @@ public class DomainOptimizerFormulaRegister {
     argTypes arg_2 = getFormulaType(var_2);
 
     if (arg_1 == argTypes.FUNC && arg_2 == argTypes.VAR) {
-      SolutionSet domain_2 = opt.getSolutionSet(var_2);
-      SolutionSet domain_1;
+      Interval domain_2 = opt.getInterval(var_2);
+      Interval domain_1;
       List<Formula> args = functionBuffer.args;
       Function func = new Function(pArgs, pFunctionDeclaration.getKind());
       putToBuffer(func);
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(0);
-      domain_1 = opt.getSolutionSet(variable);
+      domain_1 = opt.getInterval(variable);
       if (operator == operators.LTE) {
         domain_1.setUpperBound(domain_2.getUpperBound());
       } else if (operator == operators.LT) {
@@ -534,10 +534,10 @@ public class DomainOptimizerFormulaRegister {
       Function func = new Function(pArgs, pFunctionDeclaration.getKind());
       List<Formula> vars = digDeeper(args);
       Formula variable_1 = vars.get(0);
-      SolutionSet domain_1 = opt.getSolutionSet(variable_1);
+      Interval domain_1 = opt.getInterval(variable_1);
       if (vars.size() > 1) {
         Formula variable_2 = vars.get(1);
-        SolutionSet domain_2 = opt.getSolutionSet(variable_2);
+        Interval domain_2 = opt.getInterval(variable_2);
         if (!domain_2.isSet()) {
           return TraversalProcess.CONTINUE;
         }
@@ -569,13 +569,13 @@ public class DomainOptimizerFormulaRegister {
     }
 
     if (arg_1 == argTypes.VAR && arg_2 == argTypes.FUNC) {
-      SolutionSet domain_1 = opt.getSolutionSet(var_1);
+      Interval domain_1 = opt.getInterval(var_1);
       List<Formula> args = functionBuffer.args;
       Function func = new Function(pArgs, pFunctionDeclaration.getKind());
       putToBuffer(func);
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(1);
-      SolutionSet domain_2 = opt.getSolutionSet(variable);
+      Interval domain_2 = opt.getInterval(variable);
       if (operator == operators.LTE) {
         domain_1.setUpperBound(domain_2.getUpperBound());
       } else if (operator == operators.LT) {
@@ -588,8 +588,8 @@ public class DomainOptimizerFormulaRegister {
     }
 
     if (arg_1 == argTypes.VAR && arg_2 == argTypes.VAR) {
-      SolutionSet domain_1 = opt.getSolutionSet(var_1);
-      SolutionSet domain_2 = opt.getSolutionSet(var_2);
+      Interval domain_1 = opt.getInterval(var_1);
+      Interval domain_2 = opt.getInterval(var_2);
       if (operator == operators.LTE) {
         domain_1.setUpperBound(domain_2.getUpperBound());
       } else if (operator == operators.LT) {
@@ -604,7 +604,7 @@ public class DomainOptimizerFormulaRegister {
     if (arg_1 == argTypes.VAR && arg_2 == argTypes.CONST) {
       String name = format(var_2.toString());
       Integer val_2 = Integer.parseInt(name);
-      SolutionSet domain_1 = opt.getSolutionSet(var_1);
+      Interval domain_1 = opt.getInterval(var_1);
       if (operator == operators.LTE) {
         domain_1.setUpperBound(val_2);
       } else if (operator == operators.GTE) {
@@ -618,10 +618,10 @@ public class DomainOptimizerFormulaRegister {
       List<Formula> args = functionBuffer.args;
       List<Formula> vars = digDeeper(args);
       Formula variable_1 = vars.get(0);
-      SolutionSet domain_1 = opt.getSolutionSet(variable_1);
+      Interval domain_1 = opt.getInterval(variable_1);
       if (vars.size() > 1) {
         Formula variable_2 = vars.get(1);
-        SolutionSet domain_2 = opt.getSolutionSet(variable_2);
+        Interval domain_2 = opt.getInterval(variable_2);
         if (!domain_2.isSet()) {
           return TraversalProcess.CONTINUE;
         }
@@ -644,7 +644,7 @@ public class DomainOptimizerFormulaRegister {
     if (arg_1 == argTypes.CONST && arg_2 == argTypes.VAR) {
       String name = format(var_1.toString());
       int val_1 = Integer.parseInt(name);
-      SolutionSet domain_2 = opt.getSolutionSet(var_2);
+      Interval domain_2 = opt.getInterval(var_2);
       if (val_1 > domain_2.getUpperBound() || val_1 < domain_2.getLowerBound()) {
         return TraversalProcess.CONTINUE;
       }
@@ -677,7 +677,7 @@ public class DomainOptimizerFormulaRegister {
       List<Formula> args = func.args;
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(0);
-      SolutionSet domain = opt.getSolutionSet(variable);
+      Interval domain = opt.getInterval(variable);
       String name = format(var_2.toString());
       Integer val_2 = Integer.parseInt(name);
       if (dec == FunctionDeclarationKind.LTE) {
@@ -714,7 +714,7 @@ public class DomainOptimizerFormulaRegister {
     if (getFormulaType(var_1) == argTypes.VAR && getFormulaType(var_2) == argTypes.CONST) {
       String name = format(var_2.toString());
       Integer val_2 = Integer.parseInt(name);
-      SolutionSet domain_1 = opt.getSolutionSet(var_1);
+      Interval domain_1 = opt.getInterval(var_1);
       if (dec == FunctionDeclarationKind.LTE) {
         Integer upperBound = domain_1.getUpperBound();
         if (op == operators.ADD) {
@@ -751,7 +751,7 @@ public class DomainOptimizerFormulaRegister {
     if (getFormulaType(var_1) == argTypes.CONST && getFormulaType(var_2) == argTypes.VAR) {
       String name = format(var_1.toString());
       Integer val_1 = Integer.parseInt(name);
-      SolutionSet domain_2 = opt.getSolutionSet(var_2);
+      Interval domain_2 = opt.getInterval(var_2);
       if (dec == FunctionDeclarationKind.LTE) {
         Integer upperBound = domain_2.getUpperBound();
         if (op == operators.ADD) {
@@ -792,7 +792,7 @@ public class DomainOptimizerFormulaRegister {
       List<Formula> args = func.args;
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(0);
-      SolutionSet domain = opt.getSolutionSet(variable);
+      Interval domain = opt.getInterval(variable);
       if (dec == FunctionDeclarationKind.LTE) {
         Integer upperBound = domain.getUpperBound();
         if (op == operators.ADD) {

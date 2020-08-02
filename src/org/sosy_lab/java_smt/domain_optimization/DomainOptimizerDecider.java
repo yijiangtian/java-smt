@@ -31,9 +31,7 @@ import org.sosy_lab.java_smt.api.FunctionDeclaration;
 import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
-import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
@@ -47,8 +45,6 @@ public class DomainOptimizerDecider {
     delegate = pDelegate;
   }
 
-
-
   public Formula performSubstitutions(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     List<Map<Formula,Formula>> substitutions = new ArrayList<>();
@@ -58,7 +54,7 @@ public class DomainOptimizerDecider {
           @Override
           public TraversalProcess visitFreeVariable(Formula f, String name) {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            SolutionSet domain = opt.getSolutionSet(f);
+            Interval domain = opt.getInterval(f);
             IntegerFormula substitute = (IntegerFormula) f;
             switch (dec[0]) {
               case LTE:

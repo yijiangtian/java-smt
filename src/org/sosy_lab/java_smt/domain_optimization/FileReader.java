@@ -97,7 +97,7 @@ public class FileReader {
     List<Formula> usedVariables = env.getVariables();
     for (Formula var : usedVariables) {
       System.out.println(var.toString());
-      SolutionSet domain = env.getSolutionSet(var);
+      Interval domain = env.getInterval(var);
       System.out.println(domain);
     }
     delegate.close();

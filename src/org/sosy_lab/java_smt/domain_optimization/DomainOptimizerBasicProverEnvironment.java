@@ -50,8 +50,8 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
     return this.opt.getVariables();
   }
 
-  public SolutionSet getSolutionSet(Formula var) {
-    return this.opt.getSolutionSet(var);
+  public Interval getInterval(Formula var) {
+    return this.opt.getInterval(var);
   }
 
   @Override
