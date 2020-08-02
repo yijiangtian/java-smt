@@ -38,6 +38,7 @@ import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
@@ -106,9 +107,6 @@ public class DomainOptimizerTest {
       env.addConstraint((BooleanFormula) query);
     }
     boolean isBasicEnvUnsat = env.isUnsat();
-    for (int i = 0; i < queries.size(); i++) {
-      env.pop();
-    }
     for (Formula query : queries) {
       env.pushQuery(query);
     }
