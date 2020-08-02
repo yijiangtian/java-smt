@@ -101,7 +101,6 @@ public class DomainOptimizerTest {
         basicEnv.addConstraint((BooleanFormula) query);
       }
       boolean isBasicEnvUnsat = basicEnv.isUnsat();
-      basicEnv.close();
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
         for (Formula constraint : constraints) {
           env.addConstraint((BooleanFormula) constraint);
