@@ -94,13 +94,15 @@ public class DomainOptimizerTest {
       queries.add(query_1);
       queries.add(query_2);
       queries.add(query_3);
+
       for (Formula constraint : constraints) {
         basicEnv.addConstraint((BooleanFormula) constraint);
       }
       for (Formula query : queries) {
         basicEnv.addConstraint((BooleanFormula) query);
       }
-      boolean isBasicEnvUnsat = basicEnv.isUnsat();
+      isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
+    }
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
         for (Formula constraint : constraints) {
           env.addConstraint((BooleanFormula) constraint);
@@ -109,10 +111,9 @@ public class DomainOptimizerTest {
           env.pushQuery(query);
         }
         boolean isUnsat = env.isUnsat();
-        isUnsatWithoutDomainOptimizer = isBasicEnvUnsat;
         isUnsatWithDomainOptimizer = isUnsat;
       }
-    }
+
   }
 
   @Test
