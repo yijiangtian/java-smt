@@ -78,7 +78,7 @@ public class DomainOptimizerFormulaRegister {
   }
 
   // forms tuples of variables along with their domains
-  public void visit(Formula f) {
+  public void visit(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> nameExtractor =
         new DefaultFormulaVisitor<>() {
@@ -97,11 +97,11 @@ public class DomainOptimizerFormulaRegister {
             return TraversalProcess.CONTINUE;
           }
         };
-    fmgr.visitRecursively(f, nameExtractor);
+    fmgr.visitRecursively(pFormula, nameExtractor);
   }
 
 
-  public boolean isCaterpillar(Formula f) {
+  public boolean isCaterpillar(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<Boolean> isCaterpillar =
         new FormulaVisitor<>() {
@@ -136,10 +136,10 @@ public class DomainOptimizerFormulaRegister {
             return null;
           }
         };
-    return fmgr.visit(f, isCaterpillar);
+    return fmgr.visit(pFormula, isCaterpillar);
   }
 
-  public argTypes getFormulaType(Formula f) {
+  public argTypes getFormulaType(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<argTypes> getFormulaType =
         new FormulaVisitor<>() {
@@ -176,7 +176,7 @@ public class DomainOptimizerFormulaRegister {
             return null;
           }
         };
-    return fmgr.visit(f, getFormulaType);
+    return fmgr.visit(pFormula, getFormulaType);
   }
 
   public void putToBuffer(Function f) {
@@ -203,7 +203,7 @@ public class DomainOptimizerFormulaRegister {
     return this.substitution;
   }
 
-  public void foldFunction(Formula f) {
+  public void foldFunction(Formula pFormula) {
     final int[] i = {0};
     final FunctionDeclarationKind[] declaration = new FunctionDeclarationKind[1];
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -275,14 +275,14 @@ public class DomainOptimizerFormulaRegister {
             return null;
           }
         };
-    fmgr.visitRecursively(f, folder);
+    fmgr.visitRecursively(pFormula, folder);
   }
 
   public int countVariables(Formula f) {
     return delegate.getFormulaManager().extractVariables(f).size();
   }
 
-  public void solveOperations(Formula f) {
+  public void solveOperations(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> solver =
         new FormulaVisitor<>() {
@@ -316,9 +316,9 @@ public class DomainOptimizerFormulaRegister {
                 Formula substitute =
                     processOperation(
                         constants.get(0), constants.get(1), functionDeclaration.getKind());
-                Map<Formula, Formula> substitution = new HashMap<>();
-                substitution.put(f, substitute);
-                setSubstitution(substitution);
+                Map<Formula, Formula> pSubstitution = new HashMap<>();
+                pSubstitution.put(f, substitute);
+                setSubstitution(pSubstitution);
                 setSubstitutionFlag(true);
               }
             }
@@ -334,10 +334,10 @@ public class DomainOptimizerFormulaRegister {
             return TraversalProcess.CONTINUE;
           }
         };
-    fmgr.visitRecursively(f, solver);
+    fmgr.visitRecursively(pFormula, solver);
   }
 
-  public Formula replaceVariablesWithSolutionSets(Formula f) {
+  public Formula replaceVariablesWithSolutionSets(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<Formula> replacer =
         new FormulaVisitor<>() {
@@ -388,9 +388,9 @@ public class DomainOptimizerFormulaRegister {
                 Function func = new Function(args, dec);
                 putToBuffer(func);
                 Formula substitute = visitFreeVariable(arg, arg.toString());
-                Map<Formula, Formula> substitution = new HashMap<>();
-                substitution.put(arg, substitute);
-                f= fmgr.substitute(f, substitution);
+                Map<Formula, Formula> pSubstitution = new HashMap<>();
+                pSubstitution.put(arg, substitute);
+                f= fmgr.substitute(f, pSubstitution);
               }
             }
             return f;
@@ -405,11 +405,11 @@ public class DomainOptimizerFormulaRegister {
             return null;
           }
         };
-    f = fmgr.visit(f, replacer);
-    return f;
+    pFormula = fmgr.visit(pFormula, replacer);
+    return pFormula;
   }
 
-  public void processConstraint(Formula f) {
+  public void processConstraint(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> constraintExtractor =
         new DefaultFormulaVisitor<>() {
@@ -439,10 +439,10 @@ public class DomainOptimizerFormulaRegister {
                 return adjustBounds(var_1, var_2, operators.GTE, pArgs, pFunctionDeclaration);
 
               case "ADD":
-                return processDeclaration(var_1, var_2, operators.ADD, pArgs);
+                return processDeclaration(var_1, var_2, operators.ADD);
 
               case "SUB":
-                return processDeclaration(var_1, var_2, operators.SUB, pArgs);
+                return processDeclaration(var_1, var_2, operators.SUB);
 
             }
             return TraversalProcess.CONTINUE;
@@ -458,7 +458,7 @@ public class DomainOptimizerFormulaRegister {
             return TraversalProcess.CONTINUE;
           }
         };
-    fmgr.visitRecursively(f, constraintExtractor);
+    fmgr.visitRecursively(pFormula, constraintExtractor);
   }
 
   /*
@@ -543,16 +543,16 @@ public class DomainOptimizerFormulaRegister {
         }
         if (operator == operators.LTE) {
           domain_1.setUpperBound(val_2);
-          processDeclaration(variable_1, variable_2, operators.LTE, vars);
+          processDeclaration(variable_1, variable_2, operators.LTE);
         } else if (operator == operators.LT) {
           domain_1.setUpperBound(val_2 - 1);
-          processDeclaration(variable_1, variable_2, operators.LT, vars);
+          processDeclaration(variable_1, variable_2, operators.LT);
         } else if (operator == operators.GTE) {
           domain_1.setLowerBound(val_2);
-          processDeclaration(variable_1, variable_2, operators.GTE, vars);
+          processDeclaration(variable_1, variable_2, operators.GTE);
         } else if (operator == operators.GT) {
           domain_1.setLowerBound(val_2);
-          processDeclaration(variable_1, variable_2, operators.GT, vars);
+          processDeclaration(variable_1, variable_2, operators.GT);
         }
       } else {
         if (operator == operators.LTE) {
@@ -627,16 +627,16 @@ public class DomainOptimizerFormulaRegister {
         }
         if (operator == operators.LTE) {
           domain_1.setUpperBound(val_1);
-          processDeclaration(variable_1, variable_2, operators.LTE, vars);
+          processDeclaration(variable_1, variable_2, operators.LTE);
         } else if (operator == operators.LT) {
           domain_1.setUpperBound(val_1 - 1);
-          processDeclaration(variable_1, variable_2, operators.LT, vars);
+          processDeclaration(variable_1, variable_2, operators.LT);
         } else if (operator == operators.GTE) {
           domain_1.setLowerBound(val_1);
-          processDeclaration(variable_1, variable_2, operators.GTE, vars);
+          processDeclaration(variable_1, variable_2, operators.GTE);
         } else if (operator == operators.GT) {
           domain_1.setLowerBound(val_1);
-          processDeclaration(variable_1, variable_2, operators.GT, vars);
+          processDeclaration(variable_1, variable_2, operators.GT);
         }
       }
     }
@@ -669,7 +669,7 @@ public class DomainOptimizerFormulaRegister {
   parses a formula containing an arithmetic relation as an operator
   */
   public TraversalProcess processDeclaration(
-      Formula var_1, Formula var_2, operators op, List<Formula> pArgs) {
+      Formula var_1, Formula var_2, operators op) {
     Function func = readFromBuffer();
     FunctionDeclarationKind dec = func.declaration;
 

@@ -20,7 +20,6 @@ import org.sosy_lab.java_smt.api.InterpolatingProverEnvironment;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /** Examples for Craig/sequential/tree interpolation. */
 public class Interpolation {

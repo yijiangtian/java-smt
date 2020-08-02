@@ -27,7 +27,7 @@ public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProver
     implements ProverEnvironment {
 
   public DomainOptimizerProverEnvironment(
-      DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
+      DomainOptimizerSolverContext delegate) {
     super(delegate);
   }
 }

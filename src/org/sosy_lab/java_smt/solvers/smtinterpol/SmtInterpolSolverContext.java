@@ -102,7 +102,7 @@ public final class SmtInterpolSolverContext extends AbstractSolverContext {
   }
 
   @Override
-  public void close() {};
+  public void close() {}
 
   @Override
   protected boolean supportsAssumptionSolving() {

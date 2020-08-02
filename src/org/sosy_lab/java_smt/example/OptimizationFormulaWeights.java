@@ -19,7 +19,6 @@ import org.sosy_lab.java_smt.api.OptimizationProverEnvironment.OptStatus;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Example for optimizing the weight of some constraints. For a given set of formulas, the weight of

@@ -49,15 +49,15 @@ public class DomainOptimizerDecider {
 
 
 
-  public Formula performSubstitutions(Formula f) {
+  public Formula performSubstitutions(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     List<Map<Formula,Formula>> substitutions = new ArrayList<>();
-    final FunctionDeclarationKind[] dec = new FunctionDeclarationKind[1];
     FormulaVisitor<TraversalProcess> replacer =
         new FormulaVisitor<>() {
+          final FunctionDeclarationKind[] dec = new FunctionDeclarationKind[1];
           @Override
           public TraversalProcess visitFreeVariable(Formula f, String name) {
+            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             SolutionSet domain = opt.getSolutionSet(f);
             IntegerFormula substitute = (IntegerFormula) f;
             switch (dec[0]) {
@@ -113,21 +113,12 @@ public class DomainOptimizerDecider {
             return TraversalProcess.CONTINUE;
             }
             };
-    fmgr.visitRecursively(f, replacer);
+    fmgr.visitRecursively(pFormula, replacer);
     for (Map<Formula,Formula> substitution : substitutions) {
-      f = fmgr.substitute(f,substitution);
+      pFormula = fmgr.substitute(pFormula,substitution);
     }
-    return f;
+    return pFormula;
   }
 
-  public boolean decide(BooleanFormula query)
-      throws InterruptedException, SolverException {
-    query = (BooleanFormula) performSubstitutions(query);
-    ProverEnvironment wrapped = opt.getWrapped();
-    wrapped.push(query);
-    boolean isUnsat = wrapped.isUnsat();
-    wrapped.pop();
-    return isUnsat;
-  }
 
 }

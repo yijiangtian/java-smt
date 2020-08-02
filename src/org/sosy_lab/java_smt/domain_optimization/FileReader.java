@@ -41,11 +41,12 @@ public class FileReader {
 
   public static String parseHeader(String path) throws FileNotFoundException {
     String header = "";
-    Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
-    while (scanner.hasNextLine()) {
-      String s = scanner.nextLine();
-      if (s.contains("(declare-fun")) {
-        header = header.concat(s);
+    try (Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name())) {
+      while (scanner.hasNextLine()) {
+        String s = scanner.nextLine();
+        if (s.contains("(declare-fun")) {
+          header = header.concat(s);
+        }
       }
     }
     return header;
@@ -99,6 +100,8 @@ public class FileReader {
       SolutionSet domain = env.getSolutionSet(var);
       System.out.println(domain);
     }
+    delegate.close();
+    env.close();
 
   }
 }

@@ -59,59 +59,63 @@ public class DomainOptimizerTest {
     DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    ProverEnvironment basicEnv = delegate.newProverEnvironment();
-    FormulaManager fmgr = delegate.getFormulaManager();
+    try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
 
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    IntegerFormula x = imgr.makeVariable("x"),
-        y = imgr.makeVariable("y"),
-        z = imgr.makeVariable("z");
-    BooleanFormula constraint_1 = imgr.lessOrEquals(x, imgr.makeNumber(7));
-    BooleanFormula constraint_2 = imgr.lessOrEquals(imgr.makeNumber(4), x);
-    BooleanFormula constraint_3 =
-        imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-    BooleanFormula constraint_4 =
-        imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-    BooleanFormula constraint_5 = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
-    BooleanFormula constraint_6 =
-        imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
-    BooleanFormula constraint_7 =
-        imgr.greaterOrEquals(
-            imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
-            imgr.makeNumber(-50));
-    constraints.add(constraint_1);
-    constraints.add(constraint_2);
-    constraints.add(constraint_3);
-    constraints.add(constraint_4);
-    constraints.add(constraint_5);
-    constraints.add(constraint_6);
-    constraints.add(constraint_7);
+      FormulaManager fmgr = delegate.getFormulaManager();
 
-    BooleanFormula query_1 = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
-    BooleanFormula query_2 = imgr.lessOrEquals(imgr.subtract(y,z), imgr.makeNumber(8));
-    BooleanFormula query_3 = imgr.lessThan(imgr.add(x,y), imgr.makeNumber(100));
-    queries.add(query_1);
-    queries.add(query_2);
-    queries.add(query_3);
-    for (Formula constraint : constraints) {
-      basicEnv.addConstraint((BooleanFormula) constraint);
+      IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+      IntegerFormula x = imgr.makeVariable("x"),
+          y = imgr.makeVariable("y"),
+          z = imgr.makeVariable("z");
+      BooleanFormula constraint_1 = imgr.lessOrEquals(x, imgr.makeNumber(7));
+      BooleanFormula constraint_2 = imgr.lessOrEquals(imgr.makeNumber(4), x);
+      BooleanFormula constraint_3 =
+          imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
+      BooleanFormula constraint_4 =
+          imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
+      BooleanFormula constraint_5 = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
+      BooleanFormula constraint_6 =
+          imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
+      BooleanFormula constraint_7 =
+          imgr.greaterOrEquals(
+              imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
+              imgr.makeNumber(-50));
+      constraints.add(constraint_1);
+      constraints.add(constraint_2);
+      constraints.add(constraint_3);
+      constraints.add(constraint_4);
+      constraints.add(constraint_5);
+      constraints.add(constraint_6);
+      constraints.add(constraint_7);
+
+      BooleanFormula query_1 = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
+      BooleanFormula query_2 = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
+      BooleanFormula query_3 = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
+      queries.add(query_1);
+      queries.add(query_2);
+      queries.add(query_3);
+      for (Formula constraint : constraints) {
+        basicEnv.addConstraint((BooleanFormula) constraint);
+      }
+      for (Formula query : queries) {
+        basicEnv.addConstraint((BooleanFormula) query);
+      }
+      boolean isBasicEnvUnsat = basicEnv.isUnsat();
+      basicEnv.close();
+      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
+        for (Formula constraint : constraints) {
+          env.addConstraint((BooleanFormula) constraint);
+        }
+        for (Formula query : queries) {
+          env.pushQuery(query);
+        }
+        boolean isUnsat = env.isUnsat();
+        delegate.close();
+        env.close();
+        isUnsatWithoutDomainOptimizer = isBasicEnvUnsat;
+        isUnsatWithDomainOptimizer = isUnsat;
+      }
     }
-    for (Formula query : queries) {
-      basicEnv.addConstraint((BooleanFormula) query);
-    }
-    boolean isBasicEnvUnsat = basicEnv.isUnsat();
-    basicEnv.close();
-    DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
-    for (Formula constraint : constraints) {
-      env.addConstraint((BooleanFormula)constraint);
-    }
-    for (Formula query : queries) {
-      env.pushQuery(query);
-    }
-    boolean isUnsat = env.isUnsat();
-    env.close();
-    isUnsatWithoutDomainOptimizer = isBasicEnvUnsat;
-    isUnsatWithDomainOptimizer = isUnsat;
   }
 
   @Test

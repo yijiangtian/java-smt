@@ -21,7 +21,6 @@ import org.sosy_lab.java_smt.api.RationalFormulaManager;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * Example for optimizing 'x' with the constraint '0 &lt;= x &lt; 10'. We show the difference

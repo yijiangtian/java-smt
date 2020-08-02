@@ -25,7 +25,6 @@ import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.FormulaTransformationVisitor;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This application executes the inductive-invariant synthesis algorithm called "Houdini" taken from
