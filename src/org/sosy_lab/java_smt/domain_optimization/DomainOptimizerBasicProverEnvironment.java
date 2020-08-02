@@ -23,7 +23,6 @@ package org.sosy_lab.java_smt.domain_optimization;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import org.sosy_lab.common.configuration.InvalidConfigurationException;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
@@ -37,7 +36,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   private final DomainOptimizer opt;
 
   DomainOptimizerBasicProverEnvironment(
-      DomainOptimizerSolverContext delegate) throws InvalidConfigurationException {
+      DomainOptimizerSolverContext delegate) {
     this.wrapped = delegate.newProverEnvironment();
     opt = new BasicDomainOptimizer(wrapped, delegate);
   }
@@ -109,5 +108,15 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
       throws InterruptedException, SolverException {
     // TODO we could implement this via extension of AbstractProverWithAllSat
     throw new UnsupportedOperationException("not yet implemented");
+  }
+
+  public ProverEnvironment getWrapped() {
+    return this.wrapped;
+  }
+
+  public void pushQuery(Formula query) throws InterruptedException {
+    DomainOptimizerDecider decider = opt.getDecider();
+    query = decider.performSubstitutions(query);
+    this.wrapped.addConstraint((BooleanFormula) query);
   }
 }

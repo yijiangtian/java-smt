@@ -20,16 +20,11 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
-import static org.sosy_lab.java_smt.test.ProverEnvironmentSubject.assertThat;
-
-import com.google.common.truth.Truth;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;
@@ -41,20 +36,8 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
-import org.sosy_lab.java_smt.api.IntegerFormulaManager;
-import org.sosy_lab.java_smt.api.Model;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
-import org.sosy_lab.java_smt.api.ProverEnvironment;
-import org.sosy_lab.java_smt.api.SolverContext;
-import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
-import org.sosy_lab.java_smt.api.SolverException;
 
 public class FileReader {
-  FormulaManager fmgr;
-  SolverContext context;
-  DomainOptimizerProverEnvironment wrapped;
-  DomainOptimizer optimizer;
-  DomainOptimizerDecider decider;
 
   public static String parseHeader(String path) throws FileNotFoundException {
     String header = "";
@@ -103,7 +86,6 @@ public class FileReader {
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
 
     FormulaManager fmgr = delegate.getFormulaManager();
-    //IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate);
 
     for (String toAssert : asserts) {
@@ -117,10 +99,6 @@ public class FileReader {
       SolutionSet domain = env.getSolutionSet(var);
       System.out.println(domain);
     }
-
-    //IntegerFormula var_1 = (IntegerFormula) usedVariables.get(0);
-   // IntegerFormula var_2 = (IntegerFormula) usedVariables.get(1);
-    //BooleanFormula query = imgr.lessThan(imgr.add(var_1, var_2), imgr.makeNumber(10000));
 
   }
 }

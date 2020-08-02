@@ -311,7 +311,7 @@ public class DomainOptimizerFormulaRegister {
                 || dec == FunctionDeclarationKind.MUL
                 || dec == FunctionDeclarationKind.DIV
                 || dec == FunctionDeclarationKind.SUB) {
-              if (vars.size() == 0) {
+              if (vars.isEmpty()) {
                 List<Formula> constants = digDeeperForConstants(args);
                 Formula substitute =
                     processOperation(
@@ -339,11 +339,11 @@ public class DomainOptimizerFormulaRegister {
 
   public Formula replaceVariablesWithSolutionSets(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     FormulaVisitor<Formula> replacer =
         new FormulaVisitor<>() {
           @Override
           public Formula visitFreeVariable(Formula f, String name) {
+            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             SolutionSet domain = opt.getSolutionSet(f);
             Function func = readFromBuffer();
             FunctionDeclarationKind dec = func.declaration;
@@ -390,7 +390,7 @@ public class DomainOptimizerFormulaRegister {
                 Formula substitute = visitFreeVariable(arg, arg.toString());
                 Map<Formula, Formula> substitution = new HashMap<>();
                 substitution.put(arg, substitute);
-                f = fmgr.substitute(f, substitution);
+                f= fmgr.substitute(f, substitution);
               }
             }
             return f;
@@ -444,11 +444,6 @@ public class DomainOptimizerFormulaRegister {
               case "SUB":
                 return processDeclaration(var_1, var_2, operators.SUB, pArgs);
 
-              case "MUL":
-                return processDeclaration(var_1, var_2, operators.MULT, pArgs);
-
-              case "DIV":
-                return processDeclaration(var_1, var_2, operators.DIV, pArgs);
             }
             return TraversalProcess.CONTINUE;
           }
@@ -691,10 +686,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - val_2);
         } else if (op == operators.SUB) {
           domain.setUpperBound(upperBound + val_2);
-        } else if (op == operators.MULT) {
-          domain.setUpperBound(upperBound / val_2);
-        } else if (op == operators.DIV) {
-          domain.setUpperBound(upperBound * val_2);
         }
       } else if (dec == FunctionDeclarationKind.GTE) {
         Integer lowerBound = domain.getLowerBound();
@@ -702,10 +693,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - val_2);
         } else if (op == operators.SUB) {
           domain.setLowerBound(lowerBound + val_2);
-        } else if (op == operators.MULT) {
-          domain.setLowerBound(lowerBound / val_2);
-        } else if (op == operators.DIV) {
-          domain.setLowerBound(lowerBound * val_2);
         }
       } else if (dec == FunctionDeclarationKind.LT) {
         Integer upperBound = domain.getUpperBound();
@@ -713,10 +700,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - val_2 - 1);
         } else if (op == operators.SUB) {
           domain.setUpperBound(upperBound + val_2 - 1);
-        } else if (op == operators.MULT) {
-          domain.setUpperBound(upperBound / val_2 - 1);
-        } else if (op == operators.DIV) {
-          domain.setUpperBound(upperBound * val_2 - 1);
         }
       } else if (dec == FunctionDeclarationKind.GT) {
         Integer lowerBound = domain.getLowerBound();
@@ -724,10 +707,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - val_2 + 1);
         } else if (op == operators.SUB) {
           domain.setLowerBound(lowerBound + val_2 + 1);
-        } else if (op == operators.MULT) {
-          domain.setLowerBound(lowerBound / val_2 + 1);
-        } else if (op == operators.DIV) {
-          domain.setLowerBound(lowerBound * val_2 + 1);
         }
       }
     }
@@ -742,10 +721,6 @@ public class DomainOptimizerFormulaRegister {
           domain_1.setUpperBound(upperBound - val_2);
         } else if (op == operators.SUB) {
           domain_1.setUpperBound(upperBound + val_2);
-        } else if (op == operators.MULT) {
-          domain_1.setUpperBound(upperBound / val_2);
-        } else if (op == operators.DIV) {
-          domain_1.setLowerBound(val_2 / upperBound);
         }
       } else if (dec == FunctionDeclarationKind.GTE) {
         Integer lowerBound = domain_1.getLowerBound();
@@ -753,10 +728,6 @@ public class DomainOptimizerFormulaRegister {
           domain_1.setLowerBound(lowerBound - val_2);
         } else if (op == operators.SUB) {
           domain_1.setLowerBound(lowerBound + val_2);
-        } else if (op == operators.MULT) {
-          domain_1.setLowerBound(lowerBound / val_2);
-        } else if (op == operators.DIV) {
-          domain_1.setLowerBound(lowerBound * val_2);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -765,10 +736,6 @@ public class DomainOptimizerFormulaRegister {
           domain_1.setUpperBound(upperBound - val_2 - 1);
         } else if (op == operators.SUB) {
           domain_1.setUpperBound(upperBound + val_2 - 1);
-        } else if (op == operators.MULT) {
-          domain_1.setUpperBound(upperBound / val_2 - 1);
-        } else if (op == operators.DIV) {
-          domain_1.setLowerBound(val_2 / upperBound - 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -777,10 +744,6 @@ public class DomainOptimizerFormulaRegister {
           domain_1.setLowerBound(lowerBound - val_2 + 1);
         } else if (op == operators.SUB) {
           domain_1.setLowerBound(lowerBound + val_2 + 1);
-        } else if (op == operators.MULT) {
-          domain_1.setLowerBound(lowerBound / val_2 + 1);
-        } else if (op == operators.DIV) {
-          domain_1.setLowerBound(lowerBound * val_2 + 1);
         }
       }
     }
@@ -795,10 +758,6 @@ public class DomainOptimizerFormulaRegister {
           domain_2.setUpperBound(upperBound - val_1);
         } else if (op == operators.SUB) {
           domain_2.setLowerBound(upperBound - val_1);
-        } else if (op == operators.MULT) {
-          domain_2.setUpperBound(upperBound / val_1);
-        } else if (op == operators.DIV) {
-          domain_2.setLowerBound(val_1 / upperBound);
         }
       }
       if (dec == FunctionDeclarationKind.GTE) {
@@ -807,10 +766,6 @@ public class DomainOptimizerFormulaRegister {
           domain_2.setLowerBound(lowerBound - val_1);
         } else if (op == operators.SUB) {
           domain_2.setLowerBound(lowerBound + val_1);
-        } else if (op == operators.MULT) {
-          domain_2.setLowerBound(lowerBound / val_1);
-        } else if (op == operators.DIV) {
-          domain_2.setLowerBound(val_1 / lowerBound);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -819,10 +774,6 @@ public class DomainOptimizerFormulaRegister {
           domain_2.setUpperBound(upperBound - val_1 - 1);
         } else if (op == operators.SUB) {
           domain_2.setLowerBound(upperBound - val_1 - 1);
-        } else if (op == operators.MULT) {
-          domain_2.setUpperBound(upperBound / val_1 - 1);
-        } else if (op == operators.DIV) {
-          domain_2.setLowerBound(val_1 / upperBound - 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -831,10 +782,6 @@ public class DomainOptimizerFormulaRegister {
           domain_2.setLowerBound(lowerBound - val_1 + 1);
         } else if (op == operators.SUB) {
           domain_2.setLowerBound(lowerBound + val_1 + 1);
-        } else if (op == operators.MULT) {
-          domain_2.setLowerBound(lowerBound / val_1 + 1);
-        } else if (op == operators.DIV) {
-          domain_2.setLowerBound(val_1 / lowerBound + 1);
         }
       }
     }
@@ -852,10 +799,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - val_1);
         } else if (op == operators.SUB) {
           domain.setUpperBound(upperBound + val_1);
-        } else if (op == operators.MULT) {
-          domain.setUpperBound(upperBound / val_1);
-        } else if (op == operators.DIV) {
-          domain.setUpperBound(val_1 / upperBound);
         }
       }
       if (dec == FunctionDeclarationKind.GTE) {
@@ -864,10 +807,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - val_1);
         } else if (op == operators.SUB) {
           domain.setLowerBound(lowerBound + val_1);
-        } else if (op == operators.MULT) {
-          domain.setLowerBound(lowerBound / val_1);
-        } else if (op == operators.DIV) {
-          domain.setLowerBound(lowerBound * val_1);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -876,10 +815,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - val_1 + 1);
         } else if (op == operators.SUB) {
           domain.setUpperBound(upperBound + val_1 + 1);
-        } else if (op == operators.MULT) {
-          domain.setUpperBound(upperBound / val_1 + 1);
-        } else if (op == operators.DIV) {
-          domain.setUpperBound(val_1 / upperBound + 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -888,10 +823,6 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - val_1 - 1);
         } else if (op == operators.SUB) {
           domain.setLowerBound(lowerBound + val_1 - 1);
-        } else if (op == operators.MULT) {
-          domain.setLowerBound(lowerBound / val_1 - 1);
-        } else if (op == operators.DIV) {
-          domain.setLowerBound(lowerBound * val_1 - 1);
         }
       }
     }

@@ -30,7 +30,6 @@ public class Interpolation {
   }
 
   public static void main(
-      DomainOptimizer pOpt,
       String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
 

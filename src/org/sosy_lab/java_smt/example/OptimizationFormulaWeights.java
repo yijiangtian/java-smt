@@ -33,7 +33,6 @@ public class OptimizationFormulaWeights {
   }
 
   public static void main(
-      DomainOptimizer pOpt,
       String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();

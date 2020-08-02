@@ -42,7 +42,6 @@ import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /** Testing formula serialization. */
 @RunWith(Parameterized.class)

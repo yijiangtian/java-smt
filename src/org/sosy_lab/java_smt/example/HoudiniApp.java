@@ -50,7 +50,6 @@ public class HoudiniApp {
   private final SolverContext context;
 
   public static void main(
-      DomainOptimizer pOpt,
       String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
