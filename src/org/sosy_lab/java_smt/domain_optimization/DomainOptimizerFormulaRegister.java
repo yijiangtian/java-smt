@@ -759,7 +759,8 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (getFormulaType(variableOne) == Argtypes.CONST && getFormulaType(variableTwo) == Argtypes.VAR) {
+    if (getFormulaType(variableOne) == Argtypes.CONST
+        && getFormulaType(variableTwo) == Argtypes.VAR) {
       String name = format(variableOne.toString());
       Integer valueOne = Integer.parseInt(name);
       Interval domainTwo = opt.getInterval(variableTwo);
@@ -797,7 +798,8 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (getFormulaType(variableOne) == Argtypes.CONST && getFormulaType(variableTwo) == Argtypes.FUNC) {
+    if (getFormulaType(variableOne) == Argtypes.CONST
+        && getFormulaType(variableTwo) == Argtypes.FUNC) {
       String name = format(variableOne.toString());
       Integer valueOne = Integer.parseInt(name);
       List<Formula> args = func.args;
