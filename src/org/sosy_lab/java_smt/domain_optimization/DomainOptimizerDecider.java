@@ -58,20 +58,24 @@ public class DomainOptimizerDecider {
             IntegerFormula substitute = (IntegerFormula) f;
             switch (dec[0]) {
               case LTE:
-                if (domain.isUpperBoundSet())
+                if (domain.isUpperBoundSet()) {
                   substitute = imgr.makeNumber(domain.getUpperBound());
+                }
                 break;
               case LT:
-                if (domain.isUpperBoundSet())
+                if (domain.isUpperBoundSet()) {
                   substitute = imgr.makeNumber(domain.getUpperBound() - 1);
+                }
                 break;
               case GTE:
-                if (domain.isLowerBoundSet())
+                if (domain.isLowerBoundSet()) {
                   substitute = imgr.makeNumber(domain.getLowerBound());
+                }
                 break;
               case GT:
-                if (domain.isLowerBoundSet())
+                if (domain.isLowerBoundSet()) {
                   substitute = imgr.makeNumber(domain.getLowerBound() + 1);
+                }
                 break;
               default:
                 throw new IllegalStateException("Unexpected value: " + dec[0]);

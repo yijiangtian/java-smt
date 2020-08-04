@@ -37,7 +37,11 @@ import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 
-public class FileReader {
+final class FileReader {
+
+  private FileReader() {
+    throw new AssertionError("Instantiating utility class.");
+  }
 
   public static String parseHeader(String path) throws FileNotFoundException {
     String header = "";
@@ -55,19 +59,19 @@ public class FileReader {
   public static List<String> parseAsserts(String path) throws FileNotFoundException {
     List<String> asserts = new ArrayList<>();
     String toAppend = "( assert";
-    Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
-    scanner.useDelimiter("assert");
-    while (scanner.hasNext()) {
-      String toAssert = scanner.next();
-      asserts.add(toAssert);
+    try(Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name())) {
+      scanner.useDelimiter("assert");
+      while (scanner.hasNext()) {
+        String toAssert = scanner.next();
+        asserts.add(toAssert);
+      }
     }
-    scanner.close();
     asserts.remove(0);
-    ArrayList<String> processedAsserts = new ArrayList<>();
+    List<String> processedAsserts = new ArrayList<>();
     for (String s : asserts) {
-      s = toAppend.concat(s);
-      s = s.substring(0, s.length() - 1);
-      processedAsserts.add(s);
+      String newString = toAppend.concat(s);
+      String finishedString = newString.substring(0, newString.length() - 1);
+      processedAsserts.add(finishedString);
     }
     return processedAsserts;
   }

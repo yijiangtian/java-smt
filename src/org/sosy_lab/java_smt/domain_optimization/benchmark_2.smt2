@@ -1,3 +1,5 @@
+package org.sosy_lab.java_smt.domain_optimization;
+
 (set-info :smt-lib-version 2.6)
 (set-logic QF_LIA)
 (set-info :source |

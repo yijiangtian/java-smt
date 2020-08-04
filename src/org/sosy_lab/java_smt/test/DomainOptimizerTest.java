@@ -23,7 +23,7 @@ package org.sosy_lab.java_smt.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.sosy_lab.common.ShutdownManager;
@@ -56,53 +56,53 @@ public class DomainOptimizerTest {
     ShutdownManager shutdown = ShutdownManager.create();
     List<Formula> constraints = new ArrayList<>();
     List<Formula> queries = new ArrayList<>();
-    DomainOptimizerSolverContext delegate =
+    try (DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL);
-    try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+      try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
 
-      FormulaManager fmgr = delegate.getFormulaManager();
+        FormulaManager fmgr = delegate.getFormulaManager();
 
-      IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-      IntegerFormula x = imgr.makeVariable("x");
-      IntegerFormula y = imgr.makeVariable("y");
-      IntegerFormula z = imgr.makeVariable("z");
-      BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
-      BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
-      BooleanFormula constraintThree =
-          imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-      BooleanFormula constraintFour =
-          imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-      BooleanFormula constraintFive = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
-      BooleanFormula constraintSix =
-          imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
-      BooleanFormula constraintSeven =
-          imgr.greaterOrEquals(
-              imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
-              imgr.makeNumber(-50));
-      constraints.add(constraintOne);
-      constraints.add(constraintTwo);
-      constraints.add(constraintThree);
-      constraints.add(constraintFour);
-      constraints.add(constraintFive);
-      constraints.add(constraintSix);
-      constraints.add(constraintSeven);
+        IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+        IntegerFormula x = imgr.makeVariable("x");
+        IntegerFormula y = imgr.makeVariable("y");
+        IntegerFormula z = imgr.makeVariable("z");
+        BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
+        BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
+        BooleanFormula constraintThree =
+            imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
+        BooleanFormula constraintFour =
+            imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
+        BooleanFormula constraintFive = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
+        BooleanFormula constraintSix =
+            imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
+        BooleanFormula constraintSeven =
+            imgr.greaterOrEquals(
+                imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
+                imgr.makeNumber(-50));
+        constraints.add(constraintOne);
+        constraints.add(constraintTwo);
+        constraints.add(constraintThree);
+        constraints.add(constraintFour);
+        constraints.add(constraintFive);
+        constraints.add(constraintSix);
+        constraints.add(constraintSeven);
 
-      BooleanFormula queryOne = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
-      BooleanFormula queryTwo = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
-      BooleanFormula queryThree = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
-      queries.add(queryOne);
-      queries.add(queryTwo);
-      queries.add(queryThree);
+        BooleanFormula queryOne = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
+        BooleanFormula queryTwo = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
+        BooleanFormula queryThree = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
+        queries.add(queryOne);
+        queries.add(queryTwo);
+        queries.add(queryThree);
 
-      for (Formula constraint : constraints) {
-        basicEnv.addConstraint((BooleanFormula) constraint);
+        for (Formula constraint : constraints) {
+          basicEnv.addConstraint((BooleanFormula) constraint);
+        }
+        for (Formula query : queries) {
+          basicEnv.addConstraint((BooleanFormula) query);
+        }
+        isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
       }
-      for (Formula query : queries) {
-        basicEnv.addConstraint((BooleanFormula) query);
-      }
-      isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
-    }
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
         for (Formula constraint : constraints) {
           env.addConstraint((BooleanFormula) constraint);
@@ -113,7 +113,7 @@ public class DomainOptimizerTest {
         boolean isUnsat = env.isUnsat();
         isUnsatWithDomainOptimizer = isUnsat;
       }
-    delegate.close();
+    }
   }
 
   @Test

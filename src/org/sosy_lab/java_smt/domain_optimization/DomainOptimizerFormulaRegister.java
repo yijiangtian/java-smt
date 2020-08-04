@@ -179,11 +179,11 @@ public class DomainOptimizerFormulaRegister {
     return fmgr.visit(pFormula, getFormulaType);
   }
 
-  public void putToBuffer(Function f) {
+  private void putToBuffer(Function f) {
     this.functionBuffer = f;
   }
 
-  public Function readFromBuffer() {
+  private Function readFromBuffer() {
     return this.functionBuffer;
   }
 
@@ -205,7 +205,6 @@ public class DomainOptimizerFormulaRegister {
 
   public void foldFunction(Formula pFormula) {
     final int[] i = {0};
-    final FunctionDeclarationKind[] declaration = new FunctionDeclarationKind[1];
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> folder =
         new FormulaVisitor<>() {
@@ -261,7 +260,6 @@ public class DomainOptimizerFormulaRegister {
                 || dec == FunctionDeclarationKind.MUL
                 || dec == FunctionDeclarationKind.DIV) {
               i[0] = 0;
-              declaration[0] = dec;
             }
             return TraversalProcess.CONTINUE;
           }
@@ -390,8 +388,7 @@ public class DomainOptimizerFormulaRegister {
                   Map<Formula, Formula> pSubstitution = new HashMap<>();
                   pSubstitution.put(argNew, substitute);
                   f= fmgr.substitute(f, pSubstitution);
-                }
-                else {
+                } else {
                   Function func = new Function(args, dec);
                   putToBuffer(func);
                   Formula substitute = visitFreeVariable(arg, arg.toString());
@@ -435,16 +432,20 @@ public class DomainOptimizerFormulaRegister {
             // Intervals of the variables are adjusted according to the function-declaration
             switch (declaration.toString()) {
               case "LT":
-                return adjustBounds(variableOne, variableTwo, Operators.LT, pArgs, pFunctionDeclaration);
+                return adjustBounds(variableOne, variableTwo,
+                    Operators.LT, pArgs, pFunctionDeclaration);
 
               case "GT":
-                return adjustBounds(variableOne, variableTwo, Operators.GT, pArgs, pFunctionDeclaration);
+                return adjustBounds(variableOne, variableTwo,
+                    Operators.GT, pArgs, pFunctionDeclaration);
 
               case "LTE":
-                return adjustBounds(variableOne, variableTwo, Operators.LTE, pArgs, pFunctionDeclaration);
+                return adjustBounds(variableOne, variableTwo,
+                    Operators.LTE, pArgs, pFunctionDeclaration);
 
               case "GTE":
-                return adjustBounds(variableOne, variableTwo, Operators.GTE, pArgs, pFunctionDeclaration);
+                return adjustBounds(variableOne, variableTwo,
+                    Operators.GTE, pArgs, pFunctionDeclaration);
 
               case "ADD":
                 return processDeclaration(variableOne, variableTwo, Operators.ADD);
@@ -505,17 +506,17 @@ public class DomainOptimizerFormulaRegister {
   /*
   parses a formula containing a numeral relation as an operator
    */
-  public TraversalProcess adjustBounds(
+  private TraversalProcess adjustBounds(
       Formula variableOne,
       Formula variableTwo,
       Operators operator,
       List<Formula> pArgs,
       FunctionDeclaration<?> pFunctionDeclaration) {
 
-    Argtypes arg_1 = getFormulaType(variableOne);
-    Argtypes arg_2 = getFormulaType(variableTwo);
+    Argtypes argOne = getFormulaType(variableOne);
+    Argtypes argTwo = getFormulaType(variableTwo);
 
-    if (arg_1 == Argtypes.FUNC && arg_2 == Argtypes.VAR) {
+    if (argOne == Argtypes.FUNC && argTwo == Argtypes.VAR) {
       Interval domainTwo = opt.getInterval(variableTwo);
       Interval domainOne;
       List<Formula> args = functionBuffer.args;
@@ -535,7 +536,7 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (arg_1 == Argtypes.FUNC && arg_2 == Argtypes.CONST) {
+    if (argOne == Argtypes.FUNC && argTwo == Argtypes.CONST) {
       String name = format(variableTwo.toString());
       Integer valueTwo = Integer.parseInt(name);
       List<Formula> args = functionBuffer.args;
@@ -576,7 +577,7 @@ public class DomainOptimizerFormulaRegister {
       putToBuffer(func);
     }
 
-    if (arg_1 == Argtypes.VAR && arg_2 == Argtypes.FUNC) {
+    if (argOne == Argtypes.VAR && argTwo == Argtypes.FUNC) {
       Interval domainOne = opt.getInterval(variableOne);
       List<Formula> args = functionBuffer.args;
       Function func = new Function(pArgs, pFunctionDeclaration.getKind());
@@ -595,7 +596,7 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (arg_1 == Argtypes.VAR && arg_2 == Argtypes.VAR) {
+    if (argOne == Argtypes.VAR && argTwo == Argtypes.VAR) {
       Interval domainOne = opt.getInterval(variableOne);
       Interval domainTwo = opt.getInterval(variableTwo);
       if (operator == Operators.LTE) {
@@ -609,7 +610,7 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (arg_1 == Argtypes.VAR && arg_2 == Argtypes.CONST) {
+    if (argOne == Argtypes.VAR && argTwo == Argtypes.CONST) {
       String name = format(variableTwo.toString());
       Integer valueTwo = Integer.parseInt(name);
       Interval domainOne = opt.getInterval(variableOne);
@@ -620,7 +621,7 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (arg_1 == Argtypes.CONST && arg_2 == Argtypes.FUNC) {
+    if (argOne == Argtypes.CONST && argTwo == Argtypes.FUNC) {
       String name = format(variableOne.toString());
       Integer valueOne = Integer.parseInt(name);
       List<Formula> args = functionBuffer.args;
@@ -649,7 +650,7 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (arg_1 == Argtypes.CONST && arg_2 == Argtypes.VAR) {
+    if (argOne == Argtypes.CONST && argTwo == Argtypes.VAR) {
       String name = format(variableOne.toString());
       int valueOne = Integer.parseInt(name);
       Interval domainTwo = opt.getInterval(variableTwo);
@@ -676,12 +677,13 @@ public class DomainOptimizerFormulaRegister {
   /*
   parses a formula containing an arithmetic relation as an operator
   */
-  public TraversalProcess processDeclaration(
+  private TraversalProcess processDeclaration(
       Formula variableOne, Formula variableTwo, Operators op) {
     Function func = readFromBuffer();
     FunctionDeclarationKind dec = func.declaration;
 
-    if (getFormulaType(variableOne) == Argtypes.FUNC && getFormulaType(variableTwo) == Argtypes.CONST) {
+    if (getFormulaType(variableOne) == Argtypes.FUNC
+        && getFormulaType(variableTwo) == Argtypes.CONST) {
       List<Formula> args = func.args;
       List<Formula> vars = digDeeper(args);
       Formula variable = vars.get(0);
@@ -719,7 +721,8 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (getFormulaType(variableOne) == Argtypes.VAR && getFormulaType(variableTwo) == Argtypes.CONST) {
+    if (getFormulaType(variableOne) == Argtypes.VAR
+        && getFormulaType(variableTwo) == Argtypes.CONST) {
       String name = format(variableTwo.toString());
       Integer valueTwo = Integer.parseInt(name);
       Interval domainOne = opt.getInterval(variableOne);
@@ -841,7 +844,7 @@ public class DomainOptimizerFormulaRegister {
   /*
   solves operation containing two constants as arguments
    */
-  public IntegerFormula processOperation(
+  private IntegerFormula processOperation(
       Formula variableOne, Formula variableTwo, FunctionDeclarationKind declaration) {
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
@@ -876,7 +879,7 @@ public class DomainOptimizerFormulaRegister {
   /*
   removes parantheses and spaces from variable-name so that it can be parsed as a constant
    */
-  public String format(String name) {
+  private String format(String name) {
     name = name.replaceAll("[()]", "");
     name = name.replaceAll("\\s", "");
     return name;
