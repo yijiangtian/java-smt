@@ -48,7 +48,6 @@ import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.DefaultBooleanFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This program parses user-given formulas and prints out the (minimal) matching theory for them.

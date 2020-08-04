@@ -42,7 +42,6 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverContext.ProverOptions;
 import org.sosy_lab.java_smt.api.SolverException;
-import org.sosy_lab.java_smt.domain_optimization.DomainOptimizer;
 
 /**
  * This program parses user-given Sudoku and solves it with an SMT solver.

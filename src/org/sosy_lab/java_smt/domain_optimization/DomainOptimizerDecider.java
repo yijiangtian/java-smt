@@ -47,7 +47,7 @@ public class DomainOptimizerDecider {
 
   public Formula performSubstitutions(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    List<Map<Formula,Formula>> substitutions = new ArrayList<>();
+    List<Map<Formula, Formula>> substitutions = new ArrayList<>();
     FormulaVisitor<TraversalProcess> replacer =
         new FormulaVisitor<>() {
           final FunctionDeclarationKind[] dec = new FunctionDeclarationKind[1];
@@ -58,22 +58,26 @@ public class DomainOptimizerDecider {
             IntegerFormula substitute = (IntegerFormula) f;
             switch (dec[0]) {
               case LTE:
-                if (domain.isUpperBoundSet()) substitute = imgr.makeNumber(domain.getUpperBound());
+                if (domain.isUpperBoundSet())
+                  substitute = imgr.makeNumber(domain.getUpperBound());
                 break;
               case LT:
-                if (domain.isUpperBoundSet()) substitute = imgr.makeNumber(domain.getUpperBound() - 1);
+                if (domain.isUpperBoundSet())
+                  substitute = imgr.makeNumber(domain.getUpperBound() - 1);
                 break;
               case GTE:
-                if (domain.isLowerBoundSet()) substitute = imgr.makeNumber(domain.getLowerBound());
+                if (domain.isLowerBoundSet())
+                  substitute = imgr.makeNumber(domain.getLowerBound());
                 break;
               case GT:
-                if (domain.isLowerBoundSet()) substitute = imgr.makeNumber(domain.getLowerBound() + 1);
+                if (domain.isLowerBoundSet())
+                  substitute = imgr.makeNumber(domain.getLowerBound() + 1);
                 break;
               default:
                 throw new IllegalStateException("Unexpected value: " + dec[0]);
             }
-            Map<Formula,Formula> substitution = new HashMap<>();
-            substitution.put(f,substitute);
+            Map<Formula, Formula> substitution = new HashMap<>();
+            substitution.put(f, substitute);
             substitutions.add(substitution);
             return TraversalProcess.CONTINUE;
           }
@@ -92,8 +96,8 @@ public class DomainOptimizerDecider {
               Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
             FunctionDeclarationKind declaration = functionDeclaration.getKind();
             if (declaration == FunctionDeclarationKind.LTE
-                || declaration == FunctionDeclarationKind.LT ||
-                declaration == FunctionDeclarationKind.GTE
+                || declaration == FunctionDeclarationKind.LT
+                || declaration == FunctionDeclarationKind.GTE
                 || declaration == FunctionDeclarationKind.GT) {
               dec[0] = declaration;
             }
@@ -105,13 +109,13 @@ public class DomainOptimizerDecider {
                 BooleanFormula f,
                 Quantifier quantifier,
                 List<Formula> boundVariables,
-                BooleanFormula body){
+                BooleanFormula body) {
             return TraversalProcess.CONTINUE;
             }
             };
     fmgr.visitRecursively(pFormula, replacer);
-    for (Map<Formula,Formula> substitution : substitutions) {
-      pFormula = fmgr.substitute(pFormula,substitution);
+    for (Map<Formula, Formula> substitution : substitutions) {
+      pFormula = fmgr.substitute(pFormula, substitution);
     }
     return pFormula;
   }

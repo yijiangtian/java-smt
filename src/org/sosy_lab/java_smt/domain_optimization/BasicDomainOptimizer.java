@@ -43,7 +43,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   private final ProverEnvironment wrapped;
   final List<Formula> usedVariables = new ArrayList<>();
   final Set<BooleanFormula> constraints = new LinkedHashSet<>();
-  private final LinkedHashMap<Formula, Interval> domainDictionary = new LinkedHashMap<>();
+  private final Map<Formula, Interval> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
 
@@ -79,7 +79,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
             return TraversalProcess.CONTINUE;
           }
         };
-    fmgr.visitRecursively(constraint,checkForUnsupportedOperands);
+    fmgr.visitRecursively(constraint, checkForUnsupportedOperands);
     return fallBack[0];
   }
 

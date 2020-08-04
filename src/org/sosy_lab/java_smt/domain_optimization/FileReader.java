@@ -52,8 +52,8 @@ public class FileReader {
     return header;
   }
 
-  public static ArrayList<String> parseAsserts(String path) throws FileNotFoundException {
-    ArrayList<String> asserts = new ArrayList<>();
+  public static List<String> parseAsserts(String path) throws FileNotFoundException {
+    List<String> asserts = new ArrayList<>();
     String toAppend = "( assert";
     Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name());
     scanner.useDelimiter("assert");
@@ -76,7 +76,7 @@ public class FileReader {
       throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     String header = parseHeader(filePath);
-    ArrayList<String> asserts = parseAsserts(filePath);
+    List<String> asserts = parseAsserts(filePath);
 
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);

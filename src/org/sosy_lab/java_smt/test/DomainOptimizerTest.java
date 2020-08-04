@@ -23,7 +23,7 @@ package org.sosy_lab.java_smt.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.sosy_lab.common.ShutdownManager;
@@ -64,36 +64,36 @@ public class DomainOptimizerTest {
       FormulaManager fmgr = delegate.getFormulaManager();
 
       IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-      IntegerFormula x = imgr.makeVariable("x"),
-          y = imgr.makeVariable("y"),
-          z = imgr.makeVariable("z");
-      BooleanFormula constraint_1 = imgr.lessOrEquals(x, imgr.makeNumber(7));
-      BooleanFormula constraint_2 = imgr.lessOrEquals(imgr.makeNumber(4), x);
-      BooleanFormula constraint_3 =
+      IntegerFormula x = imgr.makeVariable("x");
+      IntegerFormula y = imgr.makeVariable("y");
+      IntegerFormula z = imgr.makeVariable("z");
+      BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
+      BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
+      BooleanFormula constraintThree =
           imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-      BooleanFormula constraint_4 =
+      BooleanFormula constraintFour =
           imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-      BooleanFormula constraint_5 = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
-      BooleanFormula constraint_6 =
+      BooleanFormula constraintFive = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
+      BooleanFormula constraintSix =
           imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
-      BooleanFormula constraint_7 =
+      BooleanFormula constraintSeven =
           imgr.greaterOrEquals(
               imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
               imgr.makeNumber(-50));
-      constraints.add(constraint_1);
-      constraints.add(constraint_2);
-      constraints.add(constraint_3);
-      constraints.add(constraint_4);
-      constraints.add(constraint_5);
-      constraints.add(constraint_6);
-      constraints.add(constraint_7);
+      constraints.add(constraintOne);
+      constraints.add(constraintTwo);
+      constraints.add(constraintThree);
+      constraints.add(constraintFour);
+      constraints.add(constraintFive);
+      constraints.add(constraintSix);
+      constraints.add(constraintSeven);
 
-      BooleanFormula query_1 = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
-      BooleanFormula query_2 = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
-      BooleanFormula query_3 = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
-      queries.add(query_1);
-      queries.add(query_2);
-      queries.add(query_3);
+      BooleanFormula queryOne = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
+      BooleanFormula queryTwo = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
+      BooleanFormula queryThree = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
+      queries.add(queryOne);
+      queries.add(queryTwo);
+      queries.add(queryThree);
 
       for (Formula constraint : constraints) {
         basicEnv.addConstraint((BooleanFormula) constraint);
@@ -118,7 +118,7 @@ public class DomainOptimizerTest {
 
   @Test
   public void isSatisfiabilityAffected() {
-    Assert.assertEquals(isUnsatWithDomainOptimizer,isUnsatWithoutDomainOptimizer);
+    assertEquals(isUnsatWithDomainOptimizer, isUnsatWithoutDomainOptimizer);
   }
 
 }
