@@ -34,11 +34,13 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   private final ProverEnvironment wrapped;
   private final DomainOptimizer opt;
+  private final DomainOptimizerFormulaRegister register;
 
   DomainOptimizerBasicProverEnvironment(
       DomainOptimizerSolverContext delegate) {
     this.wrapped = delegate.newProverEnvironment();
     opt = new BasicDomainOptimizer(wrapped, delegate);
+    register = new DomainOptimizerFormulaRegister(opt);
   }
 
   @Override
@@ -55,10 +57,16 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   }
 
   @Override
-  public T addConstraint(BooleanFormula constraint) throws InterruptedException {
+  public T addConstraint(BooleanFormula constraint) throws InterruptedException, SolverException {
     if (!this.opt.fallBack(constraint)) {
-      this.opt.pushConstraint(constraint);
+      if (this.register.countVariables(constraint) == 1) {
+        this.opt.pushConstraint(constraint);
+      }
     }
+      else {
+        constraint = (BooleanFormula) pushQuery(constraint);
+        System.out.println(constraint.toString());
+      }
     this.wrapped.addConstraint(constraint);
     return null;
   }
@@ -114,9 +122,9 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
     return this.wrapped;
   }
 
-  public void pushQuery(Formula query) throws InterruptedException {
+  public Formula pushQuery(Formula query) throws InterruptedException, SolverException {
     DomainOptimizerDecider decider = opt.getDecider();
-    query = decider.performSubstitutions(query);
-    this.wrapped.addConstraint((BooleanFormula) query);
+    query = decider.pruneTree(query);
+    return query;
   }
 }

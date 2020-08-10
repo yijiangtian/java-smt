@@ -384,7 +384,7 @@ public class SolverStackTest extends SolverBasedTest0 {
 
   @Test(expected = IllegalStateException.class)
   @SuppressWarnings("CheckReturnValue")
-  public void avoidDualStacksIfNotSupported() throws InterruptedException {
+  public void avoidDualStacksIfNotSupported() throws InterruptedException, SolverException {
     assume()
         .withMessage("Solver does not support multiple stacks yet")
         .that(solver)

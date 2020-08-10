@@ -34,8 +34,9 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
-import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
+import org.sosy_lab.java_smt.api.SolverException;
 
 final class FileReader {
 
@@ -90,7 +91,15 @@ final class FileReader {
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
       FormulaManager fmgr = delegate.getFormulaManager();
-
+      try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+        for (String toAssert : asserts) {
+          BooleanFormula constraint = fmgr.parse(header + toAssert);
+          basicEnv.addConstraint(constraint);
+        }
+        System.out.println("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
+      } catch (SolverException pE) {
+        pE.printStackTrace();
+      }
 
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
 
@@ -98,13 +107,9 @@ final class FileReader {
           BooleanFormula constraint = fmgr.parse(header + toAssert);
           env.addConstraint(constraint);
         }
-
-        List<Formula> usedVariables = env.getVariables();
-        for (Formula var : usedVariables) {
-          System.out.println(var.toString());
-          Interval domain = env.getInterval(var);
-          System.out.println(domain);
-        }
+        System.out.println("isUnsat with DomainOptimizer: " + env.isUnsat());
+      } catch (SolverException pE) {
+        pE.printStackTrace();
       }
     }
   }

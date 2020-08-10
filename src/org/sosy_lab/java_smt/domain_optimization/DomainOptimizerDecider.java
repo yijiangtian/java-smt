@@ -25,13 +25,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
 import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
+import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
+import org.sosy_lab.java_smt.api.SolverException;
+import org.sosy_lab.java_smt.api.visitors.BooleanFormulaTransformationVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
@@ -39,10 +43,12 @@ public class DomainOptimizerDecider {
 
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
+  private final ProverEnvironment wrapped;
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
+    this.wrapped = opt.getWrapped();
   }
 
   public Formula performSubstitutions(Formula pFormula) {
@@ -57,22 +63,22 @@ public class DomainOptimizerDecider {
             Interval domain = opt.getInterval(f);
             IntegerFormula substitute = (IntegerFormula) f;
             switch (dec[0]) {
-              case LTE:
+              case GTE:
                 if (domain.isUpperBoundSet()) {
                   substitute = imgr.makeNumber(domain.getUpperBound());
                 }
                 break;
-              case LT:
+              case GT:
                 if (domain.isUpperBoundSet()) {
                   substitute = imgr.makeNumber(domain.getUpperBound() - 1);
                 }
                 break;
-              case GTE:
+              case LTE:
                 if (domain.isLowerBoundSet()) {
                   substitute = imgr.makeNumber(domain.getLowerBound());
                 }
                 break;
-              case GT:
+              case LT:
                 if (domain.isLowerBoundSet()) {
                   substitute = imgr.makeNumber(domain.getLowerBound() + 1);
                 }
@@ -118,10 +124,49 @@ public class DomainOptimizerDecider {
             }
             };
     fmgr.visitRecursively(pFormula, replacer);
-    for (Map<Formula, Formula> substitution : substitutions) {
+    for (int i = 0; i < substitutions.size() - 1; i++) {
+      Map<Formula, Formula> substitution = substitutions.get(i);
       pFormula = fmgr.substitute(pFormula, substitution);
     }
     return pFormula;
+  }
+
+
+  public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
+    pFormula = performSubstitutions(pFormula);
+    FormulaManager fmgr = delegate.getFormulaManager();
+    ProverEnvironment wrapped = this.wrapped;
+    BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    List<BooleanFormula> operands = new ArrayList<>();
+    List<Map<Formula, Formula>> substitutions = new ArrayList<>();
+    BooleanFormulaTransformationVisitor visitor = new BooleanFormulaTransformationVisitor(fmgr) {
+      @Override
+      public BooleanFormula visitAnd(List<BooleanFormula> processedOperands) {
+        operands.addAll(processedOperands);
+          return super.visitAnd(processedOperands);
+      }
+      @Override
+      public BooleanFormula visitOr(List<BooleanFormula> processedOperands) {
+        operands.addAll(processedOperands);
+        return super.visitOr(processedOperands);
+      }
+    };
+    bmgr.visit((BooleanFormula) pFormula, visitor);
+    for (BooleanFormula toProcess : operands) {
+      wrapped.push();
+      wrapped.addConstraint(toProcess);
+      if (wrapped.isUnsat()) {
+          Map<Formula, Formula> substitution = new HashMap<>();
+          substitution.put(toProcess, bmgr.makeFalse());
+          substitutions.add(substitution);
+      }
+      wrapped.pop();
+    }
+    for (Map<Formula, Formula> substitution : substitutions) {
+      pFormula = fmgr.substitute(pFormula, substitution);
+    }
+
+    return (BooleanFormula) pFormula;
   }
 
 

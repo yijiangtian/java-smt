@@ -21,7 +21,6 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sosy_lab.java_smt.api.BooleanFormula;
@@ -67,9 +66,7 @@ public class DomainOptimizerFormulaRegister {
     LTE,
     GTE,
     ADD,
-    SUB,
-    MULT,
-    DIV
+    SUB
   }
 
   public DomainOptimizerFormulaRegister(DomainOptimizer opt) {
@@ -203,216 +200,14 @@ public class DomainOptimizerFormulaRegister {
     return this.substitution;
   }
 
-  public void foldFunction(Formula pFormula) {
-    final int[] i = {0};
-    FormulaManager fmgr = delegate.getFormulaManager();
-    FormulaVisitor<TraversalProcess> folder =
-        new FormulaVisitor<>() {
-          @Override
-          public TraversalProcess visitFreeVariable(Formula f, String name) {
-            Interval domain = opt.getInterval(f);
-            Function func = readFromBuffer();
-            FunctionDeclarationKind dec = func.declaration;
-            switch (dec) {
-              case LTE:
-                domain.setUpperBound(i[0]);
-                break;
-              case LT:
-                domain.setUpperBound(i[0] - 1);
-                break;
-              case GTE:
-                domain.setLowerBound(i[0]);
-                break;
-              case GT:
-                domain.setLowerBound(i[0] + 1);
-                break;
-              default:
-                break;
-            }
-            return TraversalProcess.CONTINUE;
-          }
 
-          @Override
-          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
-            return null;
-          }
-
-          @Override
-          public TraversalProcess visitConstant(Formula f, Object value) {
-            int val = Integer.parseInt(value.toString());
-            i[0] += val;
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitFunction(
-              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
-            FunctionDeclarationKind dec = functionDeclaration.getKind();
-            if (dec == FunctionDeclarationKind.LTE
-                || dec == FunctionDeclarationKind.LT
-                || dec == FunctionDeclarationKind.GTE
-                || dec == FunctionDeclarationKind.GT) {
-              Function func = new Function(args, dec);
-              putToBuffer(func);
-            }
-            if (dec == FunctionDeclarationKind.ADD
-                || dec == FunctionDeclarationKind.SUB
-                || dec == FunctionDeclarationKind.MUL
-                || dec == FunctionDeclarationKind.DIV) {
-              i[0] = 0;
-            }
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitQuantifier(
-              BooleanFormula f,
-              Quantifier quantifier,
-              List<Formula> boundVariables,
-              BooleanFormula body) {
-            return null;
-          }
-        };
-    fmgr.visitRecursively(pFormula, folder);
-  }
 
   public int countVariables(Formula f) {
     return delegate.getFormulaManager().extractVariables(f).size();
   }
 
-  public void solveOperations(Formula pFormula) {
-    FormulaManager fmgr = delegate.getFormulaManager();
-    FormulaVisitor<TraversalProcess> solver =
-        new FormulaVisitor<>() {
 
-          @Override
-          public TraversalProcess visitFreeVariable(Formula f, String name) {
-            return TraversalProcess.CONTINUE;
-          }
 
-          @Override
-          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitConstant(Formula f, Object value) {
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitFunction(
-              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
-            List<Formula> vars = digDeeper(args);
-            FunctionDeclarationKind dec = functionDeclaration.getKind();
-            if (dec == FunctionDeclarationKind.ADD
-                || dec == FunctionDeclarationKind.MUL
-                || dec == FunctionDeclarationKind.DIV
-                || dec == FunctionDeclarationKind.SUB) {
-              if (vars.isEmpty()) {
-                List<Formula> constants = digDeeperForConstants(args);
-                Formula substitute =
-                    processOperation(
-                        constants.get(0), constants.get(1), functionDeclaration.getKind());
-                Map<Formula, Formula> pSubstitution = new HashMap<>();
-                pSubstitution.put(f, substitute);
-                setSubstitution(pSubstitution);
-                setSubstitutionFlag(true);
-              }
-            }
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitQuantifier(
-              BooleanFormula f,
-              Quantifier quantifier,
-              List<Formula> boundVariables,
-              BooleanFormula body) {
-            return TraversalProcess.CONTINUE;
-          }
-        };
-    fmgr.visitRecursively(pFormula, solver);
-  }
-
-  public Formula replaceVariablesWithIntervals(Formula pFormula) {
-    FormulaManager fmgr = delegate.getFormulaManager();
-    FormulaVisitor<Formula> replacer =
-        new FormulaVisitor<>() {
-          @Override
-          public Formula visitFreeVariable(Formula f, String name) {
-            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            Interval domain = opt.getInterval(f);
-            Function func = readFromBuffer();
-            FunctionDeclarationKind dec = func.declaration;
-            if (dec == FunctionDeclarationKind.LTE) {
-              IntegerFormula upperBound = imgr.makeNumber(domain.getUpperBound());
-              return upperBound;
-            } else if (dec == FunctionDeclarationKind.LT) {
-              IntegerFormula upperBound = imgr.makeNumber(domain.getUpperBound() + 1);
-              return upperBound;
-            } else if (dec == FunctionDeclarationKind.GTE) {
-              IntegerFormula lowerBound = imgr.makeNumber(domain.getLowerBound());
-              return lowerBound;
-            } else if (dec == FunctionDeclarationKind.GT) {
-              IntegerFormula lowerBound = imgr.makeNumber(domain.getLowerBound() - 1);
-              return lowerBound;
-            }
-            return null;
-          }
-
-          @Override
-          public Formula visitBoundVariable(Formula f, int deBruijnIdx) {
-            return null;
-          }
-
-          @Override
-          public Formula visitConstant(Formula f, Object value) {
-            return null;
-          }
-
-          @Override
-          public Formula visitFunction(
-              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
-            FunctionDeclarationKind dec = functionDeclaration.getKind();
-            if (dec == FunctionDeclarationKind.LTE
-                || dec == FunctionDeclarationKind.LT
-                || dec == FunctionDeclarationKind.GTE
-                || dec == FunctionDeclarationKind.GT) {
-              for (Formula arg : args) {
-                if (getFormulaType(arg) == Argtypes.FUNC) {
-                  Formula argNew = digDeeper(args).get(0);
-                  Function func = new Function(args, dec);
-                  putToBuffer(func);
-                  Formula substitute = visitFreeVariable(argNew, arg.toString());
-                  Map<Formula, Formula> pSubstitution = new HashMap<>();
-                  pSubstitution.put(argNew, substitute);
-                  f= fmgr.substitute(f, pSubstitution);
-                } else {
-                  Function func = new Function(args, dec);
-                  putToBuffer(func);
-                  Formula substitute = visitFreeVariable(arg, arg.toString());
-                  Map<Formula, Formula> pSubstitution = new HashMap<>();
-                  pSubstitution.put(arg, substitute);
-                  f = fmgr.substitute(f, pSubstitution);
-                }
-              }
-            }
-            return f;
-          }
-
-          @Override
-          public Formula visitQuantifier(
-              BooleanFormula f,
-              Quantifier quantifier,
-              List<Formula> boundVariables,
-              BooleanFormula body) {
-            return null;
-          }
-        };
-    pFormula = fmgr.visit(pFormula, replacer);
-    return pFormula;
-  }
 
   public void processConstraint(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();

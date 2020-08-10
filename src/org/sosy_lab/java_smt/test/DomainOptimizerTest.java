@@ -23,7 +23,7 @@ package org.sosy_lab.java_smt.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.sosy_lab.common.ShutdownManager;
@@ -34,6 +34,7 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
@@ -42,6 +43,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
+import org.sosy_lab.java_smt.domain_optimization.Interval;
 
 public class DomainOptimizerTest {
 
@@ -73,20 +75,13 @@ public class DomainOptimizerTest {
             imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
         BooleanFormula constraintFour =
             imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-        BooleanFormula constraintFive = imgr.lessOrEquals(imgr.add(z, y), imgr.makeNumber(5));
-        BooleanFormula constraintSix =
-            imgr.lessOrEquals(imgr.add(y, imgr.makeNumber(4)), imgr.add(x, imgr.makeNumber(5)));
-        BooleanFormula constraintSeven =
-            imgr.greaterOrEquals(
-                imgr.add(imgr.add(z, imgr.makeNumber(3)), imgr.makeNumber(2)),
-                imgr.makeNumber(-50));
+        BooleanFormula constraintFive = imgr.greaterOrEquals(imgr.add(imgr.add(z,y),x),
+            imgr.makeNumber(0));
         constraints.add(constraintOne);
         constraints.add(constraintTwo);
         constraints.add(constraintThree);
         constraints.add(constraintFour);
         constraints.add(constraintFive);
-        constraints.add(constraintSix);
-        constraints.add(constraintSeven);
 
         BooleanFormula queryOne = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
         BooleanFormula queryTwo = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
@@ -111,14 +106,56 @@ public class DomainOptimizerTest {
           env.pushQuery(query);
         }
         boolean isUnsat = env.isUnsat();
-        isUnsatWithDomainOptimizer = isUnsat;
+        isUnsatWithDomainOptimizer = env.isUnsat();
       }
     }
   }
 
   @Test
   public void isSatisfiabilityAffected() {
-    assertEquals(isUnsatWithDomainOptimizer, isUnsatWithoutDomainOptimizer);
+    assertThat(isUnsatWithDomainOptimizer).isEqualTo(isUnsatWithoutDomainOptimizer);
   }
 
+  public static void main(String[] args) throws InvalidConfigurationException {
+    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
+    LogManager logger = BasicLogManager.create(config);
+    ShutdownManager shutdown = ShutdownManager.create();
+    List<Formula> constraints = new ArrayList<>();
+    List<Formula> queries = new ArrayList<>();
+    try (DomainOptimizerSolverContext delegate =
+             (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
+                 config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
+
+        FormulaManager fmgr = delegate.getFormulaManager();
+
+        IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+        BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+        IntegerFormula x = imgr.makeVariable("x");
+        IntegerFormula y = imgr.makeVariable("y");
+        IntegerFormula z = imgr.makeVariable("z");
+        BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
+        BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
+        BooleanFormula constraintThree =
+            imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
+        BooleanFormula constraintFour =
+            imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
+        BooleanFormula constraintFive = bmgr.and(imgr.lessOrEquals(x, imgr.makeNumber(3)),
+            imgr.lessOrEquals(y, imgr.makeNumber(0)));
+        env.addConstraint(constraintOne);
+        env.addConstraint(constraintTwo);
+        env.addConstraint(constraintThree);
+        env.addConstraint(constraintFour);
+        env.addConstraint(constraintFive);
+        List<Formula> variables = env.getVariables();
+        for (Formula var : variables) {
+          Interval domain = env.getInterval(var);
+          System.out.println(domain.toString());
+        }
+      } catch (InterruptedException | SolverException pE) {
+        pE.printStackTrace();
+      }
+
+    }
+  }
 }

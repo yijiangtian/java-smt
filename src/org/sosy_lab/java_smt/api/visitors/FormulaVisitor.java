@@ -28,6 +28,7 @@ import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
 import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
+import org.sosy_lab.java_smt.api.SolverException;
 
 /**
  * Visitor iterating through entire formula. Use {@link FormulaManager#visit} for visiting formulas.

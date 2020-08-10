@@ -138,7 +138,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     this.register.visit(constraint);
     this.constraints.add(constraint);
     this.register.processConstraint(constraint);
-    replace(constraint);
+
   }
 
   @Override
@@ -157,21 +157,4 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     return domain;
   }
 
-  @Override
-  public BooleanFormula replace(BooleanFormula constraint) {
-    FormulaManager fmgr = delegate.getFormulaManager();
-    int variables = this.register.countVariables(constraint);
-    while (variables > 0) {
-      constraint = (BooleanFormula) this.register.replaceVariablesWithIntervals(constraint);
-      this.register.solveOperations(constraint);
-      Map<Formula, Formula> substitution = this.register.getSubstitution();
-      boolean isSubstituted = this.register.getSubstitutionFlag();
-      if (isSubstituted) {
-        constraint = fmgr.substitute(constraint, substitution);
-      }
-      this.register.foldFunction(constraint);
-      variables = this.register.countVariables(constraint);
-    }
-    return constraint;
-  }
 }

@@ -32,10 +32,6 @@ public class Interval {
   }
 
   public void setLowerBound(Integer lBound) {
-    if (lBound == 0) {
-      lBound += 1;
-      //in order to prevent division by zero
-    }
     if (lBound > getLowerBound() && lBound < getUpperBound()) {
       lower = lBound;
     }
@@ -44,9 +40,6 @@ public class Interval {
     }
   }
   public void setUpperBound(Integer uBound) {
-    if (uBound == 0) {
-      uBound += 1;
-    }
     if (uBound < getUpperBound() && uBound > getLowerBound()) {
       upper = uBound;
     }
