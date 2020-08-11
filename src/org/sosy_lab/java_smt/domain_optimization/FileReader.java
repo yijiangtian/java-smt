@@ -92,7 +92,8 @@ final class FileReader {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-    try (BufferedWriter writer =  Files.newBufferedWriter(Paths.get("output.txt"), Charset.defaultCharset())) {
+    try (BufferedWriter writer =
+             Files.newBufferedWriter(Paths.get("output.txt"), Charset.defaultCharset())) {
       try (DomainOptimizerSolverContext delegate =
                (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
                    config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
