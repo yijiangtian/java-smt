@@ -64,7 +64,6 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
       }
     } else {
         constraint = (BooleanFormula) pushQuery(constraint);
-        System.out.println(constraint.toString());
       }
     this.wrapped.addConstraint(constraint);
     return null;

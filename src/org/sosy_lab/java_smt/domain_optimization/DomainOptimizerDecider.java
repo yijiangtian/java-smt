@@ -44,16 +44,17 @@ public class DomainOptimizerDecider {
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
+  private final DomainOptimizerFormulaRegister register;
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
+    this.register = opt.getRegister();
   }
-
   public Formula performSubstitutions(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    List<Map<Formula, Formula>> substitutions = new ArrayList<>();
+    final Map[] substitutionToSet = new Map[]{new HashMap<>()};
     FormulaVisitor<TraversalProcess> replacer =
         new FormulaVisitor<>() {
           final FunctionDeclarationKind[] dec = new FunctionDeclarationKind[1];
@@ -88,7 +89,7 @@ public class DomainOptimizerDecider {
             }
             Map<Formula, Formula> substitution = new HashMap<>();
             substitution.put(f, substitute);
-            substitutions.add(substitution);
+            substitutionToSet[0] = substitution;
             return TraversalProcess.CONTINUE;
           }
           @Override
@@ -111,35 +112,52 @@ public class DomainOptimizerDecider {
                 || declaration == FunctionDeclarationKind.GT) {
               dec[0] = declaration;
             }
-            if (declaration == FunctionDeclarationKind.ADD
-            || declaration == FunctionDeclarationKind.OR) {
+            if (declaration == FunctionDeclarationKind.AND
+                || declaration == FunctionDeclarationKind.OR) {
               for (Formula arg : args) {
-                  performSubstitutions(arg);
+                performSubstitutions(arg);
               }
             }
             return TraversalProcess.CONTINUE;
           }
 
-            @Override
-            public TraversalProcess visitQuantifier(
-                BooleanFormula f,
-                Quantifier quantifier,
-                List<Formula> boundVariables,
-                BooleanFormula body) {
+          @Override
+          public TraversalProcess visitQuantifier(
+              BooleanFormula f,
+              Quantifier quantifier,
+              List<Formula> boundVariables,
+              BooleanFormula body) {
             return TraversalProcess.CONTINUE;
-            }
-            };
+          }
+        };
     fmgr.visitRecursively(pFormula, replacer);
-    for (int i = 0; i < substitutions.size() - 1; i++) {
-      Map<Formula, Formula> substitution = substitutions.get(i);
-      pFormula = fmgr.substitute(pFormula, substitution);
-    }
+    Map<Formula, Formula> substitution = substitutionToSet[0];
+    pFormula = fmgr.substitute(pFormula, substitution);
+
     return pFormula;
   }
 
+public Formula replace(Formula pFormula) {
+  FormulaManager fmgr = delegate.getFormulaManager();
+  int variables = this.register.countVariables(pFormula);
+  while (variables > 0) {
+    System.out.println(pFormula.toString());
+    pFormula = performSubstitutions(pFormula);
+    this.register.solveOperations(pFormula);
+    Map<Formula, Formula> substitution = this.register.getSubstitution();
+    boolean isSubstituted = this.register.getSubstitutionFlag();
+    if (isSubstituted) {
+      pFormula = fmgr.substitute(pFormula, substitution);
+    }
+    this.register.foldFunction(pFormula);
+    variables = this.register.countVariables(pFormula);
+  }
+  return pFormula;
+}
+
 
   public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
-    pFormula = performSubstitutions(pFormula);
+    pFormula = replace(pFormula);
     FormulaManager fmgr = delegate.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     List<BooleanFormula> operands = new ArrayList<>();
