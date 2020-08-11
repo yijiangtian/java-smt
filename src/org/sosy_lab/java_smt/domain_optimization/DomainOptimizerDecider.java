@@ -135,7 +135,6 @@ public class DomainOptimizerDecider {
   public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
     pFormula = performSubstitutions(pFormula);
     FormulaManager fmgr = delegate.getFormulaManager();
-    ProverEnvironment wrapped = this.wrapped;
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     List<BooleanFormula> operands = new ArrayList<>();
     List<Map<Formula, Formula>> substitutions = new ArrayList<>();
@@ -153,19 +152,21 @@ public class DomainOptimizerDecider {
     };
     bmgr.visit((BooleanFormula) pFormula, visitor);
     for (BooleanFormula toProcess : operands) {
-      wrapped.push();
-      wrapped.addConstraint(toProcess);
-      if (wrapped.isUnsat()) {
-          Map<Formula, Formula> substitution = new HashMap<>();
+      Map<Formula, Formula> substitution = new HashMap<>();
+      this.wrapped.push();
+      this.wrapped.addConstraint(toProcess);
+      if (this.wrapped.isUnsat()) {
           substitution.put(toProcess, bmgr.makeFalse());
-          substitutions.add(substitution);
       }
-      wrapped.pop();
+      else {
+          substitution.put(toProcess, bmgr.makeTrue());
+      }
+      substitutions.add(substitution);
+      this.wrapped.pop();
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
     }
-
     return (BooleanFormula) pFormula;
   }
 

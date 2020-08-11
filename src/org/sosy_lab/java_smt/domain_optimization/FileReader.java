@@ -60,7 +60,7 @@ final class FileReader {
   public static List<String> parseAsserts(String path) throws FileNotFoundException {
     List<String> asserts = new ArrayList<>();
     String toAppend = "( assert";
-    try(Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name())) {
+    try (Scanner scanner = new Scanner(new File(path), Charset.defaultCharset().name())) {
       scanner.useDelimiter("assert");
       while (scanner.hasNext()) {
         String toAssert = scanner.next();

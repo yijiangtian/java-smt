@@ -58,12 +58,11 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public T addConstraint(BooleanFormula constraint) throws InterruptedException, SolverException {
-    if (!this.opt.fallBack(constraint)) {
-      if (this.register.countVariables(constraint) == 1) {
+    if (this.register.countVariables(constraint) == 1) {
+      if (!this.opt.fallBack(constraint)) {
         this.opt.pushConstraint(constraint);
       }
-    }
-      else {
+    } else {
         constraint = (BooleanFormula) pushQuery(constraint);
         System.out.println(constraint.toString());
       }
