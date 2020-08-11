@@ -55,7 +55,6 @@ public class DomainOptimizerTest {
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
     List<Formula> constraints = new ArrayList<>();
-    List<Formula> queries = new ArrayList<>();
     try (DomainOptimizerSolverContext delegate =
         (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
             config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
@@ -73,35 +72,19 @@ public class DomainOptimizerTest {
             imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
         BooleanFormula constraintFour =
             imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-        BooleanFormula constraintFive = imgr.greaterOrEquals(imgr.add(imgr.add(z,y),x),
-            imgr.makeNumber(0));
         constraints.add(constraintOne);
         constraints.add(constraintTwo);
         constraints.add(constraintThree);
         constraints.add(constraintFour);
-        constraints.add(constraintFive);
-
-        BooleanFormula queryOne = imgr.greaterThan(imgr.add(x, imgr.makeNumber(7)), z);
-        BooleanFormula queryTwo = imgr.lessOrEquals(imgr.subtract(y, z), imgr.makeNumber(8));
-        BooleanFormula queryThree = imgr.lessThan(imgr.add(x, y), imgr.makeNumber(100));
-        queries.add(queryOne);
-        queries.add(queryTwo);
-        queries.add(queryThree);
 
         for (Formula constraint : constraints) {
           basicEnv.addConstraint((BooleanFormula) constraint);
-        }
-        for (Formula query : queries) {
-          basicEnv.addConstraint((BooleanFormula) query);
         }
         isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
       }
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
         for (Formula constraint : constraints) {
           env.addConstraint((BooleanFormula) constraint);
-        }
-        for (Formula query : queries) {
-          env.pushQuery(query);
         }
         isUnsatWithDomainOptimizer = env.isUnsat();
       }
