@@ -65,7 +65,6 @@ public class DomainOptimizerTest {
         IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
         IntegerFormula x = imgr.makeVariable("x");
         IntegerFormula y = imgr.makeVariable("y");
-        IntegerFormula z = imgr.makeVariable("z");
         BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
         BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
         BooleanFormula constraintThree =
