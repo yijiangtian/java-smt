@@ -77,7 +77,9 @@ final class FileReader {
     return processedAsserts;
   }
 
-  public static void main(String[] args) throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
+  public static void main(String[] args)
+      throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
+             SolverException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     String header = parseHeader(filePath);
     List<String> asserts = parseAsserts(filePath);
@@ -96,8 +98,6 @@ final class FileReader {
           basicEnv.addConstraint(constraint);
         }
         System.out.println("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
-      } catch (SolverException pE) {
-        pE.printStackTrace();
       }
 
       try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
@@ -107,8 +107,6 @@ final class FileReader {
           env.addConstraint(constraint);
         }
         System.out.println("isUnsat with DomainOptimizer: " + env.isUnsat());
-      } catch (SolverException pE) {
-        pE.printStackTrace();
       }
     }
   }
