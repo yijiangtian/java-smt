@@ -26,6 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -42,6 +45,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 
 final class FileReader {
+
 
   private FileReader() {
     throw new AssertionError("Instantiating utility class.");
@@ -90,7 +94,7 @@ final class FileReader {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
+    try (BufferedWriter writer =  Files.newBufferedWriter(Paths.get("output.txt"), Charset.defaultCharset())) {
       try (DomainOptimizerSolverContext delegate =
                (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
                    config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
