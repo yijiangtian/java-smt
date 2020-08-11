@@ -80,7 +80,7 @@ public class ProverEnvironmentSubjectTest extends SolverBasedTest0 {
   }
 
   @Test
-  public void testIsSatisfiableNo() throws InterruptedException {
+  public void testIsSatisfiableNo() throws InterruptedException, SolverException {
     requireUnsatCore();
     try (ProverEnvironment env =
         context.newProverEnvironment(
@@ -88,8 +88,6 @@ public class ProverEnvironmentSubjectTest extends SolverBasedTest0 {
       env.push(contradiction);
       AssertionError failure = expectFailure(whenTesting -> whenTesting.that(env).isSatisfiable());
       assertThat(failure).factValue("with unsat core").isNotEmpty();
-    } catch (SolverException pE) {
-      pE.printStackTrace();
     }
   }
 
