@@ -116,46 +116,4 @@ public class DomainOptimizerTest {
     assertThat(isUnsatWithDomainOptimizer).isEqualTo(isUnsatWithoutDomainOptimizer);
   }
 
-  public static void main(String[] args) throws InvalidConfigurationException {
-    Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
-    LogManager logger = BasicLogManager.create(config);
-    ShutdownManager shutdown = ShutdownManager.create();
-    List<Formula> constraints = new ArrayList<>();
-    List<Formula> queries = new ArrayList<>();
-    try (DomainOptimizerSolverContext delegate =
-             (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-                 config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
-      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
-
-        FormulaManager fmgr = delegate.getFormulaManager();
-
-        IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-        BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
-        IntegerFormula x = imgr.makeVariable("x");
-        IntegerFormula y = imgr.makeVariable("y");
-        IntegerFormula z = imgr.makeVariable("z");
-        BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
-        BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
-        BooleanFormula constraintThree =
-            imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-        BooleanFormula constraintFour =
-            imgr.greaterOrEquals(imgr.add(y, imgr.makeNumber(3)), imgr.makeNumber(3));
-        BooleanFormula constraintFive = bmgr.and(imgr.lessOrEquals(x, imgr.makeNumber(3)),
-            imgr.lessOrEquals(y, imgr.makeNumber(0)));
-        env.addConstraint(constraintOne);
-        env.addConstraint(constraintTwo);
-        env.addConstraint(constraintThree);
-        env.addConstraint(constraintFour);
-        env.addConstraint(constraintFive);
-        List<Formula> variables = env.getVariables();
-        for (Formula var : variables) {
-          Interval domain = env.getInterval(var);
-          System.out.println(domain.toString());
-        }
-      } catch (InterruptedException | SolverException pE) {
-        pE.printStackTrace();
-      }
-
-    }
-  }
 }
