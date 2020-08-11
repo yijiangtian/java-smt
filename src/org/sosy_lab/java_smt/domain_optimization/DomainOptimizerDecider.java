@@ -114,7 +114,7 @@ public class DomainOptimizerDecider {
             if (declaration == FunctionDeclarationKind.ADD
             || declaration == FunctionDeclarationKind.OR) {
               for (Formula arg : args) {
-
+                  performSubstitutions(arg);
               }
             }
             return TraversalProcess.CONTINUE;
