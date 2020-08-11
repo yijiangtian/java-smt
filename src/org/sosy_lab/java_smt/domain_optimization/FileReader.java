@@ -77,8 +77,7 @@ final class FileReader {
     return processedAsserts;
   }
 
-  public static void main(String[] args)
-      throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
+  public static void main(String[] args) throws InvalidConfigurationException, FileNotFoundException, InterruptedException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     String header = parseHeader(filePath);
     List<String> asserts = parseAsserts(filePath);

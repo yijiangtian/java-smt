@@ -638,40 +638,6 @@ public class DomainOptimizerFormulaRegister {
     return TraversalProcess.CONTINUE;
   }
 
-  /*
-  solves operation containing two constants as arguments
-   */
-  private IntegerFormula processOperation(
-      Formula variableOne, Formula variableTwo, FunctionDeclarationKind declaration) {
-    FormulaManager fmgr = delegate.getFormulaManager();
-    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    String nameOne = format(variableOne.toString());
-    Integer valueOne = Integer.parseInt(nameOne);
-    String nameTwo = format(variableTwo.toString());
-    Integer valueTwo = Integer.parseInt(nameTwo);
-    int result;
-    switch (declaration.toString()) {
-      case "ADD":
-        result = valueOne + valueTwo;
-        break;
-
-      case "SUB":
-        result = valueOne - valueTwo;
-        break;
-
-      case "MUL":
-        result = valueOne * valueTwo;
-        break;
-
-      case "DIV":
-        result = valueOne / valueTwo;
-        break;
-
-      default:
-        throw new IllegalStateException("Unexpected value: " + declaration.toString());
-    }
-    return imgr.makeNumber(result);
-  }
 
   /*
   removes parantheses and spaces from variable-name so that it can be parsed as a constant
