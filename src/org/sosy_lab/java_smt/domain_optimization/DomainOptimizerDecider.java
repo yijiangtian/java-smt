@@ -111,6 +111,12 @@ public class DomainOptimizerDecider {
                 || declaration == FunctionDeclarationKind.GT) {
               dec[0] = declaration;
             }
+            if (declaration == FunctionDeclarationKind.ADD
+            || declaration == FunctionDeclarationKind.OR) {
+              for (Formula arg : args) {
+
+              }
+            }
             return TraversalProcess.CONTINUE;
           }
 
@@ -157,8 +163,7 @@ public class DomainOptimizerDecider {
       this.wrapped.addConstraint(toProcess);
       if (this.wrapped.isUnsat()) {
           substitution.put(toProcess, bmgr.makeFalse());
-      }
-      else {
+      } else {
           substitution.put(toProcess, bmgr.makeTrue());
       }
       substitutions.add(substitution);

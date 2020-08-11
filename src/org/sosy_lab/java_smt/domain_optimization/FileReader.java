@@ -20,8 +20,11 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +81,7 @@ final class FileReader {
   }
 
   public static void main(String[] args)
-      throws InvalidConfigurationException, FileNotFoundException, InterruptedException,
+      throws InvalidConfigurationException, InterruptedException, IOException,
              SolverException {
     String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
     String header = parseHeader(filePath);
@@ -87,26 +90,32 @@ final class FileReader {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-
-    try (DomainOptimizerSolverContext delegate =
-        (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-        config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
-      FormulaManager fmgr = delegate.getFormulaManager();
-      try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
-        for (String toAssert : asserts) {
-          BooleanFormula constraint = fmgr.parse(header + toAssert);
-          basicEnv.addConstraint(constraint);
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter("output.txt"))) {
+      try (DomainOptimizerSolverContext delegate =
+               (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
+                   config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+        FormulaManager fmgr = delegate.getFormulaManager();
+        try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+          long startTime = System.nanoTime();
+          for (String toAssert : asserts) {
+            BooleanFormula constraint = fmgr.parse(header + toAssert);
+            basicEnv.addConstraint(constraint);
+          }
+          long endTime = System.nanoTime();
+          writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
+          writer.write("Execution-time: " + (endTime - startTime));
         }
-        System.out.println("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
-      }
-
-      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
-
-        for (String toAssert : asserts) {
-          BooleanFormula constraint = fmgr.parse(header + toAssert);
-          env.addConstraint(constraint);
+        try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(
+            delegate)) {
+          long startTime = System.nanoTime();
+          for (String toAssert : asserts) {
+            BooleanFormula constraint = fmgr.parse(header + toAssert);
+            env.addConstraint(constraint);
+          }
+          long endTime = System.nanoTime();
+          writer.write("isUnsat with DomainOptimizer: " + env.isUnsat());
+          writer.write("Execution-time: " + (endTime - startTime));
         }
-        System.out.println("isUnsat with DomainOptimizer: " + env.isUnsat());
       }
     }
   }

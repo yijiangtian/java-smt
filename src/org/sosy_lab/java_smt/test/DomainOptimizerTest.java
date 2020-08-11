@@ -23,8 +23,8 @@ package org.sosy_lab.java_smt.test;
 import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Before;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import org.junit.Test;
 import org.sosy_lab.common.ShutdownManager;
 import org.sosy_lab.common.configuration.Configuration;

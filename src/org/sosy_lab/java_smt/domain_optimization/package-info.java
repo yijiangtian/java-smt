@@ -18,5 +18,5 @@
  *  limitations under the License.
  */
 
-/** module that speeds up solving process */
+/** Module that speeds up solving process. */
 package org.sosy_lab.java_smt.domain_optimization;
