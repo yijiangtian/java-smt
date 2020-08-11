@@ -34,7 +34,6 @@ import org.sosy_lab.common.log.LogManager;
 import org.sosy_lab.java_smt.SolverContextFactory;
 import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
-import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
@@ -43,7 +42,6 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
-import org.sosy_lab.java_smt.domain_optimization.Interval;
 
 public class DomainOptimizerTest {
 
@@ -105,7 +103,6 @@ public class DomainOptimizerTest {
         for (Formula query : queries) {
           env.pushQuery(query);
         }
-        boolean isUnsat = env.isUnsat();
         isUnsatWithDomainOptimizer = env.isUnsat();
       }
     }
