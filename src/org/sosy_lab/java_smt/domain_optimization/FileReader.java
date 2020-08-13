@@ -85,7 +85,7 @@ final class FileReader {
   public static void main(String[] args)
       throws InvalidConfigurationException, InterruptedException, IOException,
              SolverException {
-    String filePath = System.getProperty("user.dir") + File.separator + "benchmark_2.smt2";
+    String filePath = System.getProperty("user.dir") + File.separator + "benchmark_1.smt2";
     String header = parseHeader(filePath);
     List<String> asserts = parseAsserts(filePath);
 
@@ -98,16 +98,6 @@ final class FileReader {
                (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
                    config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
         FormulaManager fmgr = delegate.getFormulaManager();
-        try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
-          long startTime = System.nanoTime();
-          for (String toAssert : asserts) {
-            BooleanFormula constraint = fmgr.parse(header + toAssert);
-            basicEnv.addConstraint(constraint);
-          }
-          long endTime = System.nanoTime();
-          writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
-          writer.write("Execution-time: " + (endTime - startTime));
-        }
         try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(
             delegate)) {
           long startTime = System.nanoTime();
@@ -117,6 +107,16 @@ final class FileReader {
           }
           long endTime = System.nanoTime();
           writer.write("isUnsat with DomainOptimizer: " + env.isUnsat());
+          writer.write("Execution-time: " + (endTime - startTime));
+        }
+       try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+          long startTime = System.nanoTime();
+          for (String toAssert : asserts) {
+            BooleanFormula constraint = fmgr.parse(header + toAssert);
+            basicEnv.addConstraint(constraint);
+          }
+          long endTime = System.nanoTime();
+          writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
           writer.write("Execution-time: " + (endTime - startTime));
         }
       }

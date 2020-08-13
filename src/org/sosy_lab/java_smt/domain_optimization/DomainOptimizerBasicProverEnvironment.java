@@ -63,7 +63,9 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
         this.opt.pushConstraint(constraint);
       }
     } else {
+      if (this.register.countVariables(constraint) <= 17) {
         constraint = (BooleanFormula) pushQuery(constraint);
+      }
       }
     this.wrapped.addConstraint(constraint);
     return null;

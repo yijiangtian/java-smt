@@ -29,13 +29,11 @@ import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.FunctionDeclaration;
-import org.sosy_lab.java_smt.api.FunctionDeclarationKind;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
-import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
-import org.sosy_lab.java_smt.api.QuantifiedFormulaManager.Quantifier;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.api.visitors.BooleanFormulaTransformationVisitor;
+import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
@@ -45,6 +43,7 @@ public class DomainOptimizerDecider {
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
   private final DomainOptimizerFormulaRegister register;
+  private List<Formula> variables = new ArrayList<>();
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
@@ -52,117 +51,89 @@ public class DomainOptimizerDecider {
     this.wrapped = opt.getWrapped();
     this.register = opt.getRegister();
   }
-  public Formula performSubstitutions(Formula pFormula) {
+
+  public List<Formula> performSubstitutions(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
-    final Map[] substitutionToSet = new Map[]{new HashMap<>()};
-    FormulaVisitor<TraversalProcess> replacer =
-        new FormulaVisitor<>() {
-          final FunctionDeclarationKind[] dec = new FunctionDeclarationKind[1];
-          @Override
-          public TraversalProcess visitFreeVariable(Formula f, String name) {
-            IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            Interval domain = opt.getInterval(f);
-            IntegerFormula substitute = (IntegerFormula) f;
-            switch (dec[0]) {
-              case GTE:
-                if (domain.isUpperBoundSet()) {
-                  substitute = imgr.makeNumber(domain.getUpperBound());
-                }
-                break;
-              case GT:
-                if (domain.isUpperBoundSet()) {
-                  substitute = imgr.makeNumber(domain.getUpperBound() - 1);
-                }
-                break;
-              case LTE:
-                if (domain.isLowerBoundSet()) {
-                  substitute = imgr.makeNumber(domain.getLowerBound());
-                }
-                break;
-              case LT:
-                if (domain.isLowerBoundSet()) {
-                  substitute = imgr.makeNumber(domain.getLowerBound() + 1);
-                }
-                break;
-              default:
-                throw new IllegalStateException("Unexpected value: " + dec[0]);
-            }
-            Map<Formula, Formula> substitution = new HashMap<>();
-            substitution.put(f, substitute);
-            substitutionToSet[0] = substitution;
-            return TraversalProcess.CONTINUE;
-          }
-          @Override
-          public TraversalProcess visitBoundVariable(Formula f, int deBruijnIdx) {
-            return null;
-          }
-
-          @Override
-          public TraversalProcess visitConstant(Formula f, Object value) {
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    List<Formula> variables = new ArrayList<>();
+    List<Formula> substitutedFormulas = new ArrayList<>();
+    FormulaVisitor<TraversalProcess> varExtractor =
+        new DefaultFormulaVisitor<>() {
+          protected TraversalProcess visitDefault(Formula f) {
             return TraversalProcess.CONTINUE;
           }
 
-          @Override
-          public TraversalProcess visitFunction(
-              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
-            FunctionDeclarationKind declaration = functionDeclaration.getKind();
-            if (declaration == FunctionDeclarationKind.LTE
-                || declaration == FunctionDeclarationKind.LT
-                || declaration == FunctionDeclarationKind.GTE
-                || declaration == FunctionDeclarationKind.GT) {
-              dec[0] = declaration;
-            }
-            if (declaration == FunctionDeclarationKind.AND
-                || declaration == FunctionDeclarationKind.OR) {
-              for (Formula arg : args) {
-                performSubstitutions(arg);
-              }
-            }
-            return TraversalProcess.CONTINUE;
-          }
-
-          @Override
-          public TraversalProcess visitQuantifier(
-              BooleanFormula f,
-              Quantifier quantifier,
-              List<Formula> boundVariables,
-              BooleanFormula body) {
+          public TraversalProcess visitFreeVariable(Formula formula, String name) {
+            variables.add(formula);
             return TraversalProcess.CONTINUE;
           }
         };
-    fmgr.visitRecursively(pFormula, replacer);
-    Map<Formula, Formula> substitution = substitutionToSet[0];
-    pFormula = fmgr.substitute(pFormula, substitution);
+    fmgr.visitRecursively(f, varExtractor);
 
-    return pFormula;
-  }
+    this.variables = variables;
+    int[][] decisionMatrix = constructDecisionMatrix();
 
-public Formula replace(Formula pFormula) {
-  FormulaManager fmgr = delegate.getFormulaManager();
-  int variables = this.register.countVariables(pFormula);
-  while (variables > 0) {
-    System.out.println(pFormula.toString());
-    pFormula = performSubstitutions(pFormula);
-    this.register.solveOperations(pFormula);
-    Map<Formula, Formula> substitution = this.register.getSubstitution();
-    boolean isSubstituted = this.register.getSubstitutionFlag();
-    if (isSubstituted) {
-      pFormula = fmgr.substitute(pFormula, substitution);
+    for (int i = 0; i < Math.pow(2, variables.size()); i++) {
+      List<Map<Formula, Formula>> substitutions = new ArrayList<>();
+      for (int j = 0; j < variables.size(); j++) {
+        Formula var = variables.get(j);
+        Interval domain = opt.getInterval(var);
+        Map<Formula, Formula> substitution = new HashMap<>();
+        if (decisionMatrix[j][i] == 1) {
+          substitution.put(var, imgr.makeNumber(domain.getUpperBound()));
+        } else if (decisionMatrix[j][i] == 0) {
+          substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
+        }
+        substitutions.add(substitution);
+      }
+      Formula buffer = f;
+      for (Map<Formula, Formula> substitution : substitutions) {
+        f = fmgr.substitute(f, substitution);
+      }
+      substitutedFormulas.add(f);
+      f = buffer;
     }
-    this.register.foldFunction(pFormula);
-    variables = this.register.countVariables(pFormula);
+    return substitutedFormulas;
   }
-  return pFormula;
-}
+
+
+  public int[][] constructDecisionMatrix() {
+    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2,variables.size())];
+    int rows = (int) Math.pow(2,variables.size());
+    for (int i=0; i<rows; i++) {
+      for (int j=variables.size() - 1; j>=0; j--) {
+        decisionMatrix[j][i] = (i/(int) Math.pow(2, j))%2;
+      }
+    }
+    return decisionMatrix;
+  }
+
+  public boolean decide(BooleanFormula query) throws InterruptedException, SolverException {
+    List<Formula> readyForDecisisionPhase = performSubstitutions(query);
+    for (Formula f : readyForDecisisionPhase) {
+      this.wrapped.push();
+      this.wrapped.addConstraint(query);
+      if (!this.wrapped.isUnsat()) {
+        return true;
+      }
+      this.wrapped.pop();
+    }
+    return false;
+  }
 
 
   public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
-    pFormula = replace(pFormula);
     FormulaManager fmgr = delegate.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     List<BooleanFormula> operands = new ArrayList<>();
     List<Map<Formula, Formula>> substitutions = new ArrayList<>();
     BooleanFormulaTransformationVisitor visitor = new BooleanFormulaTransformationVisitor(fmgr) {
+      @Override
+      public BooleanFormula visitAtom(BooleanFormula pAtom,
+                                      FunctionDeclaration<BooleanFormula> decl) {
+        operands.add(pAtom);
+        return super.visitAtom(pAtom, decl);
+      }
       @Override
       public BooleanFormula visitAnd(List<BooleanFormula> processedOperands) {
         operands.addAll(processedOperands);
@@ -177,18 +148,16 @@ public Formula replace(Formula pFormula) {
     bmgr.visit((BooleanFormula) pFormula, visitor);
     for (BooleanFormula toProcess : operands) {
       Map<Formula, Formula> substitution = new HashMap<>();
-      this.wrapped.push();
-      this.wrapped.addConstraint(toProcess);
-      if (this.wrapped.isUnsat()) {
-          substitution.put(toProcess, bmgr.makeFalse());
-      } else {
+      if (decide((BooleanFormula) pFormula)) {
           substitution.put(toProcess, bmgr.makeTrue());
+      } else {
+          substitution.put(toProcess, bmgr.makeFalse());
       }
       substitutions.add(substitution);
-      this.wrapped.pop();
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
+      System.out.println(substitution);
     }
     return (BooleanFormula) pFormula;
   }
