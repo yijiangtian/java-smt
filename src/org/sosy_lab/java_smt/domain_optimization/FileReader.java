@@ -85,7 +85,9 @@ final class FileReader {
   public static void main(String[] args)
       throws InvalidConfigurationException, InterruptedException, IOException,
              SolverException {
-    String filePath = System.getProperty("user.dir") + File.separator + "benchmark_1.smt2";
+    try (Scanner sc = new Scanner(System.in)) {
+      System.out.println("Enter name of the .smtlib-file: ");
+      String filePath = System.getProperty("user.dir") + File.separator + sc.nextLine();
     String header = parseHeader(filePath);
     List<String> asserts = parseAsserts(filePath);
 
@@ -106,19 +108,22 @@ final class FileReader {
             env.addConstraint(constraint);
           }
           long endTime = System.nanoTime();
-          writer.write("isUnsat with DomainOptimizer: " + env.isUnsat());
-          writer.write("Execution-time: " + (endTime - startTime));
+          System.out.println("isUnsat with DomainOptimizer: " + env.isUnsat());
+          System.out.println("Execution-time: " + (endTime - startTime));
+          writer.write("isUnsat with DomainOptimizer: " + env.isUnsat() + "\n");
+          writer.write("Execution-time: " + (endTime - startTime) + "\n");
         }
-       try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+        try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
           long startTime = System.nanoTime();
           for (String toAssert : asserts) {
             BooleanFormula constraint = fmgr.parse(header + toAssert);
             basicEnv.addConstraint(constraint);
           }
           long endTime = System.nanoTime();
-          writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat());
-          writer.write("Execution-time: " + (endTime - startTime));
+          writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat() + "\n");
+          writer.write("Execution-time: " + (endTime - startTime) + "\n");
         }
+      }
       }
     }
   }

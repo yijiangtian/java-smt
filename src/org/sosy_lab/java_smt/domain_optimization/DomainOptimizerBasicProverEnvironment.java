@@ -63,7 +63,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
         this.opt.pushConstraint(constraint);
       }
     } else {
-      if (this.register.countVariables(constraint) <= 17) {
+      if (this.register.countVariables(constraint) <= 16) {
         constraint = (BooleanFormula) pushQuery(constraint);
       }
       }
@@ -124,7 +124,11 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   public Formula pushQuery(Formula query) throws InterruptedException, SolverException {
     DomainOptimizerDecider decider = opt.getDecider();
-    query = decider.pruneTree(query);
+    Formula substituted = decider.pruneTree(query);
+    if (!decider.getFallBack()) {
+      return substituted;
+    }
+    decider.setFallBack(false);
     return query;
   }
 }

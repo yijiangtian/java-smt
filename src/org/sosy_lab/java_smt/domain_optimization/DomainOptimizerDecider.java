@@ -39,6 +39,7 @@ import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
 public class DomainOptimizerDecider {
 
+  private boolean fallBack = false;
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
@@ -50,6 +51,14 @@ public class DomainOptimizerDecider {
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
     this.register = opt.getRegister();
+  }
+
+  public boolean getFallBack() {
+    return this.fallBack;
+  }
+
+  public void setFallBack(boolean pFallBack) {
+    this.fallBack = pFallBack;
   }
 
   public List<Formula> performSubstitutions(Formula f) {
@@ -72,6 +81,7 @@ public class DomainOptimizerDecider {
 
     this.variables = variables;
     int[][] decisionMatrix = constructDecisionMatrix();
+    int maxIterations = 0;
 
     for (int i = 0; i < Math.pow(2, variables.size()); i++) {
       List<Map<Formula, Formula>> substitutions = new ArrayList<>();
@@ -85,6 +95,7 @@ public class DomainOptimizerDecider {
           substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
         }
         substitutions.add(substitution);
+        maxIterations++;
       }
       Formula buffer = f;
       for (Map<Formula, Formula> substitution : substitutions) {
@@ -92,6 +103,10 @@ public class DomainOptimizerDecider {
       }
       substitutedFormulas.add(f);
       f = buffer;
+      if (maxIterations == 1000) {
+        this.fallBack = true;
+        break;
+      }
     }
     return substitutedFormulas;
   }
@@ -157,7 +172,7 @@ public class DomainOptimizerDecider {
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
-      System.out.println(substitution);
+      System.out.println(pFormula.toString());
     }
     return (BooleanFormula) pFormula;
   }
