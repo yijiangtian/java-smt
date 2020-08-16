@@ -85,7 +85,7 @@ final class FileReader {
   public static void main(String[] args)
       throws InvalidConfigurationException, InterruptedException, IOException,
              SolverException {
-    try (Scanner sc = new Scanner(System.in)) {
+    try (Scanner sc = new Scanner(System.in, Charset.defaultCharset().name())) {
       System.out.println("Enter name of the .smtlib-file: ");
       String filePath = System.getProperty("user.dir") + File.separator + sc.nextLine();
     String header = parseHeader(filePath);
