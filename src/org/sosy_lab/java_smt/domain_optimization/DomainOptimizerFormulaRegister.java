@@ -51,8 +51,6 @@ public class DomainOptimizerFormulaRegister {
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private Function functionBuffer;
-  private Map<Formula, Formula> substitution;
-  private boolean isSubstituted = false;
 
   enum Argtypes {
     VAR,
@@ -469,11 +467,9 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - valueTwo);
         } else if (op == Operators.SUB) {
           domain.setUpperBound(upperBound + valueTwo);
-        }
-        else if (op == Operators.MUL) {
+        } else if (op == Operators.MUL) {
           domain.setUpperBound(upperBound / valueTwo);
-        }
-        else if (op == Operators.DIV) {
+        } else if (op == Operators.DIV) {
           domain.setUpperBound(upperBound * valueTwo);
         }
       } else if (dec == FunctionDeclarationKind.GTE) {
@@ -548,8 +544,7 @@ public class DomainOptimizerFormulaRegister {
           domainOne.setUpperBound(upperBound + valueTwo - 1);
         } else if (op == Operators.MUL) {
           domainOne.setUpperBound(upperBound / valueTwo - 1);
-        }
-        else if (op == Operators.DIV) {
+        } else if (op == Operators.DIV) {
           domainOne.setUpperBound(upperBound * valueTwo - 1);
         }
       }
