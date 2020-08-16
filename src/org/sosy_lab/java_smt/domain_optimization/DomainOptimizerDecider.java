@@ -43,14 +43,12 @@ public class DomainOptimizerDecider {
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
-  private final DomainOptimizerFormulaRegister register;
   private List<Formula> variables = new ArrayList<>();
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
-    this.register = opt.getRegister();
   }
 
   public boolean getFallBack() {
@@ -64,22 +62,24 @@ public class DomainOptimizerDecider {
   public List<Formula> performSubstitutions(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    List<Formula> variables = new ArrayList<>();
+    List<Formula> vars = new ArrayList<>();
     List<Formula> substitutedFormulas = new ArrayList<>();
     FormulaVisitor<TraversalProcess> varExtractor =
         new DefaultFormulaVisitor<>() {
+          @Override
           protected TraversalProcess visitDefault(Formula f) {
             return TraversalProcess.CONTINUE;
           }
 
+          @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
-            variables.add(formula);
+            vars.add(formula);
             return TraversalProcess.CONTINUE;
           }
         };
     fmgr.visitRecursively(f, varExtractor);
 
-    this.variables = variables;
+    this.variables = vars;
     int[][] decisionMatrix = constructDecisionMatrix();
     int maxIterations = 0;
 
@@ -113,11 +113,11 @@ public class DomainOptimizerDecider {
 
 
   public int[][] constructDecisionMatrix() {
-    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2,variables.size())];
-    int rows = (int) Math.pow(2,variables.size());
+    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2, variables.size())];
+    int rows = (int) Math.pow(2, variables.size());
     for (int i=0; i<rows; i++) {
       for (int j=variables.size() - 1; j>=0; j--) {
-        decisionMatrix[j][i] = (i/(int) Math.pow(2, j))%2;
+        decisionMatrix[j][i] = (i / (int) Math.pow(2, j)) % 2;
       }
     }
     return decisionMatrix;
@@ -127,7 +127,7 @@ public class DomainOptimizerDecider {
     List<Formula> readyForDecisisionPhase = performSubstitutions(query);
     for (Formula f : readyForDecisisionPhase) {
       this.wrapped.push();
-      this.wrapped.addConstraint(query);
+      this.wrapped.addConstraint((BooleanFormula) f);
       if (!this.wrapped.isUnsat()) {
         return true;
       }

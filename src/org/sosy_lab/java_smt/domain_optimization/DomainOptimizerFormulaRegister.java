@@ -21,7 +21,6 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sosy_lab.java_smt.api.BooleanFormula;
@@ -66,8 +65,11 @@ public class DomainOptimizerFormulaRegister {
     GT,
     LTE,
     GTE,
+    EQ,
     ADD,
-    SUB
+    SUB,
+    MUL,
+    DIV
   }
 
   public DomainOptimizerFormulaRegister(DomainOptimizer opt) {
@@ -179,30 +181,15 @@ public class DomainOptimizerFormulaRegister {
     return fmgr.visit(pFormula, getFormulaType);
   }
 
+
   private void putToBuffer(Function f) {
     this.functionBuffer = f;
   }
 
+
   private Function readFromBuffer() {
     return this.functionBuffer;
   }
-
-  public void setSubstitutionFlag(boolean pIsSubstituted) {
-    this.isSubstituted = pIsSubstituted;
-  }
-
-  public boolean getSubstitutionFlag() {
-    return this.isSubstituted;
-  }
-
-  public void setSubstitution(Map<Formula, Formula> pSubstitution) {
-    this.substitution = pSubstitution;
-  }
-
-  public Map<Formula, Formula> getSubstitution() {
-    return this.substitution;
-  }
-
 
 
   public int countVariables(Formula f) {
@@ -243,11 +230,21 @@ public class DomainOptimizerFormulaRegister {
                 return adjustBounds(variableOne, variableTwo,
                     Operators.GTE, pArgs, pFunctionDeclaration);
 
+              case "EQ":
+                return adjustBounds(variableOne, variableTwo,
+                    Operators.EQ, pArgs, pFunctionDeclaration);
+
               case "ADD":
                 return processDeclaration(variableOne, variableTwo, Operators.ADD);
 
               case "SUB":
                 return processDeclaration(variableOne, variableTwo, Operators.SUB);
+
+              case "MUL":
+                return processDeclaration(variableOne, variableTwo, Operators.MUL);
+
+              case "DIV":
+                return processDeclaration(variableOne, variableTwo, Operators.DIV);
 
             }
             return TraversalProcess.CONTINUE;
@@ -312,26 +309,6 @@ public class DomainOptimizerFormulaRegister {
     Argtypes argOne = getFormulaType(variableOne);
     Argtypes argTwo = getFormulaType(variableTwo);
 
-    if (argOne == Argtypes.FUNC && argTwo == Argtypes.VAR) {
-      Interval domainTwo = opt.getInterval(variableTwo);
-      Interval domainOne;
-      List<Formula> args = functionBuffer.args;
-      Function func = new Function(pArgs, pFunctionDeclaration.getKind());
-      putToBuffer(func);
-      List<Formula> vars = digDeeper(args);
-      Formula variable = vars.get(0);
-      domainOne = opt.getInterval(variable);
-      if (operator == Operators.LTE) {
-        domainOne.setUpperBound(domainTwo.getUpperBound());
-      } else if (operator == Operators.LT) {
-        domainOne.setUpperBound(domainTwo.getUpperBound() - 1);
-      } else if (operator == Operators.GTE) {
-        domainOne.setLowerBound(domainTwo.getUpperBound());
-      } else if (operator == Operators.GT) {
-        domainOne.setLowerBound(domainTwo.getUpperBound() + 1);
-      }
-    }
-
     if (argOne == Argtypes.FUNC && argTwo == Argtypes.CONST) {
       String name = format(variableTwo.toString());
       Integer valueTwo = Integer.parseInt(name);
@@ -392,20 +369,6 @@ public class DomainOptimizerFormulaRegister {
       }
     }
 
-    if (argOne == Argtypes.VAR && argTwo == Argtypes.VAR) {
-      Interval domainOne = opt.getInterval(variableOne);
-      Interval domainTwo = opt.getInterval(variableTwo);
-      if (operator == Operators.LTE) {
-        domainOne.setUpperBound(domainTwo.getUpperBound());
-      } else if (operator == Operators.LT) {
-        domainOne.setUpperBound(domainTwo.getUpperBound() - 1);
-      } else if (operator == Operators.GTE) {
-        domainOne.setLowerBound(domainTwo.getUpperBound());
-      } else if (operator == Operators.GT) {
-        domainOne.setLowerBound(domainTwo.getUpperBound() + 1);
-      }
-    }
-
     if (argOne == Argtypes.VAR && argTwo == Argtypes.CONST) {
       String name = format(variableTwo.toString());
       Integer valueTwo = Integer.parseInt(name);
@@ -414,6 +377,13 @@ public class DomainOptimizerFormulaRegister {
         domainOne.setUpperBound(valueTwo);
       } else if (operator == Operators.GTE) {
         domainOne.setLowerBound(valueTwo);
+      } else if (operator == Operators.LT) {
+        domainOne.setUpperBound(valueTwo - 1);
+      } else if (operator == Operators.GT) {
+        domainOne.setLowerBound(valueTwo + 1);
+      } else if (operator == Operators.EQ) {
+        domainOne.setLowerBound(valueTwo);
+        domainOne.setUpperBound(valueTwo);
       }
     }
 
@@ -442,6 +412,9 @@ public class DomainOptimizerFormulaRegister {
         } else if (operator == Operators.GT) {
           domainOne.setLowerBound(valueOne);
           processDeclaration(varOne, varTwo, Operators.GT);
+        } else if (operator == Operators.EQ) {
+          domainOne.setLowerBound(valueOne);
+          domainOne.setUpperBound(valueOne);
         }
       }
     }
@@ -464,6 +437,10 @@ public class DomainOptimizerFormulaRegister {
       }
       if (operator == Operators.GT) {
         domainTwo.setUpperBound(valueOne - 1);
+      }
+      if (operator == Operators.EQ) {
+        domainTwo.setLowerBound(valueOne);
+        domainTwo.setUpperBound(valueOne);
       }
     }
 
@@ -493,12 +470,22 @@ public class DomainOptimizerFormulaRegister {
         } else if (op == Operators.SUB) {
           domain.setUpperBound(upperBound + valueTwo);
         }
+        else if (op == Operators.MUL) {
+          domain.setUpperBound(upperBound / valueTwo);
+        }
+        else if (op == Operators.DIV) {
+          domain.setUpperBound(upperBound * valueTwo);
+        }
       } else if (dec == FunctionDeclarationKind.GTE) {
         Integer lowerBound = domain.getLowerBound();
         if (op == Operators.ADD) {
           domain.setLowerBound(lowerBound - valueTwo);
         } else if (op == Operators.SUB) {
           domain.setLowerBound(lowerBound + valueTwo);
+        } else if (op == Operators.MUL) {
+          domain.setLowerBound(lowerBound / valueTwo);
+        } else if (op == Operators.DIV) {
+          domain.setLowerBound(lowerBound * valueTwo);
         }
       } else if (dec == FunctionDeclarationKind.LT) {
         Integer upperBound = domain.getUpperBound();
@@ -506,6 +493,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - valueTwo - 1);
         } else if (op == Operators.SUB) {
           domain.setUpperBound(upperBound + valueTwo - 1);
+        } else if (op == Operators.MUL) {
+          domain.setUpperBound(upperBound / valueTwo - 1);
+        } else if (op == Operators.DIV) {
+          domain.setUpperBound(upperBound * valueTwo - 1);
         }
       } else if (dec == FunctionDeclarationKind.GT) {
         Integer lowerBound = domain.getLowerBound();
@@ -513,6 +504,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - valueTwo + 1);
         } else if (op == Operators.SUB) {
           domain.setLowerBound(lowerBound + valueTwo + 1);
+        } else if (op == Operators.MUL) {
+          domain.setLowerBound(lowerBound / valueTwo + 1);
+        } else if (op == Operators.DIV) {
+          domain.setLowerBound(lowerBound * valueTwo + 1);
         }
       }
     }
@@ -528,6 +523,10 @@ public class DomainOptimizerFormulaRegister {
           domainOne.setUpperBound(upperBound - valueTwo);
         } else if (op == Operators.SUB) {
           domainOne.setUpperBound(upperBound + valueTwo);
+        } else if (op == Operators.MUL) {
+          domainOne.setUpperBound(upperBound / valueTwo);
+        } else if (op == Operators.DIV) {
+          domainOne.setUpperBound(upperBound * valueTwo);
         }
       } else if (dec == FunctionDeclarationKind.GTE) {
         Integer lowerBound = domainOne.getLowerBound();
@@ -535,6 +534,10 @@ public class DomainOptimizerFormulaRegister {
           domainOne.setLowerBound(lowerBound - valueTwo);
         } else if (op == Operators.SUB) {
           domainOne.setLowerBound(lowerBound + valueTwo);
+        } else if (op == Operators.MUL) {
+          domainOne.setLowerBound(lowerBound / valueTwo);
+        } else if (op == Operators.DIV) {
+          domainOne.setLowerBound(lowerBound * valueTwo);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -543,6 +546,11 @@ public class DomainOptimizerFormulaRegister {
           domainOne.setUpperBound(upperBound - valueTwo - 1);
         } else if (op == Operators.SUB) {
           domainOne.setUpperBound(upperBound + valueTwo - 1);
+        } else if (op == Operators.MUL) {
+          domainOne.setUpperBound(upperBound / valueTwo - 1);
+        }
+        else if (op == Operators.DIV) {
+          domainOne.setUpperBound(upperBound * valueTwo - 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -551,6 +559,10 @@ public class DomainOptimizerFormulaRegister {
           domainOne.setLowerBound(lowerBound - valueTwo + 1);
         } else if (op == Operators.SUB) {
           domainOne.setLowerBound(lowerBound + valueTwo + 1);
+        } else if (op == Operators.MUL) {
+          domainOne.setLowerBound(lowerBound / valueTwo + 1);
+        } else if (op == Operators.DIV) {
+          domainOne.setLowerBound(lowerBound * valueTwo + 1);
         }
       }
     }
@@ -566,6 +578,10 @@ public class DomainOptimizerFormulaRegister {
           domainTwo.setUpperBound(upperBound - valueOne);
         } else if (op == Operators.SUB) {
           domainTwo.setLowerBound(upperBound - valueOne);
+        } else if (op == Operators.MUL) {
+          domainTwo.setLowerBound(upperBound / valueOne);
+        } else if (op == Operators.DIV) {
+          domainTwo.setLowerBound(upperBound * valueOne);
         }
       }
       if (dec == FunctionDeclarationKind.GTE) {
@@ -574,6 +590,10 @@ public class DomainOptimizerFormulaRegister {
           domainTwo.setLowerBound(lowerBound - valueOne);
         } else if (op == Operators.SUB) {
           domainTwo.setLowerBound(lowerBound + valueOne);
+        } else if (op == Operators.MUL) {
+          domainTwo.setLowerBound(lowerBound / valueOne);
+        } else if (op == Operators.DIV) {
+          domainTwo.setLowerBound(lowerBound * valueOne);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -582,6 +602,10 @@ public class DomainOptimizerFormulaRegister {
           domainTwo.setUpperBound(upperBound - valueOne - 1);
         } else if (op == Operators.SUB) {
           domainTwo.setLowerBound(upperBound - valueOne - 1);
+        } else if (op == Operators.MUL) {
+          domainTwo.setLowerBound(upperBound / valueOne - 1);
+        } else if (op == Operators.DIV) {
+          domainTwo.setLowerBound(upperBound * valueOne - 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -590,6 +614,10 @@ public class DomainOptimizerFormulaRegister {
           domainTwo.setLowerBound(lowerBound - valueOne + 1);
         } else if (op == Operators.SUB) {
           domainTwo.setLowerBound(lowerBound + valueOne + 1);
+        } else if (op == Operators.MUL) {
+          domainTwo.setLowerBound(lowerBound / valueOne + 1);
+        } else if (op == Operators.DIV) {
+          domainTwo.setLowerBound(lowerBound * valueOne + 1);
         }
       }
     }
@@ -608,6 +636,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - valueOne);
         } else if (op == Operators.SUB) {
           domain.setUpperBound(upperBound + valueOne);
+        } else if (op == Operators.MUL) {
+          domain.setUpperBound(upperBound / valueOne);
+        } else if (op == Operators.DIV) {
+          domain.setUpperBound(upperBound * valueOne);
         }
       }
       if (dec == FunctionDeclarationKind.GTE) {
@@ -616,6 +648,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - valueOne);
         } else if (op == Operators.SUB) {
           domain.setLowerBound(lowerBound + valueOne);
+        } else if (op == Operators.MUL) {
+          domain.setLowerBound(lowerBound / valueOne);
+        } else if (op == Operators.DIV) {
+          domain.setLowerBound(lowerBound * valueOne);
         }
       }
       if (dec == FunctionDeclarationKind.LT) {
@@ -624,6 +660,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setUpperBound(upperBound - valueOne + 1);
         } else if (op == Operators.SUB) {
           domain.setUpperBound(upperBound + valueOne + 1);
+        } else if (op == Operators.MUL) {
+          domain.setUpperBound(upperBound / valueOne + 1);
+        } else if (op == Operators.DIV) {
+          domain.setUpperBound(upperBound * valueOne + 1);
         }
       }
       if (dec == FunctionDeclarationKind.GT) {
@@ -632,6 +672,10 @@ public class DomainOptimizerFormulaRegister {
           domain.setLowerBound(lowerBound - valueOne - 1);
         } else if (op == Operators.SUB) {
           domain.setLowerBound(lowerBound + valueOne - 1);
+        } else if (op == Operators.MUL) {
+          domain.setLowerBound(lowerBound / valueOne - 1);
+        } else if (op == Operators.DIV) {
+          domain.setLowerBound(lowerBound * valueOne - 1);
         }
       }
     }

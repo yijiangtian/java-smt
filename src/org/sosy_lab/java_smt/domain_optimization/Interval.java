@@ -32,7 +32,7 @@ public class Interval {
   }
 
   public void setLowerBound(Integer lBound) {
-    if (lBound > getLowerBound() && lBound < getUpperBound()) {
+    if (lBound > getLowerBound()) {
       lower = lBound;
     }
     if (!this.isSet) {
@@ -40,7 +40,7 @@ public class Interval {
     }
   }
   public void setUpperBound(Integer uBound) {
-    if (uBound < getUpperBound() && uBound > getLowerBound()) {
+    if (uBound < getUpperBound()) {
       upper = uBound;
     }
     if (!this.isSet) {
