@@ -62,7 +62,6 @@ public class DomainOptimizerDecider {
           protected TraversalProcess visitDefault(Formula formula) {
             return TraversalProcess.CONTINUE;
           }
-
           @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
             vars.add(formula);
