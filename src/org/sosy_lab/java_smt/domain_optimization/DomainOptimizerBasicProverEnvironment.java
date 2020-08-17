@@ -113,6 +113,8 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
         ValueAssignment assignmentUpper = new ValueAssignment(f, imgr.makeNumber(i.getUpperBound()),
             bmgr.makeBoolean(f == imgr.makeNumber(i.getUpperBound())), "assignmentUp",
             imgr.makeNumber(i.getUpperBound()), interpretation);
+        System.out.println(assignmentLower.toString());
+        System.out.println(assignmentUpper.toString());
       }
     }
   return this.wrapped.getModel();
