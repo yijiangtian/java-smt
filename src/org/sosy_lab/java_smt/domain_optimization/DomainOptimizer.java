@@ -21,6 +21,7 @@
 package org.sosy_lab.java_smt.domain_optimization;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
@@ -30,6 +31,8 @@ import org.sosy_lab.java_smt.api.SolverException;
 public interface DomainOptimizer {
 
   DomainOptimizerSolverContext getDelegate();
+
+  Map<Formula, Interval> getDomainDictionary();
 
   ProverEnvironment getWrapped();
 

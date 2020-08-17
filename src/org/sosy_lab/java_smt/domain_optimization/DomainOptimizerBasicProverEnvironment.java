@@ -20,13 +20,19 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.sosy_lab.java_smt.api.BasicProverEnvironment;
 import org.sosy_lab.java_smt.api.BooleanFormula;
+import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
+import org.sosy_lab.java_smt.api.FormulaManager;
+import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.Model;
+import org.sosy_lab.java_smt.api.Model.ValueAssignment;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
 import org.sosy_lab.java_smt.api.SolverException;
 
@@ -35,9 +41,11 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   private final ProverEnvironment wrapped;
   private final DomainOptimizer opt;
   private final DomainOptimizerFormulaRegister register;
+  private final FormulaManager fmgr;
 
   DomainOptimizerBasicProverEnvironment(
       DomainOptimizerSolverContext delegate) {
+    this.fmgr = delegate.getFormulaManager();
     this.wrapped = delegate.newProverEnvironment();
     opt = new BasicDomainOptimizer(wrapped, delegate);
     register = new DomainOptimizerFormulaRegister(opt);
@@ -61,13 +69,15 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
     if (this.register.countVariables(constraint) == 1) {
       if (!this.opt.fallBack(constraint)) {
         this.opt.pushConstraint(constraint);
+      } else {
+        this.wrapped.addConstraint(constraint);
       }
     } else {
       if (this.register.countVariables(constraint) <= 16) {
         constraint = (BooleanFormula) pushQuery(constraint);
       }
+        this.wrapped.addConstraint(constraint);
       }
-    this.wrapped.addConstraint(constraint);
     return null;
   }
 
@@ -91,8 +101,21 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public Model getModel() throws SolverException {
-    // TODO check model of Optimizer
-    return this.wrapped.getModel();
+    Map<Formula, Interval> model = opt.getDomainDictionary();
+    IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+    BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    for (Formula f : model.keySet()) {
+      for (Interval i : model.values()) {
+        List<Formula> interpretation = new ArrayList<>();
+        ValueAssignment assignmentLower = new ValueAssignment(f, imgr.makeNumber(i.getLowerBound()),
+            bmgr.makeBoolean(f == imgr.makeNumber(i.getLowerBound())), "assignmentLow",
+            imgr.makeNumber(i.getLowerBound()), interpretation);
+        ValueAssignment assignmentUpper = new ValueAssignment(f, imgr.makeNumber(i.getUpperBound()),
+            bmgr.makeBoolean(f == imgr.makeNumber(i.getUpperBound())), "assignmentUp",
+            imgr.makeNumber(i.getUpperBound()), interpretation);
+      }
+    }
+  return this.wrapped.getModel();
   }
 
   @Override
@@ -125,10 +148,6 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   public Formula pushQuery(Formula query) throws InterruptedException, SolverException {
     DomainOptimizerDecider decider = opt.getDecider();
     Formula substituted = decider.pruneTree(query);
-    if (!decider.getFallBack()) {
-      return substituted;
-    }
-    decider.setFallBack(false);
-    return query;
+    return substituted;
   }
 }

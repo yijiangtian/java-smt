@@ -39,7 +39,6 @@ import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
 public class DomainOptimizerDecider {
 
-  private boolean fallBack = false;
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
@@ -51,13 +50,6 @@ public class DomainOptimizerDecider {
     this.wrapped = opt.getWrapped();
   }
 
-  public boolean getFallBack() {
-    return this.fallBack;
-  }
-
-  public void setFallBack(boolean pFallBack) {
-    this.fallBack = pFallBack;
-  }
 
   public List<Formula> performSubstitutions(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -67,7 +59,7 @@ public class DomainOptimizerDecider {
     FormulaVisitor<TraversalProcess> varExtractor =
         new DefaultFormulaVisitor<>() {
           @Override
-          protected TraversalProcess visitDefault(Formula f) {
+          protected TraversalProcess visitDefault(Formula formula) {
             return TraversalProcess.CONTINUE;
           }
 
@@ -103,10 +95,6 @@ public class DomainOptimizerDecider {
       }
       substitutedFormulas.add(f);
       f = buffer;
-      if (maxIterations == 1000) {
-        this.fallBack = true;
-        break;
-      }
     }
     return substitutedFormulas;
   }
@@ -172,7 +160,6 @@ public class DomainOptimizerDecider {
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
-      System.out.println(pFormula.toString());
     }
     return (BooleanFormula) pFormula;
   }

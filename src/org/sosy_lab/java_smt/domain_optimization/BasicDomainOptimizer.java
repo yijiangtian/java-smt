@@ -55,6 +55,10 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     this.decider = new DomainOptimizerDecider(this, delegate);
   }
 
+  public Map<Formula,Interval> getDomainDictionary() {
+    return domainDictionary;
+  }
+
 
 @Override
   public boolean fallBack(BooleanFormula constraint) {
@@ -138,7 +142,6 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     this.register.visit(constraint);
     this.constraints.add(constraint);
     this.register.processConstraint(constraint);
-
   }
 
   @Override

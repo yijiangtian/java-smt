@@ -22,7 +22,6 @@ package org.sosy_lab.java_smt.domain_optimization;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.Formula;
 import org.sosy_lab.java_smt.api.FormulaManager;
