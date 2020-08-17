@@ -73,7 +73,6 @@ public class DomainOptimizerDecider {
 
     this.variables = vars;
     int[][] decisionMatrix = constructDecisionMatrix();
-    int maxIterations = 0;
 
     for (int i = 0; i < Math.pow(2, variables.size()); i++) {
       List<Map<Formula, Formula>> substitutions = new ArrayList<>();
@@ -87,7 +86,6 @@ public class DomainOptimizerDecider {
           substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
         }
         substitutions.add(substitution);
-        maxIterations++;
       }
       Formula buffer = f;
       for (Map<Formula, Formula> substitution : substitutions) {
