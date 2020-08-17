@@ -56,7 +56,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   }
 
   @Override
-  public Map<Formula,Interval> getDomainDictionary() {
+  public Map<Formula, Interval> getDomainDictionary() {
     return domainDictionary;
   }
 
