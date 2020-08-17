@@ -55,6 +55,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     this.decider = new DomainOptimizerDecider(this, delegate);
   }
 
+  @Override
   public Map<Formula,Interval> getDomainDictionary() {
     return domainDictionary;
   }
