@@ -129,7 +129,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
       }
     }
     DomainOptimizerModel pModel = new DomainOptimizerModel();
-    ImmutableList assignmentsImmutable = ImmutableList.of(assignments);
+    ImmutableList<ValueAssignment> assignmentsImmutable = ImmutableList.copyOf(assignments);
     pModel.setAssignments(assignmentsImmutable);
     return pModel;
   }
