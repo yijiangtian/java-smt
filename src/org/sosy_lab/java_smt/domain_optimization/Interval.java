@@ -33,12 +33,13 @@ public class Interval {
 
   public void setLowerBound(Integer lBound) {
     if (lBound > getLowerBound()) {
-      lower = lBound;
+      lower = Integer.valueOf(lBound);
     }
     if (!this.isSet) {
       this.isSet = true;
     }
   }
+
   public void setUpperBound(Integer uBound) {
     if (uBound < getUpperBound()) {
       upper = uBound;
@@ -47,7 +48,6 @@ public class Interval {
       this.isSet = true;
     }
   }
-
 
   public Integer getLowerBound() {
     return lower;

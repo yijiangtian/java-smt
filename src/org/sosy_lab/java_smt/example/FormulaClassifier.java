@@ -62,8 +62,7 @@ public class FormulaClassifier {
   private final Classifier v = new Classifier();
   private int levelLinearArithmetic = 0;
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
 
     if (args.length == 0) {

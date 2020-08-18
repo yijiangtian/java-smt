@@ -31,8 +31,7 @@ public class OptimizationFormulaWeights {
     // never called
   }
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -41,7 +40,7 @@ public class OptimizationFormulaWeights {
 
     try (SolverContext context =
             SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-         OptimizationProverEnvironment prover =
+        OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();

@@ -50,7 +50,6 @@ public interface DomainOptimizer {
 
   void removeConstraint(BooleanFormula constraint);
 
-
   DomainOptimizerFormulaRegister getRegister();
 
   DomainOptimizerDecider getDecider();

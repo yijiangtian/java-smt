@@ -37,7 +37,6 @@ import org.sosy_lab.java_smt.api.visitors.DefaultFormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.FormulaVisitor;
 import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 
-
 public class BasicDomainOptimizer implements DomainOptimizer {
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
@@ -46,7 +45,6 @@ public class BasicDomainOptimizer implements DomainOptimizer {
   private final Map<Formula, Interval> domainDictionary = new LinkedHashMap<>();
   DomainOptimizerFormulaRegister register;
   DomainOptimizerDecider decider;
-
 
   public BasicDomainOptimizer(ProverEnvironment pWrapped, DomainOptimizerSolverContext delegate) {
     this.wrapped = pWrapped;
@@ -60,8 +58,7 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     return domainDictionary;
   }
 
-
-@Override
+  @Override
   public boolean fallBack(BooleanFormula constraint) {
     boolean[] fallBack = {false};
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -74,9 +71,10 @@ public class BasicDomainOptimizer implements DomainOptimizer {
           protected TraversalProcess visitDefault(Formula f) {
             return null;
           }
+
           @Override
-          public TraversalProcess visitFunction(Formula f, List<Formula> args,
-                                                   FunctionDeclaration<?> functionDeclaration) {
+          public TraversalProcess visitFunction(
+              Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
             FunctionDeclarationKind dec = functionDeclaration.getKind();
             if (dec == FunctionDeclarationKind.MODULO) {
               fallBack[0] = true;
@@ -87,7 +85,6 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     fmgr.visitRecursively(constraint, checkForUnsupportedOperands);
     return fallBack[0];
   }
-
 
   @Override
   public DomainOptimizerSolverContext getDelegate() {
@@ -160,5 +157,4 @@ public class BasicDomainOptimizer implements DomainOptimizer {
     Interval domain = this.domainDictionary.get(var);
     return domain;
   }
-
 }

@@ -158,16 +158,14 @@ public class SolverContextFactory {
     return (lastIndexOf == -1) ? "" : path.substring(lastIndexOf);
   }
 
-  /** Create new context with solver chosen according to the supplied configuration.
-   **/
+  /** Create new context with solver chosen according to the supplied configuration. */
   public SolverContext generateContext() throws InvalidConfigurationException {
     return generateContext(solver);
   }
 
   /** Create new context with solver name supplied. */
   @SuppressWarnings("resource") // returns unclosed context object
-  public SolverContext generateContext(
-      Solvers solverToCreate)
+  public SolverContext generateContext(Solvers solverToCreate)
       throws InvalidConfigurationException {
     SolverContext context;
     try {
@@ -250,9 +248,7 @@ public class SolverContextFactory {
    * documentation of accepted parameters.
    */
   public static SolverContext createSolverContext(
-      Configuration config,
-      LogManager logger,
-      ShutdownNotifier shutdownNotifier)
+      Configuration config, LogManager logger, ShutdownNotifier shutdownNotifier)
       throws InvalidConfigurationException {
     return new SolverContextFactory(config, logger, shutdownNotifier).generateContext();
   }
@@ -264,10 +260,7 @@ public class SolverContextFactory {
    * documentation of accepted parameters.
    */
   public static SolverContext createSolverContext(
-      Configuration config,
-      LogManager logger,
-      ShutdownNotifier shutdownNotifier,
-      Solvers solver)
+      Configuration config, LogManager logger, ShutdownNotifier shutdownNotifier, Solvers solver)
       throws InvalidConfigurationException {
     return new SolverContextFactory(config, logger, shutdownNotifier).generateContext(solver);
   }
@@ -278,8 +271,7 @@ public class SolverContextFactory {
    *
    * @param solver Solver to initialize
    */
-  public static SolverContext createSolverContext(
-      Solvers solver)
+  public static SolverContext createSolverContext(Solvers solver)
       throws InvalidConfigurationException {
     return new SolverContextFactory(
             Configuration.defaultConfiguration(),

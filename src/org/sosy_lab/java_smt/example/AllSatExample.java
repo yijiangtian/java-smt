@@ -35,9 +35,7 @@ public class AllSatExample {
   private final ProverEnvironment prover;
   private final SolverContext context;
 
-  public static void main(
-      DomainOptimizer pOpt,
-      String... args)
+  public static void main(DomainOptimizer pOpt, String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -45,7 +43,7 @@ public class AllSatExample {
     for (Solvers solver : Solvers.values()) {
       try (SolverContext context =
               SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-           ProverEnvironment prover =
+          ProverEnvironment prover =
               context.newProverEnvironment(
                   ProverOptions.GENERATE_MODELS, ProverOptions.GENERATE_ALL_SAT)) {
         System.out.println("\nUsing solver " + solver + " in version " + context.getVersion());

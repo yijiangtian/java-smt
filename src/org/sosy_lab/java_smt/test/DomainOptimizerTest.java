@@ -52,8 +52,9 @@ public class DomainOptimizerTest {
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
     try (DomainOptimizerSolverContext delegate =
-        (DomainOptimizerSolverContext) SolverContextFactory.createSolverContext(
-            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+        (DomainOptimizerSolverContext)
+            SolverContextFactory.createSolverContext(
+                config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
       FormulaManager fmgr = delegate.getFormulaManager();
 
       IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
@@ -63,8 +64,7 @@ public class DomainOptimizerTest {
       BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
       BooleanFormula constraintThree =
           imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-      BooleanFormula constraintFour =
-          imgr.greaterOrEquals(imgr.add(y, x), imgr.makeNumber(3));
+      BooleanFormula constraintFour = imgr.greaterOrEquals(imgr.add(y, x), imgr.makeNumber(3));
       try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
 
         basicEnv.addConstraint(constraintOne);
@@ -88,5 +88,4 @@ public class DomainOptimizerTest {
   public void isSatisfiabilityAffected() {
     assertThat(isUnsatWithDomainOptimizer).isEqualTo(isUnsatWithoutDomainOptimizer);
   }
-
 }

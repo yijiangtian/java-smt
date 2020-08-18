@@ -25,8 +25,7 @@ import org.sosy_lab.java_smt.api.ProverEnvironment;
 public class DomainOptimizerProverEnvironment extends DomainOptimizerBasicProverEnvironment<Void>
     implements ProverEnvironment {
 
-  public DomainOptimizerProverEnvironment(
-      DomainOptimizerSolverContext delegate) {
+  public DomainOptimizerProverEnvironment(DomainOptimizerSolverContext delegate) {
     super(delegate);
   }
 }

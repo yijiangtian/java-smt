@@ -20,6 +20,7 @@
 
 package org.sosy_lab.java_smt.domain_optimization;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,8 +44,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   private final DomainOptimizerFormulaRegister register;
   private final FormulaManager fmgr;
 
-  DomainOptimizerBasicProverEnvironment(
-      DomainOptimizerSolverContext delegate) {
+  DomainOptimizerBasicProverEnvironment(DomainOptimizerSolverContext delegate) {
     this.fmgr = delegate.getFormulaManager();
     this.wrapped = delegate.newProverEnvironment();
     opt = new BasicDomainOptimizer(wrapped, delegate);
@@ -70,14 +70,14 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
       if (!this.opt.fallBack(constraint)) {
         this.opt.pushConstraint(constraint);
       } else {
-        this.wrapped.addConstraint(constraint);
+        return null;
       }
     } else {
-      if (this.register.countVariables(constraint) <= 16) {
+      if (this.register.countVariables(constraint) <= 17) {
         constraint = (BooleanFormula) pushQuery(constraint);
       }
-        this.wrapped.addConstraint(constraint);
-      }
+      this.wrapped.addConstraint(constraint);
+    }
     return null;
   }
 
@@ -100,24 +100,38 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   }
 
   @Override
-  public Model getModel() throws SolverException {
+  public Model getModel() {
     Map<Formula, Interval> model = opt.getDomainDictionary();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
+    List<ValueAssignment> assignments = new ArrayList<>();
     for (Formula f : model.keySet()) {
       for (Interval i : model.values()) {
         List<Formula> interpretation = new ArrayList<>();
-        ValueAssignment assignmentLower = new ValueAssignment(f, imgr.makeNumber(i.getLowerBound()),
-            bmgr.makeBoolean(f == imgr.makeNumber(i.getLowerBound())), "assignmentLow",
-            imgr.makeNumber(i.getLowerBound()), interpretation);
-        ValueAssignment assignmentUpper = new ValueAssignment(f, imgr.makeNumber(i.getUpperBound()),
-            bmgr.makeBoolean(f == imgr.makeNumber(i.getUpperBound())), "assignmentUp",
-            imgr.makeNumber(i.getUpperBound()), interpretation);
-        System.out.println(assignmentLower.toString());
-        System.out.println(assignmentUpper.toString());
+        ValueAssignment assignmentLower =
+            new ValueAssignment(
+                f,
+                imgr.makeNumber(i.getLowerBound()),
+                bmgr.makeBoolean(f == imgr.makeNumber(i.getLowerBound())),
+                f.toString() + "_low",
+                imgr.makeNumber(i.getLowerBound()),
+                interpretation);
+        ValueAssignment assignmentUpper =
+            new ValueAssignment(
+                f,
+                imgr.makeNumber(i.getUpperBound()),
+                bmgr.makeBoolean(f == imgr.makeNumber(i.getUpperBound())),
+                f.toString() + "_up",
+                imgr.makeNumber(i.getUpperBound()),
+                interpretation);
+        assignments.add(assignmentLower);
+        assignments.add(assignmentUpper);
       }
     }
-  return this.wrapped.getModel();
+    DomainOptimizerModel pModel = new DomainOptimizerModel();
+    ImmutableList assignmentsImmutable = ImmutableList.of(assignments);
+    pModel.setAssignments(assignmentsImmutable);
+    return pModel;
   }
 
   @Override
@@ -133,6 +147,8 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public void close() {
+    System.out.println(
+        "Number of constraints passed to DomainOptimizer: " + opt.getConstraints().size());
     wrapped.close();
   }
 

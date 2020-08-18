@@ -35,8 +35,7 @@ public class OptimizationIntReal {
     // never called
   }
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);
@@ -51,15 +50,12 @@ public class OptimizationIntReal {
 
   /** Solve the problem with integer logic. */
   private static void optimizeWithIntegers(
-      Configuration config,
-      LogManager logger,
-      ShutdownNotifier notifier,
-      Solvers solver)
+      Configuration config, LogManager logger, ShutdownNotifier notifier, Solvers solver)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
             SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-         OptimizationProverEnvironment prover =
+        OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();
@@ -78,15 +74,12 @@ public class OptimizationIntReal {
 
   /** Solve the problem with rational logic. */
   private static void optimizeWithRationals(
-      Configuration config,
-      LogManager logger,
-      ShutdownNotifier notifier,
-      Solvers solver)
+      Configuration config, LogManager logger, ShutdownNotifier notifier, Solvers solver)
       throws InterruptedException, SolverException, InvalidConfigurationException {
     // create solver context
     try (SolverContext context =
             SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-         OptimizationProverEnvironment prover =
+        OptimizationProverEnvironment prover =
             context.newOptimizationProverEnvironment(ProverOptions.GENERATE_MODELS)) {
 
       BooleanFormulaManager bmgr = context.getFormulaManager().getBooleanFormulaManager();

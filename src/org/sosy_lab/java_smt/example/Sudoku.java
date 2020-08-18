@@ -91,8 +91,7 @@ public class Sudoku {
   private final BooleanFormulaManager bmgr;
   private final IntegerFormulaManager imgr;
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException, IOException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);

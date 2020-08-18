@@ -97,7 +97,6 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(pFormula, nameExtractor);
   }
 
-
   public boolean isCaterpillar(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<Boolean> isCaterpillar =
@@ -135,8 +134,6 @@ public class DomainOptimizerFormulaRegister {
         };
     return fmgr.visit(pFormula, isCaterpillar);
   }
-
-
 
   public Argtypes getFormulaType(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -178,21 +175,17 @@ public class DomainOptimizerFormulaRegister {
     return fmgr.visit(pFormula, getFormulaType);
   }
 
-
   private void putToBuffer(Function f) {
     this.functionBuffer = f;
   }
-
 
   private Function readFromBuffer() {
     return this.functionBuffer;
   }
 
-
   public int countVariables(Formula f) {
     return delegate.getFormulaManager().extractVariables(f).size();
   }
-
 
   public void processConstraint(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
@@ -212,24 +205,24 @@ public class DomainOptimizerFormulaRegister {
             // Intervals of the variables are adjusted according to the function-declaration
             switch (declaration.toString()) {
               case "LT":
-                return adjustBounds(variableOne, variableTwo,
-                    Operators.LT, pArgs, pFunctionDeclaration);
+                return adjustBounds(
+                    variableOne, variableTwo, Operators.LT, pArgs, pFunctionDeclaration);
 
               case "GT":
-                return adjustBounds(variableOne, variableTwo,
-                    Operators.GT, pArgs, pFunctionDeclaration);
+                return adjustBounds(
+                    variableOne, variableTwo, Operators.GT, pArgs, pFunctionDeclaration);
 
               case "LTE":
-                return adjustBounds(variableOne, variableTwo,
-                    Operators.LTE, pArgs, pFunctionDeclaration);
+                return adjustBounds(
+                    variableOne, variableTwo, Operators.LTE, pArgs, pFunctionDeclaration);
 
               case "GTE":
-                return adjustBounds(variableOne, variableTwo,
-                    Operators.GTE, pArgs, pFunctionDeclaration);
+                return adjustBounds(
+                    variableOne, variableTwo, Operators.GTE, pArgs, pFunctionDeclaration);
 
               case "EQ":
-                return adjustBounds(variableOne, variableTwo,
-                    Operators.EQ, pArgs, pFunctionDeclaration);
+                return adjustBounds(
+                    variableOne, variableTwo, Operators.EQ, pArgs, pFunctionDeclaration);
 
               case "ADD":
                 return processDeclaration(variableOne, variableTwo, Operators.ADD);
@@ -242,7 +235,6 @@ public class DomainOptimizerFormulaRegister {
 
               case "DIV":
                 return processDeclaration(variableOne, variableTwo, Operators.DIV);
-
             }
             return TraversalProcess.CONTINUE;
           }
@@ -676,7 +668,6 @@ public class DomainOptimizerFormulaRegister {
 
     return TraversalProcess.CONTINUE;
   }
-
 
   /*
   removes parantheses and spaces from variable-name so that it can be parsed as a constant

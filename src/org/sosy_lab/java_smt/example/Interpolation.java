@@ -28,8 +28,7 @@ public class Interpolation {
     // never called
   }
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
 
     // set up a basic environment
@@ -43,7 +42,7 @@ public class Interpolation {
     // setup context
     try (SolverContext context =
             SolverContextFactory.createSolverContext(config, logger, notifier, solver);
-         InterpolatingProverEnvironment<?> prover =
+        InterpolatingProverEnvironment<?> prover =
             context.newProverEnvironmentWithInterpolation()) {
 
       IntegerFormulaManager imgr = context.getFormulaManager().getIntegerFormulaManager();

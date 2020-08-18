@@ -48,8 +48,7 @@ public class HoudiniApp {
   private final BooleanFormulaManager bfmgr;
   private final SolverContext context;
 
-  public static void main(
-      String... args)
+  public static void main(String... args)
       throws InvalidConfigurationException, SolverException, InterruptedException {
     Configuration config = Configuration.defaultConfiguration();
     LogManager logger = BasicLogManager.create(config);

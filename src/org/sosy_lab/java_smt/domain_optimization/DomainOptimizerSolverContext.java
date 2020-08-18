@@ -31,8 +31,7 @@ public class DomainOptimizerSolverContext implements SolverContext {
 
   private final SolverContext delegate;
 
-  public DomainOptimizerSolverContext(
-      SolverContext delegate) {
+  public DomainOptimizerSolverContext(SolverContext delegate) {
     this.delegate = delegate;
   }
 
