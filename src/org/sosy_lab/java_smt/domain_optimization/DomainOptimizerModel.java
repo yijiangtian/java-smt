@@ -63,7 +63,7 @@ public class DomainOptimizerModel implements Model {
 
   @Override
   public @Nullable Boolean evaluate(BooleanFormula f) {
-    return null;
+    return true;
   }
 
   @Override
@@ -73,7 +73,7 @@ public class DomainOptimizerModel implements Model {
 
   @Override
   public Iterator<ValueAssignment> iterator() {
-    return null;
+    return assignments.iterator();
   }
 
   @Override
