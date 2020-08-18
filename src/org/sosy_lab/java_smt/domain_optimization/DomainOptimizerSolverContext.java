@@ -40,9 +40,13 @@ public class DomainOptimizerSolverContext implements SolverContext {
     return delegate.getFormulaManager();
   }
 
-  @Override
-  public ProverEnvironment newProverEnvironment(ProverOptions... options) {
+  public ProverEnvironment newBasicProverEnvironment(ProverOptions... options) {
     return delegate.newProverEnvironment(options);
+  }
+
+  @Override
+  public DomainOptimizerProverEnvironment newProverEnvironment(ProverOptions... options) {
+    return new DomainOptimizerProverEnvironment(this);
   }
 
   @Override

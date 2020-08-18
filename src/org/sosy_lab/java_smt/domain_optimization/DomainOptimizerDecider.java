@@ -42,35 +42,35 @@ public class DomainOptimizerDecider {
   private final DomainOptimizer opt;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
+  private final DomainOptimizerFormulaRegister register;
   private List<Formula> variables = new ArrayList<>();
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
+    this.register = opt.getRegister();
   }
 
   public List<Formula> performSubstitutions(Formula f) {
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-    List<Formula> vars = new ArrayList<>();
+    List<Formula> variables = new ArrayList<>();
     List<Formula> substitutedFormulas = new ArrayList<>();
     FormulaVisitor<TraversalProcess> varExtractor =
         new DefaultFormulaVisitor<>() {
-          @Override
-          protected TraversalProcess visitDefault(Formula formula) {
+          protected TraversalProcess visitDefault(Formula f) {
             return TraversalProcess.CONTINUE;
           }
 
-          @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
-            vars.add(formula);
+            variables.add(formula);
             return TraversalProcess.CONTINUE;
           }
         };
     fmgr.visitRecursively(f, varExtractor);
 
-    this.variables = vars;
+    this.variables = variables;
     int[][] decisionMatrix = constructDecisionMatrix();
 
     for (int i = 0; i < Math.pow(2, variables.size()); i++) {
@@ -96,12 +96,13 @@ public class DomainOptimizerDecider {
     return substitutedFormulas;
   }
 
+
   public int[][] constructDecisionMatrix() {
-    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2, variables.size())];
-    int rows = (int) Math.pow(2, variables.size());
-    for (int i = 0; i < rows; i++) {
-      for (int j = variables.size() - 1; j >= 0; j--) {
-        decisionMatrix[j][i] = (i / (int) Math.pow(2, j)) % 2;
+    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2,variables.size())];
+    int rows = (int) Math.pow(2,variables.size());
+    for (int i=0; i<rows; i++) {
+      for (int j=variables.size() - 1; j>=0; j--) {
+        decisionMatrix[j][i] = (i/(int) Math.pow(2, j))%2;
       }
     }
     return decisionMatrix;
@@ -111,7 +112,7 @@ public class DomainOptimizerDecider {
     List<Formula> readyForDecisisionPhase = performSubstitutions(query);
     for (Formula f : readyForDecisisionPhase) {
       this.wrapped.push();
-      this.wrapped.addConstraint((BooleanFormula) f);
+      this.wrapped.addConstraint(query);
       if (!this.wrapped.isUnsat()) {
         return true;
       }
@@ -120,32 +121,30 @@ public class DomainOptimizerDecider {
     return false;
   }
 
+
   public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
     FormulaManager fmgr = delegate.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     List<BooleanFormula> operands = new ArrayList<>();
     List<Map<Formula, Formula>> substitutions = new ArrayList<>();
-    BooleanFormulaTransformationVisitor visitor =
-        new BooleanFormulaTransformationVisitor(fmgr) {
-          @Override
-          public BooleanFormula visitAtom(
-              BooleanFormula pAtom, FunctionDeclaration<BooleanFormula> decl) {
-            operands.add(pAtom);
-            return super.visitAtom(pAtom, decl);
-          }
-
-          @Override
-          public BooleanFormula visitAnd(List<BooleanFormula> processedOperands) {
-            operands.addAll(processedOperands);
-            return super.visitAnd(processedOperands);
-          }
-
-          @Override
-          public BooleanFormula visitOr(List<BooleanFormula> processedOperands) {
-            operands.addAll(processedOperands);
-            return super.visitOr(processedOperands);
-          }
-        };
+    BooleanFormulaTransformationVisitor visitor = new BooleanFormulaTransformationVisitor(fmgr) {
+      @Override
+      public BooleanFormula visitAtom(BooleanFormula pAtom,
+                                      FunctionDeclaration<BooleanFormula> decl) {
+        operands.add(pAtom);
+        return super.visitAtom(pAtom, decl);
+      }
+      @Override
+      public BooleanFormula visitAnd(List<BooleanFormula> processedOperands) {
+        operands.addAll(processedOperands);
+        return super.visitAnd(processedOperands);
+      }
+      @Override
+      public BooleanFormula visitOr(List<BooleanFormula> processedOperands) {
+        operands.addAll(processedOperands);
+        return super.visitOr(processedOperands);
+      }
+    };
     bmgr.visit((BooleanFormula) pFormula, visitor);
     for (BooleanFormula toProcess : operands) {
       Map<Formula, Formula> substitution = new HashMap<>();
@@ -158,7 +157,10 @@ public class DomainOptimizerDecider {
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
+      System.out.println(substitution);
     }
     return (BooleanFormula) pFormula;
   }
+
+
 }

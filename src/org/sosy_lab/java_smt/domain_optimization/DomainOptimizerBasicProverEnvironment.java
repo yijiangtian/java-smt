@@ -39,6 +39,8 @@ import org.sosy_lab.java_smt.api.SolverException;
 
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
+  public int totalConstraints = 0;
+  public int solvedConstraints = 0;
   private final ProverEnvironment wrapped;
   private final DomainOptimizer opt;
   private final DomainOptimizerFormulaRegister register;
@@ -46,7 +48,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   DomainOptimizerBasicProverEnvironment(DomainOptimizerSolverContext delegate) {
     this.fmgr = delegate.getFormulaManager();
-    this.wrapped = delegate.newProverEnvironment();
+    this.wrapped = delegate.newBasicProverEnvironment();
     opt = new BasicDomainOptimizer(wrapped, delegate);
     register = new DomainOptimizerFormulaRegister(opt);
   }
@@ -73,12 +75,22 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
         return null;
       }
     } else {
+      this.totalConstraints += 1;
       if (this.register.countVariables(constraint) <= 17) {
         constraint = (BooleanFormula) pushQuery(constraint);
+        this.solvedConstraints += 1;
       }
-      this.wrapped.addConstraint(constraint);
     }
+    this.wrapped.addConstraint(constraint);
     return null;
+  }
+
+  public int getTotalConstraints() {
+    return this.totalConstraints;
+  }
+
+  public int getSolvedConstraints() {
+    return this.solvedConstraints;
   }
 
   @Override
@@ -147,8 +159,6 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public void close() {
-    System.out.println(
-        "Number of constraints passed to DomainOptimizer: " + opt.getConstraints().size());
     wrapped.close();
   }
 

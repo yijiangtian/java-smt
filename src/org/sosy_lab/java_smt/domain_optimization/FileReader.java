@@ -101,20 +101,23 @@ final class FileReader {
                     config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
           FormulaManager fmgr = delegate.getFormulaManager();
           try (DomainOptimizerProverEnvironment env =
-              new DomainOptimizerProverEnvironment(delegate)) {
+              delegate.newProverEnvironment()) {
             long startTime = System.nanoTime();
             for (String toAssert : asserts) {
               BooleanFormula constraint = fmgr.parse(header + toAssert);
               env.addConstraint(constraint);
             }
-            env.getModel();
+            int totalConstraints = env.getTotalConstraints();
+            int solvedConstraints = env.getSolvedConstraints();
             long endTime = System.nanoTime();
-            System.out.println("isUnsat with DomainOptimizer: " + env.isUnsat());
-            System.out.println("Execution-time: " + (endTime - startTime));
             writer.write("isUnsat with DomainOptimizer: " + env.isUnsat() + "\n");
-            writer.write("Execution-time: " + (endTime - startTime) + "\n");
+            writer.write("Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" +
+                "\n");
+            writer.write("Total number of queries: " + totalConstraints + "\n");
+            writer.write("Number of queries solved by DomainOptimizer: " + solvedConstraints +
+                "\n");
           }
-          try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+          try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
             long startTime = System.nanoTime();
             for (String toAssert : asserts) {
               BooleanFormula constraint = fmgr.parse(header + toAssert);
@@ -122,7 +125,7 @@ final class FileReader {
             }
             long endTime = System.nanoTime();
             writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat() + "\n");
-            writer.write("Execution-time: " + (endTime - startTime) + "\n");
+            writer.write("Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
           }
         }
       }
