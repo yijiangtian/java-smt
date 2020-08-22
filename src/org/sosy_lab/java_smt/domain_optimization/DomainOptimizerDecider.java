@@ -121,6 +121,7 @@ public class DomainOptimizerDecider {
     int count = 0;
     for (Formula f : readyForDecisisionPhase) {
       this.wrapped.push();
+      this.wrapped.addConstraint((BooleanFormula) f);
       this.wrapped.addConstraint(query);
       if (!this.wrapped.isUnsat()) {
         return true;
