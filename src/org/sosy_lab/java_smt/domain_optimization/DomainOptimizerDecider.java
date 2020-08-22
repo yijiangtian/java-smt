@@ -40,6 +40,7 @@ import org.sosy_lab.java_smt.api.visitors.TraversalProcess;
 public class DomainOptimizerDecider {
 
   private final DomainOptimizer opt;
+  private boolean fallBack;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
   private final DomainOptimizerFormulaRegister register;
@@ -50,6 +51,11 @@ public class DomainOptimizerDecider {
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
     this.register = opt.getRegister();
+    this.fallBack = false;
+  }
+
+  public boolean getFallback() {
+    return this.fallBack;
   }
 
   public List<Formula> performSubstitutions(Formula f) {
@@ -108,21 +114,29 @@ public class DomainOptimizerDecider {
     return decisionMatrix;
   }
 
-  public boolean decide(BooleanFormula query) throws InterruptedException, SolverException {
+  public boolean decide(BooleanFormula query, int maxIterations) throws InterruptedException,
+                                                              SolverException {
     List<Formula> readyForDecisisionPhase = performSubstitutions(query);
+    int count = 0;
     for (Formula f : readyForDecisisionPhase) {
       this.wrapped.push();
       this.wrapped.addConstraint(query);
       if (!this.wrapped.isUnsat()) {
         return true;
       }
+      count++;
       this.wrapped.pop();
+      if (count == maxIterations) {
+        this.fallBack = true;
+        return false;
+      }
     }
     return false;
   }
 
 
-  public BooleanFormula pruneTree(Formula pFormula) throws InterruptedException, SolverException {
+  public BooleanFormula pruneTree(Formula pFormula, int maxIterations) throws InterruptedException,
+                                                              SolverException {
     FormulaManager fmgr = delegate.getFormulaManager();
     BooleanFormulaManager bmgr = fmgr.getBooleanFormulaManager();
     List<BooleanFormula> operands = new ArrayList<>();
@@ -148,7 +162,7 @@ public class DomainOptimizerDecider {
     bmgr.visit((BooleanFormula) pFormula, visitor);
     for (BooleanFormula toProcess : operands) {
       Map<Formula, Formula> substitution = new HashMap<>();
-      if (decide((BooleanFormula) pFormula)) {
+      if (decide((BooleanFormula) pFormula, maxIterations)) {
         substitution.put(toProcess, bmgr.makeTrue());
       } else {
         substitution.put(toProcess, bmgr.makeFalse());
