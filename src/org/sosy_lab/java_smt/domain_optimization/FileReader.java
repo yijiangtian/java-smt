@@ -100,8 +100,7 @@ final class FileReader {
                 SolverContextFactory.createSolverContext(
                     config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
           FormulaManager fmgr = delegate.getFormulaManager();
-          try (DomainOptimizerProverEnvironment env =
-              delegate.newProverEnvironment()) {
+          try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
             long startTime = System.nanoTime();
             for (String toAssert : asserts) {
               BooleanFormula constraint = fmgr.parse(header + toAssert);
@@ -111,11 +110,11 @@ final class FileReader {
             int solvedConstraints = env.getSolvedConstraints();
             long endTime = System.nanoTime();
             writer.write("isUnsat with DomainOptimizer: " + env.isUnsat() + "\n");
-            writer.write("Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" +
-                "\n");
+            writer.write(
+                "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
             writer.write("Total number of queries: " + totalConstraints + "\n");
-            writer.write("Number of queries solved by DomainOptimizer: " + solvedConstraints +
-                "\n");
+            writer.write(
+                "Number of queries solved by DomainOptimizer: " + solvedConstraints + "\n");
           }
           try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
             long startTime = System.nanoTime();
@@ -125,7 +124,8 @@ final class FileReader {
             }
             long endTime = System.nanoTime();
             writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat() + "\n");
-            writer.write("Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
+            writer.write(
+                "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
           }
         }
       }
