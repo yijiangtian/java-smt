@@ -43,14 +43,12 @@ public class DomainOptimizerDecider {
   private boolean fallBack;
   private final DomainOptimizerSolverContext delegate;
   private final ProverEnvironment wrapped;
-  private final DomainOptimizerFormulaRegister register;
   private List<Formula> variables = new ArrayList<>();
 
   public DomainOptimizerDecider(DomainOptimizer pOpt, DomainOptimizerSolverContext pDelegate) {
     opt = pOpt;
     delegate = pDelegate;
     this.wrapped = opt.getWrapped();
-    this.register = opt.getRegister();
     this.fallBack = false;
   }
 
