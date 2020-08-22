@@ -65,10 +65,11 @@ public class DomainOptimizerDecider {
     List<Formula> substitutedFormulas = new ArrayList<>();
     FormulaVisitor<TraversalProcess> varExtractor =
         new DefaultFormulaVisitor<>() {
+          @Override
           protected TraversalProcess visitDefault(Formula f) {
             return TraversalProcess.CONTINUE;
           }
-
+          @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
             variables.add(formula);
             return TraversalProcess.CONTINUE;
@@ -171,7 +172,6 @@ public class DomainOptimizerDecider {
     }
     for (Map<Formula, Formula> substitution : substitutions) {
       pFormula = fmgr.substitute(pFormula, substitution);
-      System.out.println(substitution);
     }
     return (BooleanFormula) pFormula;
   }
