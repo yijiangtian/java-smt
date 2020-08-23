@@ -39,8 +39,8 @@ import org.sosy_lab.java_smt.api.SolverException;
 
 class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment<T> {
 
-  public int totalConstraints = 0;
-  public int solvedConstraints = 0;
+  private int totalConstraints = 0;
+  private int solvedConstraints = 0;
   private final ProverEnvironment wrapped;
   private final DomainOptimizer opt;
   private final DomainOptimizerFormulaRegister register;
@@ -71,9 +71,8 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
     if (this.register.countVariables(constraint) == 1) {
       if (!this.opt.fallBack(constraint)) {
         this.opt.pushConstraint(constraint);
-      } else {
-        this.wrapped.addConstraint(constraint);
       }
+      this.wrapped.addConstraint(constraint);
     } else {
       this.totalConstraints += 1;
       if (this.register.countVariables(constraint) <= 17) {
@@ -108,7 +107,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   @Override
   public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions)
       throws SolverException, InterruptedException {
-    throw new UnsupportedOperationException("not yet implemented");
+    return wrapped.isUnsatWithAssumptions(assumptions);
   }
 
   @Override
@@ -154,7 +153,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   @Override
   public Optional<List<BooleanFormula>> unsatCoreOverAssumptions(
       Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-    throw new UnsupportedOperationException("not yet implemented");
+    return wrapped.unsatCoreOverAssumptions(assumptions);
   }
 
   @Override
@@ -183,4 +182,5 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
       this.wrapped.addConstraint(substituted);
     }
   }
+
 }

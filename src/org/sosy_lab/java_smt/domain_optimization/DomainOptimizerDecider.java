@@ -96,7 +96,11 @@ public class DomainOptimizerDecider {
             substitution.put(var, var);
           }
         } else if (decisionMatrix[j][i] == 0) {
-          substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
+          if (domain.isLowerBoundSet()) {
+            substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
+          } else {
+            substitution.put(var, var);
+          }
         }
         substitutions.add(substitution);
       }
@@ -128,6 +132,7 @@ public class DomainOptimizerDecider {
     for (BooleanFormula f : readyForDecisisionPhase) {
       this.wrapped.push();
       this.wrapped.addConstraint(f);
+      this.wrapped.addConstraint(query);
       if (!this.wrapped.isUnsat()) {
         return true;
       }
