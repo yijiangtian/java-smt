@@ -147,7 +147,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public List<BooleanFormula> getUnsatCore() {
-    throw new UnsupportedOperationException("not yet implemented");
+    return wrapped.getUnsatCore();
   }
 
   @Override

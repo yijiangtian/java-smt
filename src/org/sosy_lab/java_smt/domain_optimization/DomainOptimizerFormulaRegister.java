@@ -88,8 +88,8 @@ public class DomainOptimizerFormulaRegister {
           @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-            IntegerFormula var = imgr.makeVariable(name);
-            opt.addVariable(var);
+            IntegerFormula variable = imgr.makeVariable(name);
+            opt.addVariable(variable);
             return TraversalProcess.CONTINUE;
           }
         };
