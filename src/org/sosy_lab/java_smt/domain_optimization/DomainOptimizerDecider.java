@@ -120,9 +120,9 @@ public class DomainOptimizerDecider {
   public int[][] constructDecisionMatrix() {
     int[][] decisionMatrix = new int[(int) Math.pow(2, variables.size())][variables.size()];
     int rows = (int) Math.pow(2, variables.size());
-      for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < variables.size(); j++) {
-        decisionMatrix[i][j]= (i / (int) Math.pow(2, j)) % 2;
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < variables.size(); j++) {
+        decisionMatrix[i][j] = (i / (int) Math.pow(2, j)) % 2;
       }
     }
     return decisionMatrix;
