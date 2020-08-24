@@ -175,12 +175,11 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   public void pushQuery(Formula query) throws InterruptedException, SolverException {
     DomainOptimizerDecider decider = opt.getDecider();
     BooleanFormula substituted = decider.pruneTree(query, 500);
-    if (decider.getFallback()) {
-      this.wrapped.addConstraint((BooleanFormula) query);
-    } else {
+    if (!decider.getFallback()) {
       this.solvedConstraints += 1;
       this.wrapped.addConstraint(substituted);
+    } else {
+      this.wrapped.addConstraint((BooleanFormula) query);
     }
   }
-
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.BooleanFormulaManager;
 import org.sosy_lab.java_smt.api.Formula;
@@ -88,21 +89,23 @@ public class DomainOptimizerDecider {
       for (int j = 0; j < variables.size(); j++) {
         Formula var = variables.get(j);
         Interval domain = opt.getInterval(var);
-        Map<Formula, Formula> substitution = new HashMap<>();
-        if (decisionMatrix[j][i] == 1) {
-          if (domain.isUpperBoundSet()) {
-            substitution.put(var, imgr.makeNumber(domain.getUpperBound()));
-          } else {
-            substitution.put(var, var);
+        if (domain != null) {
+          Map<Formula, Formula> substitution = new HashMap<>();
+          if (decisionMatrix[i][j] == 1) {
+            if (domain.isUpperBoundSet()) {
+              substitution.put(var, imgr.makeNumber(domain.getUpperBound()));
+            } else {
+              substitution.put(var, var);
+            }
+          } else if (decisionMatrix[i][j] == 0) {
+            if (domain.isLowerBoundSet()) {
+              substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
+            } else {
+              substitution.put(var, var);
+            }
           }
-        } else if (decisionMatrix[j][i] == 0) {
-          if (domain.isLowerBoundSet()) {
-            substitution.put(var, imgr.makeNumber(domain.getLowerBound()));
-          } else {
-            substitution.put(var, var);
-          }
+          substitutions.add(substitution);
         }
-        substitutions.add(substitution);
       }
       Formula buffer = f;
       for (Map<Formula, Formula> substitution : substitutions) {
@@ -115,11 +118,11 @@ public class DomainOptimizerDecider {
   }
 
   public int[][] constructDecisionMatrix() {
-    int[][] decisionMatrix = new int[variables.size()][(int) Math.pow(2, variables.size())];
+    int[][] decisionMatrix = new int[(int) Math.pow(2, variables.size())][variables.size()];
     int rows = (int) Math.pow(2, variables.size());
-    for (int i = 0; i < rows; i++) {
-      for (int j = variables.size() - 1; j >= 0; j--) {
-        decisionMatrix[j][i] = (i / (int) Math.pow(2, j)) % 2;
+      for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < variables.size(); j++) {
+        decisionMatrix[i][j]= (i / (int) Math.pow(2, j)) % 2;
       }
     }
     return decisionMatrix;
@@ -127,12 +130,16 @@ public class DomainOptimizerDecider {
 
   public boolean decide(BooleanFormula query, int maxIterations)
       throws InterruptedException, SolverException {
+    Set<BooleanFormula> constraints = opt.getConstraints();
+    for (BooleanFormula constraint : constraints) {
+      this.wrapped.push();
+      this.wrapped.addConstraint(constraint);
+    }
     List<BooleanFormula> readyForDecisisionPhase = performSubstitutions(query);
     int count = 0;
     for (BooleanFormula f : readyForDecisisionPhase) {
       this.wrapped.push();
       this.wrapped.addConstraint(f);
-      this.wrapped.addConstraint(query);
       if (!this.wrapped.isUnsat()) {
         return true;
       }
@@ -177,9 +184,7 @@ public class DomainOptimizerDecider {
     bmgr.visit((BooleanFormula) pFormula, visitor);
     for (BooleanFormula toProcess : operands) {
       Map<Formula, Formula> substitution = new HashMap<>();
-      if (decide((BooleanFormula) pFormula, maxIterations)) {
-        substitution.put(toProcess, bmgr.makeTrue());
-      } else {
+      if (!decide((BooleanFormula) pFormula, maxIterations)) {
         substitution.put(toProcess, bmgr.makeFalse());
       }
       substitutions.add(substitution);

@@ -90,7 +90,6 @@ public class DomainOptimizerFormulaRegister {
             IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
             IntegerFormula var = imgr.makeVariable(name);
             opt.addVariable(var);
-
             return TraversalProcess.CONTINUE;
           }
         };
@@ -119,6 +118,9 @@ public class DomainOptimizerFormulaRegister {
           @Override
           public Boolean visitFunction(
               Formula f, List<Formula> args, FunctionDeclaration<?> functionDeclaration) {
+            if (args.size() != 2) {
+              return false;
+            }
             return getFormulaType(args.get(0)) != Argtypes.FUNC
                 || getFormulaType(args.get(1)) != Argtypes.FUNC;
           }
@@ -665,7 +667,6 @@ public class DomainOptimizerFormulaRegister {
         }
       }
     }
-
     return TraversalProcess.CONTINUE;
   }
 
