@@ -107,7 +107,7 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
   @Override
   public boolean isUnsatWithAssumptions(Collection<BooleanFormula> assumptions)
       throws SolverException, InterruptedException {
-    return wrapped.isUnsatWithAssumptions(assumptions);
+    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override
@@ -147,13 +147,13 @@ class DomainOptimizerBasicProverEnvironment<T> implements BasicProverEnvironment
 
   @Override
   public List<BooleanFormula> getUnsatCore() {
-    return wrapped.getUnsatCore();
+    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override
   public Optional<List<BooleanFormula>> unsatCoreOverAssumptions(
       Collection<BooleanFormula> assumptions) throws SolverException, InterruptedException {
-    return wrapped.unsatCoreOverAssumptions(assumptions);
+    throw new UnsupportedOperationException("not yet implemented");
   }
 
   @Override
