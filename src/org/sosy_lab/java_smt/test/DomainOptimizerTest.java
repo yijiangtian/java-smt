@@ -65,7 +65,7 @@ public class DomainOptimizerTest {
       BooleanFormula constraintThree =
           imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
       BooleanFormula constraintFour = imgr.greaterOrEquals(imgr.add(y, x), imgr.makeNumber(3));
-      try (ProverEnvironment basicEnv = delegate.newProverEnvironment()) {
+      try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
 
         basicEnv.addConstraint(constraintOne);
         basicEnv.addConstraint(constraintTwo);
@@ -74,7 +74,7 @@ public class DomainOptimizerTest {
 
         isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
       }
-      try (DomainOptimizerProverEnvironment env = new DomainOptimizerProverEnvironment(delegate)) {
+      try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
         env.addConstraint(constraintOne);
         env.addConstraint(constraintTwo);
         env.addConstraint(constraintThree);
