@@ -54,7 +54,7 @@ public class DomainOptimizerTest {
     ShutdownManager shutdown = ShutdownManager.create();
     try (SolverContext context =
         SolverContextFactory.createSolverContext(
-            config, logger, shutdown.getNotifier(), Solvers.MATHSAT5)) {
+            config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
       try (DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context)) {
         FormulaManager fmgr = delegate.getFormulaManager();
 
