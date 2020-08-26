@@ -40,6 +40,7 @@ import org.sosy_lab.java_smt.SolverContextFactory.Solvers;
 import org.sosy_lab.java_smt.api.BooleanFormula;
 import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
+import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 
 final class FileReader {
@@ -91,14 +92,15 @@ final class FileReader {
 
       Configuration config =
           Configuration.builder().setOption("useDomainOptimizer", "true").build();
+      System.out.println(config.toString());
       LogManager logger = BasicLogManager.create(config);
       ShutdownManager shutdown = ShutdownManager.create();
       try (BufferedWriter writer =
           Files.newBufferedWriter(Paths.get("output.txt"), Charset.defaultCharset())) {
-        try (DomainOptimizerSolverContext delegate =
-            (DomainOptimizerSolverContext)
-                SolverContextFactory.createSolverContext(
-                    config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+        try (SolverContext context =
+                     SolverContextFactory.createSolverContext(
+                         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+          DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
           FormulaManager fmgr = delegate.getFormulaManager();
           try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
             long startTime = System.nanoTime();

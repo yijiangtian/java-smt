@@ -36,6 +36,7 @@ import org.sosy_lab.java_smt.api.FormulaManager;
 import org.sosy_lab.java_smt.api.IntegerFormulaManager;
 import org.sosy_lab.java_smt.api.NumeralFormula.IntegerFormula;
 import org.sosy_lab.java_smt.api.ProverEnvironment;
+import org.sosy_lab.java_smt.api.SolverContext;
 import org.sosy_lab.java_smt.api.SolverException;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerProverEnvironment;
 import org.sosy_lab.java_smt.domain_optimization.DomainOptimizerSolverContext;
@@ -51,10 +52,10 @@ public class DomainOptimizerTest {
     Configuration config = Configuration.builder().setOption("useDomainOptimizer", "true").build();
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
-    try (DomainOptimizerSolverContext delegate =
-        (DomainOptimizerSolverContext)
-            SolverContextFactory.createSolverContext(
-                config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+    try (SolverContext context =
+             SolverContextFactory.createSolverContext(
+                 config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+      DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
       FormulaManager fmgr = delegate.getFormulaManager();
 
       IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
