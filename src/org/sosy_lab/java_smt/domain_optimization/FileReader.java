@@ -92,42 +92,42 @@ final class FileReader {
 
       Configuration config =
           Configuration.builder().setOption("useDomainOptimizer", "true").build();
-      System.out.println(config.toString());
       LogManager logger = BasicLogManager.create(config);
       ShutdownManager shutdown = ShutdownManager.create();
       try (BufferedWriter writer =
           Files.newBufferedWriter(Paths.get("output.txt"), Charset.defaultCharset())) {
         try (SolverContext context =
-                     SolverContextFactory.createSolverContext(
-                         config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
-          DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
-          FormulaManager fmgr = delegate.getFormulaManager();
-          try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
-            long startTime = System.nanoTime();
-            for (String toAssert : asserts) {
-              BooleanFormula constraint = fmgr.parse(header + toAssert);
-              env.addConstraint(constraint);
+            SolverContextFactory.createSolverContext(
+                config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
+          try (DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context)) {
+            FormulaManager fmgr = delegate.getFormulaManager();
+            try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
+              long startTime = System.nanoTime();
+              for (String toAssert : asserts) {
+                BooleanFormula constraint = fmgr.parse(header + toAssert);
+                env.addConstraint(constraint);
+              }
+              int totalConstraints = env.getTotalConstraints();
+              int solvedConstraints = env.getSolvedConstraints();
+              long endTime = System.nanoTime();
+              writer.write("isUnsat with DomainOptimizer: " + env.isUnsat() + "\n");
+              writer.write(
+                  "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
+              writer.write("Total number of queries: " + totalConstraints + "\n");
+              writer.write(
+                  "Number of queries solved by DomainOptimizer: " + solvedConstraints + "\n");
             }
-            int totalConstraints = env.getTotalConstraints();
-            int solvedConstraints = env.getSolvedConstraints();
-            long endTime = System.nanoTime();
-            writer.write("isUnsat with DomainOptimizer: " + env.isUnsat() + "\n");
-            writer.write(
-                "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
-            writer.write("Total number of queries: " + totalConstraints + "\n");
-            writer.write(
-                "Number of queries solved by DomainOptimizer: " + solvedConstraints + "\n");
-          }
-          try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
-            long startTime = System.nanoTime();
-            for (String toAssert : asserts) {
-              BooleanFormula constraint = fmgr.parse(header + toAssert);
-              basicEnv.addConstraint(constraint);
+            try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
+              long startTime = System.nanoTime();
+              for (String toAssert : asserts) {
+                BooleanFormula constraint = fmgr.parse(header + toAssert);
+                basicEnv.addConstraint(constraint);
+              }
+              long endTime = System.nanoTime();
+              writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat() + "\n");
+              writer.write(
+                  "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
             }
-            long endTime = System.nanoTime();
-            writer.write("is Unsat without DomainOptimizer: " + basicEnv.isUnsat() + "\n");
-            writer.write(
-                "Execution-time: " + ((endTime - startTime) * 0.000000001) + " seconds" + "\n");
           }
         }
       }

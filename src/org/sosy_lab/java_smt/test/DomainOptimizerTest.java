@@ -53,34 +53,35 @@ public class DomainOptimizerTest {
     LogManager logger = BasicLogManager.create(config);
     ShutdownManager shutdown = ShutdownManager.create();
     try (SolverContext context =
-             SolverContextFactory.createSolverContext(
-                 config, logger, shutdown.getNotifier(), Solvers.SMTINTERPOL)) {
-      DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context);
-      FormulaManager fmgr = delegate.getFormulaManager();
+        SolverContextFactory.createSolverContext(
+            config, logger, shutdown.getNotifier(), Solvers.MATHSAT5)) {
+      try (DomainOptimizerSolverContext delegate = new DomainOptimizerSolverContext(context)) {
+        FormulaManager fmgr = delegate.getFormulaManager();
 
-      IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
-      IntegerFormula x = imgr.makeVariable("x");
-      IntegerFormula y = imgr.makeVariable("y");
-      BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
-      BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
-      BooleanFormula constraintThree =
-          imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
-      BooleanFormula constraintFour = imgr.greaterOrEquals(imgr.add(y, x), imgr.makeNumber(3));
-      try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
+        IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
+        IntegerFormula x = imgr.makeVariable("x");
+        IntegerFormula y = imgr.makeVariable("y");
+        BooleanFormula constraintOne = imgr.lessOrEquals(x, imgr.makeNumber(7));
+        BooleanFormula constraintTwo = imgr.lessOrEquals(imgr.makeNumber(4), x);
+        BooleanFormula constraintThree =
+            imgr.lessOrEquals(imgr.subtract(y, imgr.makeNumber(3)), imgr.makeNumber(7));
+        BooleanFormula constraintFour = imgr.greaterOrEquals(imgr.add(y, x), imgr.makeNumber(3));
+        try (ProverEnvironment basicEnv = delegate.newBasicProverEnvironment()) {
 
-        basicEnv.addConstraint(constraintOne);
-        basicEnv.addConstraint(constraintTwo);
-        basicEnv.addConstraint(constraintThree);
-        basicEnv.addConstraint(constraintFour);
+          basicEnv.addConstraint(constraintOne);
+          basicEnv.addConstraint(constraintTwo);
+          basicEnv.addConstraint(constraintThree);
+          basicEnv.addConstraint(constraintFour);
 
-        isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
-      }
-      try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
-        env.addConstraint(constraintOne);
-        env.addConstraint(constraintTwo);
-        env.addConstraint(constraintThree);
-        env.addConstraint(constraintFour);
-        isUnsatWithDomainOptimizer = env.isUnsat();
+          isUnsatWithoutDomainOptimizer = basicEnv.isUnsat();
+        }
+        try (DomainOptimizerProverEnvironment env = delegate.newProverEnvironment()) {
+          env.addConstraint(constraintOne);
+          env.addConstraint(constraintTwo);
+          env.addConstraint(constraintThree);
+          env.addConstraint(constraintFour);
+          isUnsatWithDomainOptimizer = env.isUnsat();
+        }
       }
     }
   }
