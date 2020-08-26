@@ -99,7 +99,7 @@ public class SolverContextFactory {
   private boolean useLogger = false;
 
   @Option(secure = true, description = "Whether to use DomainOptimizer")
-  private boolean useDomainOptimizer = true;
+  private boolean useDomainOptimizer = false;
 
   @Option(secure = true, description = "Default rounding mode for floating point operations.")
   private FloatingPointRoundingMode floatingPointRoundingMode =
