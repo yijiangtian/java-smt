@@ -82,8 +82,7 @@ public class DomainOptimizerDecider {
               Map<Formula, Formula> substitution = new HashMap<>();
               substitution.put(formula, imgr.makeNumber(domain.getLowerBound()));
               equalSubstitutions.add(substitution);
-            }
-            else {
+            } else {
               vars.add(formula);
             }
             return TraversalProcess.CONTINUE;
@@ -130,6 +129,10 @@ public class DomainOptimizerDecider {
     return substitutedFormulas;
   }
 
+  /**
+   * every row in the decision matrix yields a formula with a different combination of upper and
+   * lower bounds
+   */
   public int[][] constructDecisionMatrix() {
     int[][] decisionMatrix = new int[(int) Math.pow(2, variables.size())][variables.size()];
     int rows = (int) Math.pow(2, variables.size());
@@ -141,6 +144,7 @@ public class DomainOptimizerDecider {
     return decisionMatrix;
   }
 
+  /** passes the formulas with substituted variables to the ProverEnvironment */
   public boolean decide(BooleanFormula query, int maxIterations)
       throws InterruptedException, SolverException {
     Set<BooleanFormula> constraints = opt.getConstraints();
@@ -167,6 +171,7 @@ public class DomainOptimizerDecider {
     return false;
   }
 
+  /** removes the subtrees deemed to be unsatisfiable */
   public BooleanFormula pruneTree(Formula pFormula, int maxIterations)
       throws InterruptedException, SolverException {
     FormulaManager fmgr = delegate.getFormulaManager();
