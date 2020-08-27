@@ -74,7 +74,7 @@ public class DomainOptimizerFormulaRegister {
     this.delegate = opt.getDelegate();
   }
 
-  /** forms tuples of variables along with their domains */
+  /** forms tuples of variables along with their domains. */
   public void visit(Formula pFormula) {
     FormulaManager fmgr = delegate.getFormulaManager();
     FormulaVisitor<TraversalProcess> nameExtractor =
@@ -254,7 +254,7 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(pFormula, constraintExtractor);
   }
 
-  /** performs depth-search on a function in order to retrieve variables { f(x,y) -> x,y }. */
+  /** performs depth-search on a function in order to retrieve variables. */
   public List<Formula> digDeeper(List<Formula> args) {
     List<Formula> vars = new ArrayList<>();
     for (Formula var : args) {
