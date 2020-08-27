@@ -131,7 +131,7 @@ public class DomainOptimizerDecider {
 
   /**
    * every row in the decision matrix yields a formula with a different combination of upper and
-   * lower bounds
+   * lower bounds.
    */
   public int[][] constructDecisionMatrix() {
     int[][] decisionMatrix = new int[(int) Math.pow(2, variables.size())][variables.size()];
@@ -144,7 +144,7 @@ public class DomainOptimizerDecider {
     return decisionMatrix;
   }
 
-  /** passes the formulas with substituted variables to the ProverEnvironment */
+  /** passes the formulas with substituted variables to the ProverEnvironment. */
   public boolean decide(BooleanFormula query, int maxIterations)
       throws InterruptedException, SolverException {
     Set<BooleanFormula> constraints = opt.getConstraints();
@@ -171,7 +171,7 @@ public class DomainOptimizerDecider {
     return false;
   }
 
-  /** removes the subtrees deemed to be unsatisfiable */
+  /** removes the subtrees deemed to be unsatisfiable. */
   public BooleanFormula pruneTree(Formula pFormula, int maxIterations)
       throws InterruptedException, SolverException {
     FormulaManager fmgr = delegate.getFormulaManager();

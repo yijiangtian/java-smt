@@ -254,7 +254,7 @@ public class DomainOptimizerFormulaRegister {
     fmgr.visitRecursively(pFormula, constraintExtractor);
   }
 
-  /** performs depth-search on a function in order to retrieve variables { f(x,y) -> x,y } */
+  /** performs depth-search on a function in order to retrieve variables { f(x,y) -> x,y }. */
   public List<Formula> digDeeper(List<Formula> args) {
     List<Formula> vars = new ArrayList<>();
     for (Formula var : args) {
@@ -269,7 +269,7 @@ public class DomainOptimizerFormulaRegister {
     return vars;
   }
 
-  /** retrieves constants from function */
+  /** retrieves constants from function. */
   public List<Formula> digDeeperForConstants(List<Formula> args) {
     List<Formula> constants = new ArrayList<>();
     for (Formula var : args) {
@@ -283,7 +283,7 @@ public class DomainOptimizerFormulaRegister {
     return constants;
   }
 
-  /** parses a formula containing a numeral relation as an operator */
+  /** parses a formula containing a numeral relation as an operator. */
   private TraversalProcess adjustBounds(
       Formula variableOne,
       Formula variableTwo,
@@ -432,7 +432,7 @@ public class DomainOptimizerFormulaRegister {
     return TraversalProcess.CONTINUE;
   }
 
-  /** parses a formula containing an arithmetic relation as an operator */
+  /** parses a formula containing an arithmetic relation as an operator. */
   private TraversalProcess processDeclaration(
       Formula variableOne, Formula variableTwo, Operators op) {
     Function func = readFromBuffer();
@@ -662,7 +662,7 @@ public class DomainOptimizerFormulaRegister {
     return TraversalProcess.CONTINUE;
   }
 
-  /** removes parantheses and spaces from variable-name so that it can be parsed as a constant */
+  /** removes parantheses and spaces from variable-name so that it can be parsed as a constant. */
   private String format(String name) {
     name = name.replaceAll("[()]", "");
     name = name.replaceAll("\\s", "");
