@@ -65,6 +65,7 @@ public class DomainOptimizerDecider {
     FormulaManager fmgr = delegate.getFormulaManager();
     IntegerFormulaManager imgr = fmgr.getIntegerFormulaManager();
     List<Formula> vars = new ArrayList<>();
+    List<Map<Formula, Formula>> equalSubstitutions = new ArrayList<>();
     List<BooleanFormula> substitutedFormulas = new ArrayList<>();
     FormulaVisitor<TraversalProcess> varExtractor =
         new DefaultFormulaVisitor<>() {
@@ -75,7 +76,16 @@ public class DomainOptimizerDecider {
 
           @Override
           public TraversalProcess visitFreeVariable(Formula formula, String name) {
-            vars.add(formula);
+            Interval domain = opt.getInterval(formula);
+            // in case the operator is =, we don't add the variable to the decision matrix
+            if (domain.getLowerBound().equals(domain.getUpperBound())) {
+              Map<Formula, Formula> substitution = new HashMap<>();
+              substitution.put(formula, imgr.makeNumber(domain.getLowerBound()));
+              equalSubstitutions.add(substitution);
+            }
+            else {
+              vars.add(formula);
+            }
             return TraversalProcess.CONTINUE;
           }
         };
@@ -109,6 +119,9 @@ public class DomainOptimizerDecider {
       }
       Formula buffer = f;
       for (Map<Formula, Formula> substitution : substitutions) {
+        f = fmgr.substitute(f, substitution);
+      }
+      for (Map<Formula, Formula> substitution : equalSubstitutions) {
         f = fmgr.substitute(f, substitution);
       }
       substitutedFormulas.add((BooleanFormula) f);
